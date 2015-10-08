@@ -218,6 +218,11 @@ read_nexus_data2 <- function(file, check_ambig_chars=TRUE, convert_ambiguous_to=
     	cat("\n\nread_nexus_data2() is checking for ambiguous characters in line...\n", sep="")
     	} # END  if ((check_ambig_chars == TRUE) && (printall != "none"))
     
+    
+    #######################################################
+	# LOOP THROUGH ROWS j OF THE NEXUS FILE
+	#######################################################
+    
     #for (j in start.reading:22)
 	for (j in start.reading:NROW(X))
     	{
@@ -404,6 +409,9 @@ read_nexus_data2 <- function(file, check_ambig_chars=TRUE, convert_ambiguous_to=
 		
 		# Here, this if() didnt run on a standard simplified MrBayes NEXUS file
 		l <- grep(nAME, names(Obj))
+		#print("Printing l")
+		#print(l)
+		
 		if (any(l))
         	{
             tsp <- strsplit(Seq, NULL)[[1]]
@@ -451,7 +459,35 @@ read_nexus_data2 <- function(file, check_ambig_chars=TRUE, convert_ambiguous_to=
             for (k2 in 1:length(tsp))
             	{
                 p <- k2 + pos
-                Obj[[l]][p] <- tsp[k2]
+                try_result = try(Obj[[l]][p] <- tsp[k2])
+                if (class(try_result) == "try-error")
+                	{
+                 	cat("\n\nA parsing error happened at read_nexus_data2, position 1.\n\n")
+                	txt = "ERROR in parsing detected by read_nexus_data2(): printing j, Name, nAME, l, p, k2, pos"
+                	cat("\n\n")
+                	cat(txt)
+                	cat("\n")
+                	print(j)
+                	cat("\n\n")
+                	print("Name:")
+                	print(Name)
+                	cat("\n\n")
+                	print("nAME:")
+                	print(nAME)
+                	cat("\n\n")
+                	txt2 = "STOP ERROR NOTE: If you see characters (01011 etc..) where 'Name' or 'nAME' are, this probably means you have INAPPROPRIATE LINE BREAKS in your NEXUS file. R's scan() function reads files line-by-line, so each row of the data matrix HAS TO BE ON A SINGLE LINE.\n\n"
+                	cat(txt2)
+
+                	#print(Obj)
+                	print(l)
+                	print(p)
+                	print(k2)
+                	print(pos)
+                	#print(tsp[[k2]])
+                	cat("\n\n")
+                	txt3 = paste0(txt, "\n\n", txt2)
+                	stop(txt3)
+                	}
                 chars.done <- k2
 	            }
 	        # endif if (any(l))
@@ -460,6 +496,8 @@ read_nexus_data2 <- function(file, check_ambig_chars=TRUE, convert_ambiguous_to=
 			tsp <- strsplit(Seq, NULL)[[1]]
             names(Obj)[i] <- Name
 			tsp_orig = tsp
+			l <- grep(nAME, names(Obj))	# Needed 2015-10-08
+
 
 			# Correct for ambiguous sequences
             if (need_to_correct_ambiguous == TRUE)
@@ -497,6 +535,35 @@ read_nexus_data2 <- function(file, check_ambig_chars=TRUE, convert_ambiguous_to=
             	{
                 p <- k2 + pos
                 Obj[[i]][p] <- tsp[k2]
+                try_result = try(Obj[[l]][p] <- tsp[k2])
+                if (class(try_result) == "try-error")
+                	{
+                 	cat("\n\nA parsing error happened at read_nexus_data2, position 2.\n\n")
+                	txt = "ERROR in parsing detected by read_nexus_data2(): printing j, Name, nAME, l, p, k2, pos"
+                	cat("\n\n")
+                	cat(txt)
+                	cat("\n")
+                	print(j)
+                	cat("\n\n")
+                	print("Name:")
+                	print(Name)
+                	cat("\n\n")
+                	print("nAME:")
+                	print(nAME)
+                	cat("\n\n")
+                	txt2 = "STOP ERROR NOTE: If you see characters (01011 etc..) where 'Name' or 'nAME' are, this probably means you have INAPPROPRIATE LINE BREAKS in your NEXUS file. R's scan() function reads files line-by-line, so each row of the data matrix HAS TO BE ON A SINGLE LINE.\n\n"
+                	cat(txt2)
+
+                	#print(Obj)
+                	print(l)
+                	print(p)
+                	print(k2)
+                	print(pos)
+                	#print(tsp[[k2]])
+                	cat("\n\n")
+                	txt3 = paste0(txt, "\n\n", txt2)
+                	stop(txt3)
+                	}
                 chars.done <- k2
             	}
 	        }

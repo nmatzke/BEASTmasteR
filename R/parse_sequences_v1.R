@@ -451,6 +451,18 @@ write_BEAST2_morphology_characters <- function(nexd7, numstates_morph_list, data
 		# for the characters with unique_numstates[i] states
 		tmpseqs = apply(X=tmpnexd, MARGIN=2, FUN=paste, collapse="")
 		
+		if (isblank_TF(ascertainment))
+			{
+			txt = "WARNING in write_BEAST2_morphology_characters(): 'ascertainment' was blank, which probably means you have 'ascertainment' blank in the 'data' worksheet of the Excel settings file, for the morphology row(s). Defaulting to 'Mk' model (no ascertainment bias correction), which you may not want."
+			cat("\n\n")
+			cat(txt)
+			cat("\n\n")
+			#stop(txt)
+			
+			ascertainment = "Mk"
+			} # END if (isblank_TF(ascertainment))
+		
+		
 		# Add the sites to condition on
 		if (ascertainment == "Mk")
 			{
