@@ -32,7 +32,7 @@ DOI: XX.
 Ideally, there will be a release with a DOI, but it may be you just use the 
 most up-to-date commit. E.g. pre-release 0.1 is at 
 https://github.com/nmatzke/BEASTmasteR/releases/tag/0.1 , and has DOI 
-http://dx.doi.org/10.5281/zenodo.31927
+http://dx.doi.org/10.5281/zenodo.31927 -- and a button: <a href="https://zenodo.org/badge/latestdoi/18687/nmatzke/BEASTmasteR"><img src="https://zenodo.org/badge/18687/nmatzke/BEASTmasteR.svg" alt="10.5281/zenodo.31927"></a>
 
 Some of the functions in "tree_utils_v1.R", e.g. read_beast_prt, used for
 extracting the bracketed statistics from BEAST NEXUS tree files (MCC files) are
