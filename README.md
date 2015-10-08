@@ -2,22 +2,20 @@ The purpose of "BEASTmasteR" is to convert NEXUS data file(s) (DNA, amino acids,
 discrete morphological characters, and/or continuous traits), plus an Excel
 settings file, into Beast2 XML format.
 
-The author is Nicholas J. Matzke, ORCID: http://orcid.org/0000-0002-8698-7656 . Website: http://phylo.wikidot.com/nicholas-j-matzke
+The author is Nicholas J. Matzke, ORCID: http://orcid.org/0000-0002-8698-7656 .
 
 BEASTmasteR is primarily aimed at enabling tip-dating analyses using fossils as
 dated terminal taxa. The Birth-Death-Skyline-Serial-Sampling tree model is used
 (or the Sampled-Ancestors variant), enabling different birth, death, and sampling
-rates through time. Introduction and instructions are at: http://phylo.wikidot.com/beastmaster
-
-However, it may be useful for setting up molecular-only
+rates through time. However, it may be useful for setting up molecular-only
 analyses (particularly automated variants), for learning Beast2 XML (since the
 BEASTmasteR XML output is annotated and much easier for human reading than the
 BEAUTi output), or for automating such analyses. BEASTmasteR also contains
 functions for parsing Beast2 output, e.g. plotting a dated tree in R, with
 posterior probabilities, 95% HPDs on node dates, and also 95% HPDs on tip dates,
-if available (http://phylo.wikidot.com/beastmaster#tipdate_plots_script ).
+if available.
 
-CITATION
+Citation
 
 BEASTmasteR will eventually become an R package and have a publication associated
 with it. Until then, please cite:
@@ -28,9 +26,13 @@ Instructions at PhyloWiki, http://phylo.wikidot.com/beastmaster. Accessed (acces
 date).
 
 Matzke, Nicholas J. (2015). BEASTmasteR code archive. Github:
-https://github.com/nmatzke/BEASTmasteR . Accessed (access date). Release:
-(Ideally, there will be a release with a DOI, but it may be you just use the most
-up-to-date commit.)
+https://github.com/nmatzke/BEASTmasteR . Accessed (access date). Release: XX. 
+DOI: XX. 
+
+Ideally, there will be a release with a DOI, but it may be you just use the 
+most up-to-date commit. E.g. pre-release 0.1 is at 
+https://github.com/nmatzke/BEASTmasteR/releases/tag/0.1 , and has DOI 
+http://dx.doi.org/10.5281/zenodo.31927
 
 Some of the functions in "tree_utils_v1.R", e.g. read_beast_prt, used for
 extracting the bracketed statistics from BEAST NEXUS tree files (MCC files) are
