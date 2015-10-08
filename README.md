@@ -2,20 +2,22 @@ The purpose of "BEASTmasteR" is to convert NEXUS data file(s) (DNA, amino acids,
 discrete morphological characters, and/or continuous traits), plus an Excel
 settings file, into Beast2 XML format.
 
-The author is Nicholas J. Matzke, ORCID: http://orcid.org/0000-0002-8698-7656 .
+The author is Nicholas J. Matzke, ORCID: http://orcid.org/0000-0002-8698-7656 . Website: http://phylo.wikidot.com/nicholas-j-matzke
 
 BEASTmasteR is primarily aimed at enabling tip-dating analyses using fossils as
 dated terminal taxa. The Birth-Death-Skyline-Serial-Sampling tree model is used
 (or the Sampled-Ancestors variant), enabling different birth, death, and sampling
-rates through time. However, it may be useful for setting up molecular-only
+rates through time. Introduction and instructions are at: http://phylo.wikidot.com/beastmaster
+
+However, it may be useful for setting up molecular-only
 analyses (particularly automated variants), for learning Beast2 XML (since the
 BEASTmasteR XML output is annotated and much easier for human reading than the
 BEAUTi output), or for automating such analyses. BEASTmasteR also contains
 functions for parsing Beast2 output, e.g. plotting a dated tree in R, with
 posterior probabilities, 95% HPDs on node dates, and also 95% HPDs on tip dates,
-if available.
+if available (http://phylo.wikidot.com/beastmaster#tipdate_plots_script ).
 
-Citation
+CITATION
 
 BEASTmasteR will eventually become an R package and have a publication associated
 with it. Until then, please cite:
