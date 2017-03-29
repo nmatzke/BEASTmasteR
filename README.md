@@ -15,17 +15,20 @@ functions for parsing Beast2 output, e.g. plotting a dated tree in R, with
 posterior probabilities, 95% HPDs on node dates, and also 95% HPDs on tip dates,
 if available.
 
+2016-2017 additions: Added ascertainment bias corrections, various bug checks, 
+gene-tree/species tree analysis setup.
+
 Citation
 
 BEASTmasteR will eventually become an R package and have a publication associated
-with it. Until then, please cite:
+with it. Until then, please cite something like:
 
-Matzke, Nicholas J. (2015). "BEASTmasteR: R tools for automated conversion of
+Matzke, Nicholas J. (2017). "BEASTmasteR: R tools for automated conversion of
 NEXUS data to BEAST2 XML format, for fossil tip-dating and other uses."
 Instructions at PhyloWiki, http://phylo.wikidot.com/beastmaster. Accessed (access
 date).
 
-Matzke, Nicholas J. (2015). BEASTmasteR code archive. Github:
+Matzke, Nicholas J. (2017). BEASTmasteR code archive. Github:
 https://github.com/nmatzke/BEASTmasteR . Accessed (access date). Release: XX. 
 DOI: XX. 
 
