@@ -1,3 +1,94 @@
+
+
+#######################################################
+# Is the XML item an XMLCommentNode?
+#######################################################
+is_XMLcomment_TF <- function(item)
+	{
+	classes = class(item)
+	tmpTF = classes == "XMLCommentNode"
+	if (sum(tmpTF) > 0)
+		{
+		return(TRUE)
+		} else {
+		return(FALSE)
+		}
+	} # END is_XMLcomment_TF <- function(item)
+
+
+
+
+#######################################################
+# Remove duplicate XMLS
+#######################################################
+remove_duplicate_xmls <- function(xml)
+	{
+	XML_names = names(xml)
+	for (i in 1:length(XML_names))
+		{
+		#print("Here")
+		#print(i)
+		#print(class(xml[[i]]))
+		# Only proceed if it's a list
+		# Extract this XML name
+		cmdtxt = paste0("tmpXML = xml$", XML_names[i])
+		eval(parse(text=cmdtxt))
+		
+		if (class(tmpXML) == "list")
+			{
+			x=1 # pass
+			} else {
+			# If not
+			next()
+			}
+		
+	
+		# Proceed
+		
+		# Remove comments and NULLs
+		comment_TF = sapply(X=tmpXML, FUN=is_XMLcomment_TF)
+		null_TF = sapply(X=tmpXML, FUN=is.null)
+		comment_TF2 = comment_TF + null_TF
+		tmpXML2 = tmpXML[comment_TF2 == FALSE]
+		
+		# Of the remaining, which ones are duplicates?
+		duplicated_TF = duplicated(tmpXML2)
+		
+		if (sum(duplicated_TF) == 0)
+			{
+			# No duplicates
+			newXML = tmpXML
+			} else {
+			# Find the unique versions of the duplicates
+			unique_xmls = unique(tmpXML2[duplicated_TF])
+
+			for (j in 1:length(unique_xmls))
+				{
+				# Check for identical matches
+				matches_TF = sapply(X=tmpXML, FUN=identical, y=unique_xmls[[j]])
+				matchnums = (1:length(matches_TF))[matches_TF]
+				matchnums_to_remove = matchnums[-1] # keep the first instance
+				matchnums_to_remove = matchnums_to_remove * -1 # minus removes them
+				tmpXML = tmpXML[matchnums_to_remove]
+				} # END for (j in 1:length(unique_xmls))
+
+			newXML = tmpXML
+			} # END if (sum(duplicated_TF) == 0)
+	
+		# Back into original XML
+		cmdtxt = paste0("xml$", XML_names[i], " = NULL")
+		eval(parse(text=cmdtxt))
+
+		cmdtxt = paste0("xml$", XML_names[i], " = newXML")
+		eval(parse(text=cmdtxt))
+		} # END for (i in 1:length(XML_names))
+	
+	return(xml)
+	} # END remove_duplicate_xmls <- function(xml)
+
+
+
+
 #######################################################
 # Save the stats to default filenames
 #######################################################
@@ -8,41 +99,68 @@
 # 
 # And the "morphList"
 #
-save_data_stats <- function(data_XMLs)
+save_data_stats <- function(data_XMLs, datastats_dir=NULL)
 	{
 	# Output filenames
 	outfns = NULL
 	
 	# Print stats out
 	names(data_XMLs)
-
+	
+	if (length(data_XMLs$matrices_stats) == 0)
+		{
+		txt = "WARNING from save_data_stats(): Nothing was found in data_XMLs$matrices_stats. Probably this means your dataset has no morphological characters. No statistics will be calculated on 0 characters. save_data_stats() will now return NULL." 
+		cat("\n\n")
+		warning(txt)
+		cat("\n\n")
+		return(NULL)
+		}
+	
+	
+	# Modify datastats_dir
+	if (is.null(datastats_dir) == FALSE)
+		{
+		datastats_dir = paste0(slashslash(datastats_dir), "/")
+		}
+	
 	# Show the stats
-	data_XMLs$morphstats
+	data_XMLs$matrices_stats
 
 	# Show the number of data matrices
 	length(data_XMLs$charsdf_list)
 
-	for (i in 1:length(data_XMLs$morphstats))
+	for (i in 1:length(data_XMLs$matrices_stats))
 		{
-		completeness_df = data_XMLs$morphstats[[i]]$completeness_df
-		outfn = paste0("_completeness_stats_morph", i, ".txt")
+		completeness_df = data_XMLs$matrices_stats[[i]]$completeness_df
+		outfn = paste0(datastats_dir, "completeness_stats_matrix", i, ".txt")
 		write.table(completeness_df, file=outfn, quote=FALSE, sep="\t")
 		outfns = c(outfns, outfn)
 
-		matrix_stats_df = data_XMLs$morphstats[[i]]$matrix_stats_df
-		outfn = paste0("_matrix_stats_morph", i, ".txt")
+		matrix_stats_df = data_XMLs$matrices_stats[[i]]$matrix_stats_df
+		outfn = paste0(datastats_dir, "stats_matrix", i, ".txt")
 		write.table(matrix_stats_df, file=outfn, quote=FALSE, sep="\t")
 		outfns = c(outfns, outfn)
-		} # END for (i in 1:length(data_XMLs$morphstats))
+		
+		if (is.null(data_XMLs$matrices_stats[[i]]$autapomorphies_desc_df) == FALSE)
+			{
+			autapomorphies_desc_df = data_XMLs$matrices_stats[[i]]$autapomorphies_desc_df
+			
+			# Write autapomorphies description matrix to file
+			outfn = paste0(datastats_dir, "autapomorphies_desc_morph", i, ".txt")
+			write.table(autapomorphies_desc_df, file=outfn, quote=FALSE, sep="\t")
+			outfns = c(outfns, outfn)
+			} # END if (is.null(data_XMLs$matrices_stats[[i]]$char_is_autapomorphic) == FALSE)
+		
+		} # END for (i in 1:length(data_XMLs$matrices_stats))
 
 	morphList = data_XMLs$morphList
-	outfn = "_morphList.txt"
+	outfn = paste0(datastats_dir, "morphList.txt")
 	outfns = c(outfns, outfn)
 	write.table(morphList, file=outfn, quote=FALSE, sep="\t")
 	
-	txt = paste(outfns, sep="", collapse=", ")
+	txt = paste(outfns, sep="", collapse="\n")
 	cat("\n")
-	cat("Saved morphology stats to: ", txt)
+	cat("Saved morphology stats to: \n\n", txt)
 	cat("\n")
 	
 	return(outfns)
@@ -56,7 +174,7 @@ save_data_stats <- function(data_XMLs)
 # Parse the "run" worksheet, and convert "xml" to the full XML file
 #######################################################
 
-parse_run <- function(run_df, xml, outfn="run_df", burnin_fraction=0.5, dataset_source="", printall="short", BEAST2_version="2.1.3")
+parse_run <- function(run_df, xml, outfn="run_df", burnin_fraction=0.5, dataset_source="", printall="short", BEAST2_version="2.4.3")
 	{
 	defaults='
 	outfn=NULL
@@ -73,9 +191,62 @@ parse_run <- function(run_df, xml, outfn="run_df", burnin_fraction=0.5, dataset_
 		cat("\n")
 		stop(errortxt)
 		}
+
+	#######################################################
+	# Remove any duplicates that were accidentally created
+	# (excluding XMLCommentNodes, blanks, etc.)
+	#######################################################
+	xml = remove_duplicate_xmls(xml)
+
+
 	
 	# Get the line you are using
 	settings = run_df[TF,]
+	
+	# Fill in blanks
+	if (isblank_TF(settings$chainLength))
+		{
+		settings$chainLength = 10000
+		}
+	if (isblank_TF(settings$numsamps))
+		{
+		settings$numsamps = 2000
+		}
+	if (isblank_TF(settings$state_store))
+		{
+		settings$state_store = floor(settings$chainLength / settings$numsamps)
+		}
+	if (isblank_TF(settings$tracelog_store))
+		{
+		settings$tracelog_store = floor(settings$chainLength / settings$numsamps)
+		}
+	if (isblank_TF(settings$screenlog_store))
+		{
+		settings$screenlog_store = floor(settings$chainLength / settings$numsamps)
+		}
+	if (isblank_TF(settings$treelog_store))
+		{
+		settings$treelog_store = floor(settings$chainLength / settings$numsamps)
+		}
+	
+	
+	# Error correction (/0, divide-by-zero error, if logEvery is 0)
+	if (settings$state_store < 1) 
+		{
+		settings$state_store = 100
+		}
+	if (settings$tracelog_store < 1)
+		{
+		settings$tracelog_store = 100
+		}
+	if (settings$screenlog_store < 1)
+		{
+		settings$screenlog_store = 100
+		}
+	if (settings$treelog_store < 1)
+		{
+		settings$treelog_store = 100
+		}
 	
 	# Extract the filename from run_df
 	if (outfn == "run_df")
@@ -89,6 +260,7 @@ parse_run <- function(run_df, xml, outfn="run_df", burnin_fraction=0.5, dataset_
 			stop(txt)
 			}
 		}
+
 	
 	# Make the header XML_namespaces
 	# (XML_namespaces will be included in the <beast> tag)
@@ -169,10 +341,25 @@ parse_run <- function(run_df, xml, outfn="run_df", burnin_fraction=0.5, dataset_
 	xml$tracelog = c(logs_XML, xml$tracelog)
 	xml$screenlog = c(logs_XML, xml$screenlog)
 	
+	# Add these to the screen log and trace log:
+	#    <log id="ESS.0" spec="util.ESS" arg="@posterior"/>
+    #    <log id="ESS.0" spec="util.ESS" arg="@likelihood"/>
+    #    <log id="ESS.0" spec="util.ESS" arg="@prior"/>
+	
+	# Adding these to tracelog kills Tracer because the first row has
+	# "N" as the output
+	# xml$tracelog = cl(ESS_log1, ESS_log2, ESS_log3, xml$tracelog)
+
+	ESS_log1 = xmlNode(name="log", attrs=list(id="ESS.po", spec="util.ESS", arg="@prior"))
+	ESS_log2 = xmlNode(name="log", attrs=list(id="ESS.pr", spec="util.ESS", arg="@likelihood"))
+	ESS_log3 = xmlNode(name="log", attrs=list(id="ESS.l", spec="util.ESS", arg="@posterior"))
+	xml$screenlog = cl(ESS_log1, ESS_log2, ESS_log3, xml$screenlog)
+	
+	
 	# Assemble the state
-	storeEvery = sprintf("%0.0f", as.numeric(settings$state_store))
+	storeEvery_statelog = sprintf("%0.0f", as.numeric(settings$state_store))
 	state_id = "state"
-	state_XML = xmlNode(name="state", attrs=list(id=state_id, storeEvery=storeEvery), .children=xml$state )
+	state_XML = xmlNode(name="state", attrs=list(id=state_id, storeEvery=storeEvery_statelog), .children=xml$state )
 	
 	# Assemble the trace log
 	storeEvery_tracelog = sprintf("%0.0f", as.numeric(settings$tracelog_store))
@@ -181,16 +368,16 @@ parse_run <- function(run_df, xml, outfn="run_df", burnin_fraction=0.5, dataset_
 	traceLog_XML = xmlNode(name="logger", attrs=list(id=traceLog_id, fileName=fileName, logEvery=storeEvery_tracelog, model=posterior_idref, sanitiseHeaders="true", sort="smart"), .children=xml$tracelog )
 
 	# Assemble the screen log
-	storeEvery = sprintf("%0.0f", as.numeric(settings$screenlog_store))
+	storeEvery_screenlog = sprintf("%0.0f", as.numeric(settings$screenlog_store))
 	screenLog_id = "screenlog"
-	screenLog_XML = xmlNode(name="logger", attrs=list(id=screenLog_id, fileName="", logEvery=storeEvery, sanitiseHeaders="true", sort="smart"), .children=xml$screenlog )
+	screenLog_XML = xmlNode(name="logger", attrs=list(id=screenLog_id, fileName="", logEvery=storeEvery_screenlog, sanitiseHeaders="true", sort="smart"), .children=xml$screenlog )
 
 	# Assemble the tree log
 	storeEvery_treelog = sprintf("%0.0f", as.numeric(settings$treelog_store))
 	fileName = settings$treelog_fn
 	treeLog_id = "treelog"
 	# *NO* , substitutions="false" on plain treelog
-	treeLog_XML = xmlNode(name="logger", attrs=list(id=treeLog_id, fileName=fileName, logEvery=storeEvery, mode="tree"), .children=xml$treelog )
+	treeLog_XML = xmlNode(name="logger", attrs=list(id=treeLog_id, fileName=fileName, logEvery=storeEvery_treelog, mode="tree"), .children=xml$treelog )
 
 	# Assemble the "subs" log (tree of substitutions rather than time)
 	storeEvery_treelog = sprintf("%0.0f", as.numeric(settings$treelog_store))
@@ -199,13 +386,34 @@ parse_run <- function(run_df, xml, outfn="run_df", burnin_fraction=0.5, dataset_
 		{
 		# *NO* , substitutions="true" on plain treelog
 		subsLog_id = "subslog"
-		subsLog_XML = xmlNode(name="logger", attrs=list(id=subsLog_id, fileName=fileName, logEvery=storeEvery, mode="tree"), .children=xml$subslog )
+		subsLog_XML = xmlNode(name="logger", attrs=list(id=subsLog_id, fileName=fileName, logEvery=storeEvery_treelog, mode="tree"), .children=xml$subslog )
 		} else {
 		subsLog_XML = xmlCommentNode(" Note: substitutions treelog (subslog.txt) not saved, as 'subslog_fn' in worksheet 'run' was left blank. ")
 		} # END if (isblank_TF(fileName) == FALSE)
-
-
 	
+	
+	# SpeciesTree/GeneTree loggers
+	if (is.null(xml$speciesTreeLogger_XMLs) == FALSE)
+		{
+		speciesTreeLogger_XMLs = xml$speciesTreeLogger_XMLs
+		} else {
+		speciesTreeLogger_XMLs = NULL
+		}
+	if (is.null(xml$geneTree_treeLogs_XMLs) == FALSE)
+		{
+		geneTree_treeLogs_XMLs = xml$geneTree_treeLogs_XMLs
+		} else {
+		geneTree_treeLogs_XMLs = NULL
+		}
+
+
+	#######################################################
+	# Remove any duplicates that were accidentally created
+	# (excluding XMLCommentNodes, blanks, etc.)
+	#######################################################
+	xml = remove_duplicate_xmls(xml)
+
+
 	# Assemble the run tag
 	run_id = "mcmc"
 	chainLength = settings$chainLength
@@ -214,7 +422,11 @@ parse_run <- function(run_df, xml, outfn="run_df", burnin_fraction=0.5, dataset_
 		list(state_XML), 
 		xml$starting_tree,	# Put the starting tree in here
 		list(bl()), 
+		xml$init, 			# Initializers
+		list(bl()), 
 		list(posterior_XML), 
+		list(bl()), 
+		list(bl()), 
 		xml$operators, 
 		list(bl()), 
 		list(bl()), 
@@ -227,7 +439,13 @@ parse_run <- function(run_df, xml, outfn="run_df", burnin_fraction=0.5, dataset_
 		list(treeLog_XML), 
 		list(bl()), 
 		list(bl()), 
-		list(subsLog_XML) 
+		list(subsLog_XML),
+		list(bl()), 
+		list(bl()), 
+		speciesTreeLogger_XMLs,
+		list(bl()), 
+		list(bl()), 
+		geneTree_treeLogs_XMLs
 		)
 	
 	# Assemble the big XML

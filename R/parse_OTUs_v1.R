@@ -19,11 +19,17 @@ make_XML_for_OTU_idref <- function(OTU)
 # If OTU_idref=TRUE, the taxa will be referred to with "idref" tags.
 # If OTU_idref=FALSE, the taxa will be referred to with "id" tags 
 #    and specified to be spec="Taxon"
-make_XMLs_for_OTUs <- function(OTUs, OTU_idref=TRUE)
+make_XMLs_for_OTUs <- function(OTUs, OTU_idref=TRUE, StarBeast2_TF=FALSE)
 	{
 	defaults='
 	OTU_idref=TRUE
 	'
+	
+	if (StarBeast2_TF == TRUE)
+		{
+		OTU_idref = TRUE
+		}
+	
 	
 	if (OTU_idref == TRUE)
 		{
@@ -269,7 +275,7 @@ rowdf_to_XML_distribution <- function(rowdf, tipsonly="true", monophyletic="fals
 			{
 			normMeanval = meanval + offset
 			#normSDval = sdval
-			normSDval = 0.01 * normMeanval
+			normSDval = 0.001 * normMeanval
 			
 			distribution_name = paste0("convertedForStartingTree_NormalDistrib_", OTUname)
 			param1_name = paste0("convertedForStartingTree_mean_of_NormalDistrib_", OTUname)
@@ -309,7 +315,7 @@ rowdf_to_XML_distribution <- function(rowdf, tipsonly="true", monophyletic="fals
 			{
 			normMeanval = meanval + offset
 			# For conversion to normal
-			normSDval = 0.01 * meanval
+			normSDval = 0.001 * meanval
 			
 			distribution_name = paste0("convertedForStartingTree_NormalDistrib_", OTUname)
 			param1_name = paste0("convertedForStartingTree_mean_of_NormalDistrib_", OTUname)
@@ -349,7 +355,7 @@ rowdf_to_XML_distribution <- function(rowdf, tipsonly="true", monophyletic="fals
 			{
 			normMeanval = (lower + upper) / 2
 			# For conversion to normal
-			normSDval = 0.01 * normMeanval
+			normSDval = 0.001 * normMeanval
 			
 			distribution_name = paste0("convertedForStartingTree_NormalDistrib_", OTUname)
 			param1_name = paste0("convertedForStartingTree_mean_of_NormalDistrib_", OTUname)
@@ -585,9 +591,10 @@ isblank_TF <- function(items)
 	TF3 = items == "\t"
 	TF4 = is.na(items)
 	TF5 = is.nan(items)
+	TF6 = items == "NaN"
 	
 	# Keep only the items where none of the above occur
-	TFall = TF1 + TF2 + TF3 + TF4 + TF5
+	TFall = TF1 + TF2 + TF3 + TF4 + TF5 + TF6
 	
 	# Correct for NA, NaNs
 	TFall[is.na(TFall)] = 1

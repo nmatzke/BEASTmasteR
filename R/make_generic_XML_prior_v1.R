@@ -1,7 +1,8 @@
 # Input a single line of the Excel file...
 # stem=TRUE only specifies that we desire a prior on the stem of a terminal branch;
 # don't use it elsewhere!  Stem vs. node calibrations for nodes are 
-make_generic_XML_prior <- function(dfline, colname_prefix="birthRate", param_name="birthRate", header_scheme=1, stem=FALSE, distrib=NULL, param1=NULL, param2=NULL, tmp_offset=NULL, meanInRealSpace=NULL)
+# better done by specifying the relevant clade as a node prior
+make_generic_XML_prior <- function(dfline, colname_prefix="birthRate", param_name="birthRate", header_scheme=1, stem=FALSE, distrib=NULL, param1=NULL, param2=NULL, lower=NULL, upper=NULL, tmp_offset=NULL, meanInRealSpace=NULL, xml=NULL)
 	{
 	defaults='
 	param_name="birthRate"
@@ -23,6 +24,8 @@ make_generic_XML_prior <- function(dfline, colname_prefix="birthRate", param_nam
 		param1_hdr = paste0(colname_prefix, "_prior_param1")
 		param2_hdr = paste0(colname_prefix, "_prior_param2")
 		offset_hdr = paste0(colname_prefix, "_offset")
+		lower_hdr = paste0(colname_prefix, "_min")
+		upper_hdr = paste0(colname_prefix, "_max")
 		meanInRealSpace_hdr = paste0(colname_prefix, "_meanInRealSpace")
 		}
 
@@ -32,6 +35,8 @@ make_generic_XML_prior <- function(dfline, colname_prefix="birthRate", param_nam
 		param1_hdr = paste0(colname_prefix, "_param1")
 		param2_hdr = paste0(colname_prefix, "_param2")
 		offset_hdr = paste0(colname_prefix, "_offset")
+		lower_hdr = paste0(colname_prefix, "_min")
+		upper_hdr = paste0(colname_prefix, "_max")
 		meanInRealSpace_hdr = paste0(colname_prefix, "_meanInRealSpace")
 		}
 
@@ -54,6 +59,18 @@ make_generic_XML_prior <- function(dfline, colname_prefix="birthRate", param_nam
 		text_to_run = paste0("param2 = dfline$", param2_hdr)
 		eval(parse(text=text_to_run))
 		} # END if (!is.null(param2))
+
+	if (is.null(lower))
+		{
+		text_to_run = paste0("lower = dfline$", lower_hdr)
+		eval(parse(text=text_to_run))
+		} # END if (!is.null(lower))
+	
+	if (is.null(upper))
+		{
+		text_to_run = paste0("upper = dfline$", upper_hdr)
+		eval(parse(text=text_to_run))
+		} # END if (!is.null(upper))
 	
 	if (is.null(tmp_offset))
 		{
@@ -151,6 +168,38 @@ make_generic_XML_prior <- function(dfline, colname_prefix="birthRate", param_nam
 		txt = paste0(" Prior probability density on the value of the parameter '", param_name, "', according to a ", distrib, " distribution with mean=", meanval, ", offset=", tmp_offset, ". ")
 		} # END if (distribution == "normal")
 
+
+	if (distrib == "OneOnX")
+		{
+		if (lower <= 0)
+			{
+			txt = paste0("STOP ERROR in dfline_row_to_XML_distribution_meanSD(): You have a OneOnX prior on '", colname_prefix, "', but your '", lower_hdr, ",' is equal or less than 0. A OneOnX means that the prior density is proportional to 1/rate. The rate needs limits so that the prior density integrates to a finite value instead of infinite (which makes it an improper prior).  Re-set '", lower_hdr, ",' to be greater than 0, e.g. 0.000001.")
+			
+			cat("\n\n")
+			cat(txt)
+			cat("\n\n")
+			stop(txt)
+			} # END if (lower <= 0)
+		if (is.infinite(upper))
+			{
+			txt = paste0("STOP ERROR in dfline_row_to_XML_distribution_meanSD(): You have a OneOnX prior on '", colname_prefix, "', but your '", upper_hdr, "' is equal or less than 0. A OneOnX means that the prior density is proportional to 1/rate. The rate needs limits so that the prior density integrates to a finite value instead of infinite (which makes it an improper prior).  Re-set '", upper_hdr, ",' to be greater than 0, e.g. 10 or 100.")
+			
+			cat("\n\n")
+			cat(txt)
+			cat("\n\n")
+			stop(txt)
+			} # END if (upper =< 0)
+
+		id_of_distribution_on_param = paste0("prP_OneOnX_Distrib_on_param_", param_name)
+
+		distribution_name = paste0("OneOnX_Distrib_on_param_", param_name)
+		distrib_XML = xmlNode(name="OneOnX", attrs=list(id=distribution_name, name="distr", offset=tmp_offset, spec="beast.math.distributions.OneOnX"))
+
+		txt = paste0(" Prior probability density on the value of the parameter '", param_name, "', according to a ", distrib, " distribution. ")
+		} # END if (distribution == "OneOnX")
+
+
+
 	if (distrib == "uniform")
 		{
 		id_of_distribution_on_param = paste0("prP_UniformDistrib_on_param_", param_name)
@@ -182,8 +231,11 @@ make_generic_XML_prior <- function(dfline, colname_prefix="birthRate", param_nam
 	prior_XML_plus_comment = list(bl(), comment_XML, prior_XML)
 
 
-
-
+	########################################################################
+	# Log the value of the parameter
+	########################################################################
+	log_value_XML = xmlNode(name="log", attrs=list(idref=param_name))
+	log_value_XMLtxt = xmlCommentNode(paste0(" Log of the value of the parameter '", param_name, "' "))
 
 
 	########################################################################
@@ -192,7 +244,9 @@ make_generic_XML_prior <- function(dfline, colname_prefix="birthRate", param_nam
 	idref_of_distribution_on_param = paste0(id_of_distribution_on_param)
 	log_XMLtxt = xmlCommentNode(paste0(" Log of the prior probability density of value of the parameter '", param_name, "' "))
 	log_XML = xmlNode(name="log", attrs=list(idref=idref_of_distribution_on_param))
-	log_XMLs = list(bl(), log_XMLtxt, log_XML)
+
+	#log_value_XMLs = list(bl(), log_value_XMLtxt, log_value_XML)
+	log_XMLs = list(bl(), log_value_XMLtxt, log_value_XML, bl(), log_XMLtxt, log_XML)
 
 
 	#######################################################
@@ -206,11 +260,19 @@ make_generic_XML_prior <- function(dfline, colname_prefix="birthRate", param_nam
 	#######################################################
 	# Output the XML
 	#######################################################
-	tmpXML = NULL
-	tmpXML$priors = c(prior_XML_plus_comment)
-	tmpXML$tracelog = log_XMLs
+	if (is.null(xml))
+		{
+		tmpXML = NULL
+		tmpXML$priors = c(prior_XML_plus_comment)
+		tmpXML$tracelog = log_XMLs
+		return(tmpXML)
+		} else {
+		xml$priors = c(xml$priors, prior_XML_plus_comment)
+		xml$tracelog = c(xml$tracelog, prior_XML_plus_comment)
+		return(xml)
+		}
 	
-	return(tmpXML)
+	return(stop("make_generic_XML_prior(): Shouldn't get here..."))
 	} # END make_generic_XML_prior <- function(dfline, param_name="birthRate", header_scheme=1, distribution=NULL, param1=NULL, param2=NULL, tmp_offset=NULL, meanInRealSpace=NULL)
 
 

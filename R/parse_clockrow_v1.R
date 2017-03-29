@@ -1,15 +1,29 @@
 
-clock_df_row_to_XML_distribution <- function(clock_df, tree_name="shared_tree")
+clock_df_row_to_XML_distribution <- function(clock_df, tree_name="shared_tree", clock_type=NULL)
 	{
 	defaults='
 	tree_name="shared_tree"
 	'
 	
 	# Get the clock type
-	clock_type = clock_df$clockmodel_type	# e.g. "ucld"
+	if (isblank_TF(clock_type) == TRUE)
+		{
+		clock_type = clock_df$clockmodel_type	# e.g. "ucld"
+		if (isblank_TF(clock_type) == TRUE)
+			{
+			txt = "STOP ERROR in clock_df_row_to_XML_distribution(): you must specify clock_type either in the 'clock_type' input, or in the cell of the clock_df row in the Excel file."
+			cat("\n\n")
+			cat(txt)
+			cat("\n\n")
+			stop(txt)
+			} # END if (isblank_TF(clock_type) == TRUE)
+		} # END if (isblank_TF(clock_type) == TRUE)
 
-	clock_types_allowed = c("ucld", "uced", "rlc")
-	if (clock_type %in% clock_types_allowed == FALSE)
+
+	clockModel_name = clock_df$clockModel_name
+
+	clock_types_allowed = c("strict", "ucld", "uced", "rlc", "SpeciesTreeUCLN", "SpeciesTreeUCED", "SpeciesTreeRLC")
+	if (tolower(clock_type) %in% tolower(clock_types_allowed) == FALSE)
 		{
 		txt = paste0("STOP ERROR in clock_df_row_to_XML_distribution(): clock_type=", clock_type, " but no match found in clock_types_allowed.")
 		cat("\n\n")
@@ -21,46 +35,67 @@ clock_df_row_to_XML_distribution <- function(clock_df, tree_name="shared_tree")
 		stop(txt)
 		} # END if (clock_type %in% clock_types_allowed == FALSE)
 
-	# LogNormal relaxed clock
-	if (clock_type == "ucld")
+	# Strict clock
+	if (clock_type == "strict")
 		{
-		tmpXML = clock_df_row_to_XML_distribution_meanSD(clock_df, tree_name="shared_tree")
+		tmpXML = clock_df_row_to_XML_distribution_justMean(clock_df, tree_name=tree_name, clock_type=clock_type)
+		}
+
+	# LogNormal relaxed clock
+	if ((tolower(clock_type) == "ucld") || (tolower(clock_type) == tolower("SpeciesTreeUCLN")))
+		{
+		tmpXML = clock_df_row_to_XML_distribution_meanSD(clock_df, tree_name=tree_name, clock_type=clock_type)
 		}
 	# Exponential relaxed clock
-	if (clock_type == "uced")
+	if ((tolower(clock_type) == "uced") || (tolower(clock_type) == tolower("SpeciesTreeUCED")))
 		{
-		tmpXML = clock_df_row_to_XML_distribution_justMean(clock_df, tree_name="shared_tree")
+		tmpXML = clock_df_row_to_XML_distribution_justMean(clock_df, tree_name=tree_name, clock_type=clock_type)
 		}
 	# Local random clock
-	if (clock_type == "rlc")
+	if ((tolower(clock_type) == "rlc") || (tolower(clock_type) == tolower("SpeciesTreeRLC")))
 		{
-		tmpXML = clock_df_row_to_XML_distribution_justMean(clock_df, tree_name="shared_tree")
+		tmpXML = clock_df_row_to_XML_distribution_justMean(clock_df, tree_name=tree_name, clock_type=clock_type)
 		}
 	
 	return(tmpXML)
 	}
 
 
-clock_df_row_to_XML_distribution_meanSD <- function(clock_df, tree_name="shared_tree")
+clock_df_row_to_XML_distribution_meanSD <- function(clock_df, tree_name="shared_tree", clock_type=NULL)
 	{
 	defaults='
 	clock_df = seqs_df[1,]
 	tree_name="shared_tree"
 	'
+
+	# Get the clock type
+	if (isblank_TF(clock_type) == TRUE)
+		{
+		# Get the ids for relaxed clockrate mean and SD
+		clock_type = clock_df$clockmodel_type	# e.g. "ucld"
+		
+		if (isblank_TF(clock_type) == TRUE)
+			{
+			txt = "STOP ERROR in clock_df_row_to_XML_distribution_meanSD(): you must specify clock_type either in the 'clock_type' input, or in the cell of the clock_df row in the Excel file."
+			cat("\n\n")
+			cat(txt)
+			cat("\n\n")
+			stop(txt)
+			} # END if (isblank_TF(clock_type) == TRUE)
+		} # END if (isblank_TF(clock_type) == TRUE)
+
 	
 	# Get the clock name
-	clockModel_name = clock_df$clockmodel_name
+	clockModel_name = clock_df$clockModel_name
 	clockModel_idref = paste0("@", clockModel_name)
 		
 	# Get the tree name
 	tree_idref = paste0("@", tree_name)
 	
-	# Get the ids for relaxed clockrate mean and SD
-	clock_type = clock_df$clockmodel_type	# e.g. "ucld"
 
-	if ( (clock_type == "uced") || (clock_type == "rlc") )
+	if ( (clock_type == "uced") || (clock_type == "rlc") || (clock_type == "strict") )
 		{
-		txt = paste0("STOP ERROR in 'clock_df_row_to_XML_distribution_justMean': your clock_df$clockmodel_type=='uced' or 'rlc', but these models need _justMean, not _meanSD")
+		txt = paste0("STOP ERROR in 'clock_df_row_to_XML_distribution_justMean': your clock_df$clockmodel_type=='uced' or 'rlc' or 'strict', but these models need _justMean, not _meanSD")
 		cat("\n\n")
 		cat(txt)
 		cat("\n\n")
@@ -68,16 +103,16 @@ clock_df_row_to_XML_distribution_meanSD <- function(clock_df, tree_name="shared_
 		}
 	
 
-	mean_of_shared_clock_id = paste0(clock_type, "Mean_of_", clockModel_name) 
+	mean_of_shared_clock_id = paste0(clock_type, "_Mean_of_", clockModel_name) 
 	mean_of_shared_clock_idref = paste0("@", mean_of_shared_clock_id)
-	SD_of_shared_clock_id = paste0(clock_type, "Stdev_of_", clockModel_name) 
+	SD_of_shared_clock_id = paste0(clock_type, "_Stdev_of_", clockModel_name) 
 	SD_of_shared_clock_idref = paste0("@", SD_of_shared_clock_id)
 	
 	
 	#######################################################
 	# Prior on the mean clockrate
 	#######################################################
-	
+
 	# Get the offset, if it exists
 	if (isblank_TF(clock_df$clockrate_offset) == FALSE)
 		{
@@ -136,6 +171,41 @@ clock_df_row_to_XML_distribution_meanSD <- function(clock_df, tree_name="shared_
 
 		txt = paste0(" Prior probability density of the mean of '", clockModel_name, "', according to a ", clock_df$clockrate_prior_dist, " distribution with mean=", meanval, ", sd=", sdval, ", offset=", offset, ". ")
 		} # END if (clock_df$clockrate_prior_dist == "normal")
+
+
+	if (clock_df$clockrate_prior_dist == "OneOnX")
+		{
+		if (lower_rate <= 0)
+			{
+			txt = "STOP ERROR in clock_df_row_to_XML_distribution_meanSD(): You have a OneOnX prior on clock rate, but your 'clockrate_min' is equal or less than 0. A OneOnX means that the prior density is proportional to 1/rate. The rate needs limits so that the prior density integrates to a finite value instead of infinite (which makes it an improper prior).  Re-set 'clockrate_min' to be greater than 0, e.g. 0.000001."
+			
+			cat("\n\n")
+			cat(txt)
+			cat("\n\n")
+			stop(txt)
+			} # END if (lower_rate <= 0)
+		if (is.infinite(upper_rate))
+			{
+			txt = "STOP ERROR in clock_df_row_to_XML_distribution_meanSD(): You have a OneOnX prior on clock rate, but your 'clockrate_min' is equal or less than 0. A OneOnX means that the prior density is proportional to 1/rate. The rate needs limits so that the prior density integrates to a finite value instead of infinite (which makes it an improper prior).  Re-set 'clockrate_min' to be greater than 0, e.g. 10 or 100."
+			
+			cat("\n\n")
+			cat(txt)
+			cat("\n\n")
+			stop(txt)
+			} # END if (is.infinite(upper_rate))
+		
+		
+		
+		id_of_prior_distrib_on_clock_mean = paste0("prP_OneOnX_Distrib_on_mean_of_", clockModel_name)
+		meanval = clock_df$clockrate_prior_param1
+		 
+		distribution_name = paste0("OneOnX_Distrib_on_mean_of_", clockModel_name)
+		distrib_XML = xmlNode(name="OneOnX", attrs=list(id=distribution_name, name="distr", offset=offset, spec="beast.math.distributions.OneOnX"))
+
+		txt = paste0(" Prior probability density of the mean of '", clockModel_name, "', according to a OneOnX distribution (meaning: prior density of rate X ~ 1/X. This only a proper prior if the lower limit on X is above 0, and the upper is below infinity")
+		} # END if (clock_df$clockrate_prior_dist == "OneOnX")
+
+
 
 	if (clock_df$clockrate_prior_dist == "exponential")
 		{
@@ -375,21 +445,32 @@ clock_df_row_to_XML_distribution_meanSD <- function(clock_df, tree_name="shared_
 
 
 
-clock_df_row_to_XML_distribution_justMean <- function(clock_df, tree_name="shared_tree")
+clock_df_row_to_XML_distribution_justMean <- function(clock_df, tree_name="shared_tree", clock_type=NULL)
 	{
 	defaults='
 	tree_name="shared_tree"
 	'
 	
 	# Get the clock name
-	clockModel_name = clock_df$clockmodel_name
+	clockModel_name = clock_df$clockModel_name
 	clockModel_idref = paste0("@", clockModel_name)
 		
 	# Get the tree name
 	tree_idref = paste0("@", tree_name)
 	
-	# Get the ids for relaxed clockrate mean and SD
-	clock_type = clock_df$clockmodel_type	# e.g. "uced" or "rlc"
+	# Get the clock type
+	if (isblank_TF(clock_type) == TRUE)
+		{
+		clock_type = clock_df$clockmodel_type	# e.g. "ucld"
+		if (isblank_TF(clock_type) == TRUE)
+			{
+			txt = "STOP ERROR in clock_df_row_to_XML_distribution(): you must specify clock_type either in the 'clock_type' input, or in the cell of the clock_df row in the Excel file."
+			cat("\n\n")
+			cat(txt)
+			cat("\n\n")
+			stop(txt)
+			} # END if (isblank_TF(clock_type) == TRUE)
+		} # END if (isblank_TF(clock_type) == TRUE)
 	
 	if (clock_type == "ucld")
 		{
@@ -400,8 +481,31 @@ clock_df_row_to_XML_distribution_justMean <- function(clock_df, tree_name="share
 		stop(txt)
 		}
 	
-	mean_of_shared_clock_id = paste0(clock_type, "Mean_of_", clockModel_name) 
+	mean_of_shared_clock_id = paste0(clock_type, "_Mean_of_", clockModel_name) 
 	mean_of_shared_clock_idref = paste0("@", mean_of_shared_clock_id)
+	
+	# Limits on the clock parameters: REQUIRED for the OneOnX distribution!
+	lower_rate = clock_df$clockrate_min
+	upper_rate = clock_df$clockrate_max
+	lower_SD = clock_df$clockSD_min
+	upper_SD = clock_df$clockSD_max
+	
+	if (isblank_TF(lower_rate) == TRUE)
+		{
+		lower_rate = 0.0000001
+		}
+	if (isblank_TF(upper_rate) == TRUE)
+		{
+		upper_rate = 10
+		}
+	if (isblank_TF(lower_SD) == TRUE)
+		{
+		lower_SD = 0.0000001
+		}
+	if (isblank_TF(upper_SD) == TRUE)
+		{
+		upper_SD = 10
+		}
 	
 	
 	#######################################################

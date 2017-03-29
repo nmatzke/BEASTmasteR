@@ -2,6 +2,26 @@
 # Functions for parsing sequence data and adding to XML
 #######################################################
 
+convert_NEXUS_to_FASTA <- function(fasta_fn, out_nexus_aln_fn=NULL)
+	{
+	require(ape)
+	require(seqinr)
+	
+	if (is.null(out_nexus_aln_fn))
+		{
+		out_nexus_aln_fn = paste0(fasta_fn, ".nex")
+		}
+		
+	# Write out to NEXUS
+	seqs = seqinr::read.fasta(fasta_fn)
+	ape::write.nexus.data(x=seqs, file=out_nexus_aln_fn)
+	txt = paste0("\nconvert_NEXUS_to_FASTA() converted a FASTA file named '", fasta_fn, "' to a NEXUS data file named '", out_nexus_aln_fn, "'.\n")
+	cat(txt)
+	
+	return(out_nexus_aln_fn)
+	} # END convert_NEXUS_to_FASTA <- function(fasta_fn, out_nexus_aln_fn=NULL)
+
+
 collapse_seqs <- function(dataset)
 	{
 	txtseqs = unlist(lapply(X=dataset, FUN=paste0, collapse=""))
@@ -62,18 +82,31 @@ print_unique_numstates <- function(numstates_morph_list, printall="short")
 
 
 
-make_BEAST2_userDataTypes <- function(numstates_morph_list, nexd6, dataset_name="", ordering="unordered", numGammaCat=1, clockModel_name="shared_clock", add_morphList=TRUE, printall="short")
+make_BEAST2_userDataTypes <- function(numstates_morph_list, nexd6, dataset_name="", ordering="unordered", morph_transition_rates="equal", baseFreqs="equal", numGammaCat=1, clockModel_name="shared_clock", clockModel_relRate=NA, gammaShape_suffix=NA, add_morphList=TRUE, printall="short")
 	{
 	defaults='
 	numstates_morph_list = numstates_morph_list_subset
 	nexd6 = nexd6
 	printall="short"
 	'
-
+	
+	# Warning for when shared_clock in clockModel_name is lost somehow...
+	if (is.null(clockModel_name) == TRUE)
+		{
+		txt = "WARNING from make_BEAST2_userDataTypes(): input 'clockModel_name' was NULL, so setting it to 'shared_clock'."
+		cat("\n")
+		cat(txt)
+		cat("\n")
+		warning(txt)
+		
+		clockModel_name = "shared_clock"
+		}
+	
+	
 	# Error check on ordering
 	if ( (ordering != "unordered") && (ordering != "ordered") )
 		{
-		txt = paste0("\n\nERROR in make_BEAST2_userDataTypes(): 'ordering' must be either\n'unordered' (default) or 'ordered'. Instead, you have: ", ordering, "\n\n")
+		txt = paste0("\n\nERROR in make_BEAST2_userDataTypes(): 'ordering' must be either\n'unordered' (default) or 'ordered'. Instead, you have: ", ordering, "\n\n2016-09-24 update: The 'ordering' column is deprecated, instead the 'model' column is checked for 'Mk_unord' or 'Mk_ord'.\n\n")
 		cat(txt)
 		stop(txt)
 		}
@@ -315,7 +348,10 @@ make_BEAST2_userDataTypes <- function(numstates_morph_list, nexd6, dataset_name=
 		
 		# Save in morphList
 		numchars = sum(numstates_morph_list==numstates)
-		morphList_row = c(dataset_name, name_of_userDataType, numstates, ordering, numchars, numGammaCat, clockModel_name)
+		
+		# 2016-09-24: added morph_transition_rates, baseFreqs
+		# 2016-12-19: added clockModel_relRate
+		morphList_row = c(dataset_name, name_of_userDataType, numstates, ordering, morph_transition_rates, baseFreqs, numchars, numGammaCat, clockModel_name, clockModel_relRate, gammaShape_suffix)
 		morphList = rbind(morphList, morphList_row)
 		
 		# Add this 
@@ -336,12 +372,17 @@ make_BEAST2_userDataTypes <- function(numstates_morph_list, nexd6, dataset_name=
 	result = NULL
 	result$nexd5 = nexd5
 	result$userDataType_nodes_list = userDataType_nodes_list
+# 	print("Checkpoint_1 in make_BEAST2_userDataTypes()...")
 	
 	if (add_morphList == TRUE)
 		{
 		row.names(morphList) = NULL
 		morphList = as.data.frame(morphList, row.names=NULL, stringsAsFactors=FALSE)
-		names(morphList) = c("dataset_name", "name_of_userDataType", "numstates", "ordering", "numchars", "numGammaCat", "clockModel_name")
+# 		print(names(morphList))
+# 		print(morphList)
+		
+		
+		names(morphList) = c("dataset_name", "name_of_userDataType", "numstates", "ordering", "morph_transition_rates", "baseFreqs", "numchars", "numGammaCat", "clockModel_name", "clockModel_relRate", "gammaShape_suffix")
 		class(morphList$numstates) = "numeric"
 		class(morphList$numchars) = "numeric"
 		result$morphList = morphList
@@ -368,8 +409,8 @@ make_BEAST2_userDataTypes <- function(numstates_morph_list, nexd6, dataset_name=
 # Options for ascertainment model:
 # ascertainment="Mk": Markov-k model for k states, no correction for ascertainment bias
 # ascertainment="Mkv": Markov-k model, conditioning on unobservability of invariant sites
-# Not implemented
-# ascertainment="MkInf": Markov-k model, conditioning on all sites being 
+# Now implemented:
+# ascertainment="MkParsInf": Markov-k model, conditioning on all sites being 
 #                         parsimony-informative (all invariant and autapomorphic sites
 #                         excluded)
 # ascertainment="noabsencesites": Markov-k model, sites of all-0 are disallowed
@@ -379,7 +420,12 @@ make_BEAST2_userDataTypes <- function(numstates_morph_list, nexd6, dataset_name=
 #                                 (e.g. for restriction-site data, where all-absence
 #                                 -- all-0 -- site data is disallowed). See e.g. MrBayes.
 # 
-write_BEAST2_morphology_characters <- function(nexd7, numstates_morph_list, dataset_name="", ordering="unordered", ascertainment="Mk")
+# MkA: Pyron (2016)'s F81-like model for binary characters. 
+# pi0 = basefrequency of state 0, and rate of 1->0
+# pi1 = basefrequency of state 1, and rate of 0->1
+# 
+# 
+write_BEAST2_morphology_characters <- function(nexd7, numstates_morph_list, dataset_name="", ordering="unordered", morph_transition_rates="equal", baseFreqs="equal", ascertainment="Mk", max_num_patterns=2500, assumed_nstates="")
 	{
 	junk='
 	nexd7=nexdf
@@ -390,12 +436,12 @@ write_BEAST2_morphology_characters <- function(nexd7, numstates_morph_list, data
 	# Correct numstates_morph_list to set characters with 0 or 1 states to 2
 	numstates_morph_list[numstates_morph_list<2] = 2
 	
-	allowed_ascertainment_models = c("Mk", "Mkv", "noabsencesites", "nopresencesites")
+	allowed_ascertainment_models = c("Mk", "Mkv", "noabsencesites", "nopresencesites", "MkInf", "MkParsInf")
 	
 	# Error check on ordering
 	if ( (ordering != "unordered") && (ordering != "ordered") )
 		{
-		txt = paste0("\n\nERROR in write_BEAST2_morphology_characters(): 'ordering' must be either\n'unordered' (default) or 'ordered'. Instead, you have: ", ordering, "\n\n")
+		txt = paste0("\n\nSTOP ERROR in write_BEAST2_morphology_characters(): 'ordering' must be either\n'unordered' (default) or 'ordered'. Instead, you have: ", ordering, "\n\n")
 		cat(txt)
 		stop(txt)
 		}
@@ -466,17 +512,9 @@ write_BEAST2_morphology_characters <- function(nexd7, numstates_morph_list, data
 		# Add the sites to condition on
 		if (ascertainment == "Mk")
 			{
-			ascertainment_txt = " The ascertainment-bias model for these characters has been set to 'Mkv' (Markov-k). This means *NO* correction for unobservable character patterns will be performed.\n"
+			ascertainment_txt = " The ascertainment-bias model for these characters has been set to 'Mk' (Markov-k). This means *NO* correction for unobservable character patterns will be performed.\n"
 			} # END if (ascertainment == "Mk")
-		if (ascertainment == "MkInf")
-			{
-			allowed_ascertainment_models_txt = paste(allowed_ascertainment_models, sep=", ", collapse=", ")
-			error_txt = paste0("\n\nSTOP ERROR IN write_BEAST2_morphology_characters(): The ascertainment-bias model for these characters has been set to 'MkInf', but this model is not yet implemented in BEASTmasteR. Allowed models: ", allowed_ascertainment_models_txt, "\n\n")
-			ascertainment_txt = paste0(" The ascertainment-bias model for these characters has been set to 'MkInf' (Markov-k, only parsimony-informative characters allowed, i.e. no autapomorphies). This model is not yet implemented in BEASTmasteR because ", "(1) It's a pain (you have to list in the XML all of the patterns you are *not* able to observe, i.e., an autapomorphy on each possible taxon; this soon gets ridiculous for many taxa/many character states). ", "(2) You should probably describe/code autapomorphies in morphological characters anyway: these are (slightly) informative in a likelihood/Bayesian framework, they can distinguish OTUs that would otherwise be identical, ", "they give a little more information about the amount of morphological divergence and thus time elapsed (I credit Randy Irmis for pointing this out to me). Finally, it's always possible that new taxa/new descriptions will make autapomorphies into synapomorphies. (I credit Randy Irmis for convincing me of this.) ", "(3) As far as I can tell from the MrBayes 3.1.2 code, MrBayes is only set up to do parsimony-informative ascertainment bias correction for 2-state (binary) characters anyway: i.e., if you thought you were doing it for 3-state, 4-state characters etc., you probably weren't actually. This is also hinted at in the MrBayes manual: https://groups.google.com/forum/#!topic/raxml/QOgSN8jRA2o . ", "(4) The MrBayes manual suggests that parsimony-informative ascertainment bias doesn't matter much anyway for large phylogenies. (5) Even if it does matter for the likelihoods, it's debatable whether or not the dating and topology would be effected much, ", " except in extreme cases, because the rates should adjust to match date calibrations regardless of whether the rate is absolutely correct. All of this constitutes the casual opinion of Nick Matzke and I Might Be Wrong.\n\n")
-			cat(error_txt)
-			cat(ascertainment_txt)
-			stop(error_txt)
-			} # END if (ascertainment == "MkInf")
+		
 
 		if (ascertainment == "Mkv")
 			{
@@ -489,6 +527,43 @@ write_BEAST2_morphology_characters <- function(nexd7, numstates_morph_list, data
 			dummy_characters = rep(states_to_exclude_txt, length(tmpseqs))			
 			tmpseqs = paste(dummy_characters, tmpseqs, sep="")
 			} # END if (ascertainment == "Mkv")
+
+		# MkInf = old version of ParsInf name
+		if ((ascertainment == "MkParsInf") || (ascertainment == "MkInf"))
+			{
+			allowed_ascertainment_models_txt = paste(allowed_ascertainment_models, sep=", ", collapse=", ")
+			error_txt = paste0("\n\nSTOP ERROR IN write_BEAST2_morphology_characters(): The ascertainment-bias model for these characters has been set to 'MkParsInf', but this model is not yet implemented in BEASTmasteR. Allowed models: ", allowed_ascertainment_models_txt, "\n\n")
+			ascertainment_txt = " The ascertainment-bias model for these characters has been set to 'MkParsInf' (Markov-k, with correction for observing only parsimony-informative characters). This correction will be attempted, but will fail if there are too many possible unobservable site patterns.\n"
+			#ascertainment_txt = paste0(" The ascertainment-bias model for these characters has been set to 'MkParsInf' (Markov-k, only parsimony-informative characters allowed, i.e. no autapomorphies). This model is not yet implemented in BEASTmasteR because ", "(1) It's a pain (you have to list in the XML all of the patterns you are *not* able to observe, i.e., an autapomorphy on each possible taxon; this soon gets ridiculous for many taxa/many character states). ", "(2) You should probably describe/code autapomorphies in morphological characters anyway: these are (slightly) informative in a likelihood/Bayesian framework, they can distinguish OTUs that would otherwise be identical, ", "they give a little more information about the amount of morphological divergence and thus time elapsed (I credit Randy Irmis for pointing this out to me). Finally, it's always possible that new taxa/new descriptions will make autapomorphies into synapomorphies. (I credit Randy Irmis for convincing me of this.) ", "(3) As far as I can tell from the MrBayes 3.1.2 code, MrBayes is only set up to do parsimony-informative ascertainment bias correction for 2-state (binary) characters anyway: i.e., if you thought you were doing it for 3-state, 4-state characters etc., you probably weren't actually. This is also hinted at in the MrBayes manual: https://groups.google.com/forum/#!topic/raxml/QOgSN8jRA2o . ", "(4) The MrBayes manual suggests that parsimony-informative ascertainment bias doesn't matter much anyway for large phylogenies. (5) Even if it does matter for the likelihoods, it's debatable whether or not the dating and topology would be effected much, ", " except in extreme cases, because the rates should adjust to match date calibrations regardless of whether the rate is absolutely correct. All of this constitutes the casual opinion of Nick Matzke and I Might Be Wrong.\n\n")
+			#cat(error_txt)
+			cat("\n\n")
+			cat(ascertainment_txt)
+			cat("\n\n")
+			#stop(error_txt)
+			
+			if (ordering == "ordered")
+				{
+				error_txt = "STOP ERROR in write_BEAST2_morphology_characters(): The ascertainment-bias model for these characters has been set to 'MkParsInf', but the ordering is 'ordered'. MkParsInf for ordered characters will be different than for unordered characters, and I have not implemented it yet.\n"
+				cat("\n\n")
+				cat(error_txt)
+				cat("\n\n")
+				stop(error_txt)
+				} # END if (ordering == "ordered")
+			
+			# Otherwise, implement the characters and fuse them to the beginning of the data matrix:
+			ntaxa = length(tmpseqs)
+			nstates = numstates
+			# Returns a matrix
+			newcols = list_unobservable_patterns_ParsInf(ntaxa=ntaxa, nstates=nstates, printflag=TRUE, max_num_patterns=max_num_patterns, ordering=ordering, assumed_nstates=assumed_nstates)
+			
+			num_parsInf_dummy_characters = ncol(newcols)
+			
+			# Fuse the matrix columns
+			dummy_characters = apply(X=newcols, MARGIN=1, FUN=paste, collapse="")
+			tmpseqs = paste(dummy_characters, tmpseqs, sep="")
+			} # END if (ascertainment == "MkParsInf")
+
+
 		if (ascertainment == "noabsencesites")
 			{
 			states_to_exclude = 0
@@ -555,20 +630,40 @@ write_BEAST2_morphology_characters <- function(nexd7, numstates_morph_list, data
 			# Original
 			#morph_alignment_nodes_list[[(anum=anum+1)]] = xmlNode(name="data", attrs=list(id=partition_name, dataType="user defined"), .children=sequence_nodes_list)
 			
-			# Exclude invariant sites from the likelihood (strip="true")
-			# (for consistency in model comparison with the Mkv etc.)
-			morph_alignment_nodes_list[[(anum=anum+1)]] = xmlNode(name="data", attrs=list(id=partition_name, dataType="user defined", ascertained="false", statecount=numstates, strip="true", spec="beast.evolution.alignment.AscertainedAlignment"), .children=sequence_nodes_list)
+			# DO NOT STRIP invariant sites from the likelihood (strip="true") when ascertainment is Mk
+			# (so: strip=false)
+			morph_alignment_nodes_list[[(anum=anum+1)]] = xmlNode(name="data", attrs=list(id=partition_name, dataType="user defined", ascertained="false", statecount=numstates, strip="false", spec="beast.evolution.alignment.AscertainedAlignment"), .children=sequence_nodes_list)
 			} # END if (ascertainment == "Mk")
 
 		if (ascertainment == "Mkv")
 			{
+			# DO STRIP invariant sites from the likelihood (strip="true") when ascertainment is Mkv
+			# (so: strip=true)
+			# But: the R-script/user should do this
+
 			# Exclude from 0 to the first state that is NOT excluded
 			# Using 0-based counting
 			excludefrom = 0
 			excludeto = nchar(states_to_exclude_txt) - 0 
 			excludeevery = 1
-			morph_alignment_nodes_list[[(anum=anum+1)]] = xmlNode(name="data", attrs=list(id=partition_name, dataType="user defined", ascertained="true", statecount=numstates, excludefrom=excludefrom, excludeto=excludeto, excludeevery=excludeevery, strip="true", spec="beast.evolution.alignment.AscertainedAlignment"), .children=sequence_nodes_list)
+			morph_alignment_nodes_list[[(anum=anum+1)]] = xmlNode(name="data", attrs=list(id=partition_name, dataType="user defined", ascertained="true", statecount=numstates, excludefrom=excludefrom, excludeto=excludeto, excludeevery=excludeevery, strip="false", spec="beast.evolution.alignment.AscertainedAlignment"), .children=sequence_nodes_list)
 			} # END if (ascertainment == "Mkv")
+
+
+		if ((ascertainment == "MkParsInf") || (ascertainment == "MkInf"))
+			{
+			# DO STRIP invariant sites from the likelihood (strip="true") when ascertainment is MkParsInf
+			# (so: strip=true)
+			# But: the R-script/user should do this
+
+			# Exclude from 0 to the first state that is NOT excluded
+			# Using 0-based counting
+			excludefrom = 0
+			excludeto = num_parsInf_dummy_characters - 0 
+			excludeevery = 1
+			morph_alignment_nodes_list[[(anum=anum+1)]] = xmlNode(name="data", attrs=list(id=partition_name, dataType="user defined", ascertained="true", statecount=numstates, excludefrom=excludefrom, excludeto=excludeto, excludeevery=excludeevery, strip="false", spec="beast.evolution.alignment.AscertainedAlignment"), .children=sequence_nodes_list)
+			} # END if (ascertainment == "Mkv")
+
 
 		if (ascertainment == "noabsencesites")
 			{
@@ -577,7 +672,7 @@ write_BEAST2_morphology_characters <- function(nexd7, numstates_morph_list, data
 			excludefrom = 0
 			excludeto = nchar(states_to_exclude_txt) - 0 
 			excludeevery = 1
-			morph_alignment_nodes_list[[(anum=anum+1)]] = xmlNode(name="data", attrs=list(id=partition_name, dataType="user defined", ascertained="true", statecount=numstates, excludefrom=excludefrom, excludeto=excludeto, excludeevery=excludeevery, strip="true", spec="beast.evolution.alignment.AscertainedAlignment"), .children=sequence_nodes_list)
+			morph_alignment_nodes_list[[(anum=anum+1)]] = xmlNode(name="data", attrs=list(id=partition_name, dataType="user defined", ascertained="true", statecount=numstates, excludefrom=excludefrom, excludeto=excludeto, excludeevery=excludeevery, strip="false", spec="beast.evolution.alignment.AscertainedAlignment"), .children=sequence_nodes_list)
 			} # END if (ascertainment == "noabsencesites")
 
 		if (ascertainment == "nopresencesites")
@@ -587,13 +682,13 @@ write_BEAST2_morphology_characters <- function(nexd7, numstates_morph_list, data
 			excludefrom = 0
 			excludeto = nchar(states_to_exclude_txt) - 0 
 			excludeevery = 1
-			morph_alignment_nodes_list[[(anum=anum+1)]] = xmlNode(name="data", attrs=list(id=partition_name, dataType="user defined", ascertained="true", statecount=numstates, excludefrom=excludefrom, excludeto=excludeto, excludeevery=excludeevery, strip="true", spec="beast.evolution.alignment.AscertainedAlignment"), .children=sequence_nodes_list)
+			morph_alignment_nodes_list[[(anum=anum+1)]] = xmlNode(name="data", attrs=list(id=partition_name, dataType="user defined", ascertained="true", statecount=numstates, excludefrom=excludefrom, excludeto=excludeto, excludeevery=excludeevery, strip="false", spec="beast.evolution.alignment.AscertainedAlignment"), .children=sequence_nodes_list)
 			} # END if (ascertainment == "nopresencesites")
 
 
 		}
 	return(morph_alignment_nodes_list)
-	}
+	} # END write_BEAST2_morphology_characters
 
 
 
@@ -603,21 +698,21 @@ write_BEAST2_morphology_characters <- function(nexd7, numstates_morph_list, data
 # format for XML, output to XML tag 
 
 # If add_morphLength=TRUE, add the length of the morphology data to the xml output
-
-parse_datasets <- function(seqs_df, add_morphLength=TRUE, add_morphList=TRUE, OTUs=NULL, printall="short", convert_ambiguous_to_IUPAC=FALSE, xml=NULL, xlsfn=NULL, return_charsdf=TRUE)
+# CUT: check_numstates If TRUE (default), then conflicts between the observed number of states, and the theoretical number
+parse_datasets <- function(seqs_df, add_morphLength=TRUE, add_morphList=TRUE, OTUs=NULL, printall="short", convert_ambiguous_to_IUPAC=FALSE, xml=NULL, xlsfn=NULL, return_charsdf=TRUE)#, check_numstates=TRUE)
 	{
 	defaults='
-	xml=NULL
+	# Example script defaults
 	add_morphLength=TRUE
 	add_morphList=TRUE
-	OTUs=NULL
+	OTUs=OTUs
 	printall="short"
 	convert_ambiguous_to_IUPAC=FALSE
 	xml=NULL
 	xlsfn=xlsfn
-	return_charsdf=TRUE
-	
+	return_charsdf=TRUE	
 	'
+	
 	# Get the list of OTUs you actually want to use
 	if (is.null(OTUs) == TRUE)
 		{
@@ -628,10 +723,13 @@ parse_datasets <- function(seqs_df, add_morphLength=TRUE, add_morphList=TRUE, OT
 		tmpOTUs_df = tmpOTUs_df[OTUs_to_keep_TF,]
 		}
 	
+	# Default is use="yes"
+	seqs_df$use[isblank_TF(seqs_df$use)] = "yes"
 	
 	
 	# Initialize
 	chars_wLT_2_states_df_list = list()
+	count_per_charstate_per_char = NULL
 	
 	# Return the characters data frame for morphology, if desired
 	if (return_charsdf == TRUE)
@@ -643,25 +741,40 @@ parse_datasets <- function(seqs_df, add_morphLength=TRUE, add_morphList=TRUE, OT
 	# Subset to just the sequence datasets you intend to use
 	seqs_df = seqs_df[seqs_df$use == "yes", ]
 	
-	# Get unique NEXUS filenames marked with 
-	convert_ambiguous_to_IUPAC = convert_ambiguous_to_IUPAC
-	#TF = seqs_df$use == "yes"
-	#seqs_df = seqs_df[TF, ]
 	
+	# Get unique NEXUS filenames
+	
+	# Standardize the filenames, to include the directory etc.
 	# Convert blank directories to ""
 	# If there is only one slash, fix that
 	seqs_df$dir[isblank_TF(seqs_df$dir)] = ""
+	dirs = seqs_df$dir
 	fns = seqs_df$filename
 	for (fnum in 1:length(fns))
 		{
+		if (isblank_TF(dirs[fnum]) == TRUE)
+			{
+			next()
+			}
+		
+		# If the prefix in the filename is redundant with 
+		# the one in dir, remove it from fn
+		prefix = addslash(get_fn_prefix(fns[fnum]))
+		tmpdir = addslash(dirs[fnum])
+		if (grepl(pattern=prefix, x=tmpdir) == TRUE)
+			{
+			fns[fnum] = gsub(pattern=prefix, replacement="", x=fns[fnum])
+			}
+
 		# Paste on the directory, unless the filename is "traits"
 		if (fns[fnum] != "traits")
 			{
-			fn = slashslash(paste(seqs_df$dir[fnum], fns[fnum], sep="/"))
+			fns[fnum] = slashslash(paste(seqs_df$dir[fnum], fns[fnum], sep="/"))
 			} # END if (fns[fnum] != "traits")
-		hits = gregexpr(pattern="/", text=fn)[[1]]
-		# If only 1 slash, fix that
-		if (length(hits) == 1)
+		
+		# If only 1 slash, at the beginning, fix that
+		hits = gregexpr(pattern="/", text=fns[fnum])[[1]]
+		if ( (length(hits) == 1) && (hits[[1]] == 1) )
 			{
 			fns[fnum] = gsub(pattern="/", replacement="", x=fns[fnum])
 			} # END if (length(hits) == 1)
@@ -680,7 +793,7 @@ parse_datasets <- function(seqs_df, add_morphLength=TRUE, add_morphList=TRUE, OT
 	# (used for making the morphology models and likelihood tags)
 	morphList = NULL
 	
-	morphstats = list()
+	matrices_stats = list()
 	
 	# First, see if there are two versions of morph, ordered and unordered
 	# Revise the rows to include accordingly...
@@ -688,13 +801,13 @@ parse_datasets <- function(seqs_df, add_morphLength=TRUE, add_morphList=TRUE, OT
 	for (i in 1:length(uniq_fn_rownums))
 		{
 		current_rownum = uniq_fn_rownums[i]
-		if (datatypes[i] != "morph")
+		if (toupper(datatypes[i]) != toupper("morph"))
 			{
 			unique_rows_revised = c(unique_rows_revised, current_rownum)
 			next()	# Skip to next item in the loop
 			}
 	
-		if (datatypes[i] == "morph")
+		if (toupper(datatypes[i]) == toupper("morph"))
 			{
 			dataset_name = seqs_df$datasetName[current_rownum]
 			TF = seqs_df$datasetName == dataset_name
@@ -709,21 +822,105 @@ parse_datasets <- function(seqs_df, add_morphLength=TRUE, add_morphList=TRUE, OT
 	uniq_fn_rownums = unique_rows_revised
 	uniq_fn_rownums
 	uniq_fns = fns[uniq_fn_rownums]
+	
+	
+	# There should be one dataset_name for each file, 
+	# or for e.g. unordered vs. ordered morph from a single file
 	dataset_names = seqs_df$datasetName[uniq_fn_rownums]
+	
+	# For DNA or AAs, choose which function to use to read DNA/AAs
+	# (read_nexus_data2 is SLOOOOOW for large files)
+	seqs_read_functions = seqs_df$seqs_read_function[uniq_fn_rownums]
+	
+	if (is.null(seqs_df$file_types) == FALSE)
+		{
+		file_types = seqs_df$file_types[uniq_fn_rownums]
+		} else {
+		file_types = rep("", times=length(uniq_fn_rownums))
+		} # END if (is.null(seqs_df$file_types) == FALSE)
+	
+	
+	# Number of characters in each raw dataset (each file)
+	dataset_lengths = rep(0, length(dataset_names))
+	dataset_ntaxa = rep(0, length(dataset_names))
+	
+	# Completeness statistics
+# 	meanQs
+# 	maxQs
+# 	minQs
+# 	pctData
+# 	nMajData
+
+	meanQs = rep(0, length(dataset_names))
+	maxQs = rep(0, length(dataset_names))
+	minQs = rep(0, length(dataset_names))
+	pctData = rep(0, length(dataset_names))
+	nMajData = rep(0, length(dataset_names))
+
+	
+	# filteredAlignment_names can be whole files, or 
+	# subsets of those files (e.g. partitions)
 	filteredAlignment_names = seqs_df$filteredAlignmentName[uniq_fn_rownums]
 	datatypes = seqs_df$type[uniq_fn_rownums]
-	order_types = seqs_df$order_type[uniq_fn_rownums]
+	geneTreeNames = seqs_df$geneTreeName[uniq_fn_rownums]
+	seqNames_to_cut = seqs_df$seqNames_to_cut[uniq_fn_rownums]
+	
+	# Old versions had an "order_type" column; this is deprecated, but 
+	# being filled in from the "model" column
+	models = seqs_df$model[uniq_fn_rownums]
+	# default is unordered
+	order_types = rep("unordered", times=length(models))
+	order_types[models == "Mk_ord"] = "ordered"
+	
+	# Added 2016-09-24:
+	# Different kinds of morphological models (MkA for e.g. asymmetric)
+	morph_transition_rates = seqs_df$morph_transition_rates[uniq_fn_rownums]
+	baseFreqs = seqs_df$baseFreqs[uniq_fn_rownums]
+	
+	# Ascertainment bias models
 	ascertainment = seqs_df$ascertainment[uniq_fn_rownums]
+	
+	# Defaults
+	# (irrelevant for DNA)
+	morph_transition_rates[isblank_TF(morph_transition_rates)] = "equal"
+	baseFreqs[isblank_TF(baseFreqs)] = "equal"
+	ascertainment[isblank_TF(ascertainment)] = "Mkv"
+	
+	
+	# Maximum number of unobservable patterns to list for ascertainment bias correction: 
+	# mostly to keep your R script and/or BEAST from crashing, when they try to 
+	# write out, or read in, the potentially BILLIONS of unobservable site patterns
+	# that there are for, say, a 5-state unordered character with 100 taxa
+	max_num_patterns = seqs_df$max_num_patterns[uniq_fn_rownums]
+	max_num_patterns[isblank_TF(max_num_patterns)] = 2500
+	max_num_patterns = as.numeric(max_num_patterns)
+	
+	
+	# Assumed nstates -- if e.g. you want to run a 2-state correction on a 3-state
+	# character (mostly because this might be what MrBayes has actually been doing).
+	assumed_nstates = seqs_df$assumed_nstates[uniq_fn_rownums]
+	assumed_nstates[isblank_TF(assumed_nstates)] = ""
+	
+	#print("assumed_nstates2:")
+	#print(assumed_nstates)
+	
+	
 	charlists = seqs_df$list[uniq_fn_rownums]
 	startchars = seqs_df$startchar[uniq_fn_rownums]
 	endchars = seqs_df$endchar[uniq_fn_rownums]
 	bynums = seqs_df$by[uniq_fn_rownums]
 	numGammaCats = seqs_df$gammaNum[uniq_fn_rownums]
-	clockModel_names = seqs_df$clockmodel_name[uniq_fn_rownums]
-
-	if (length(dataset_names) != length(fns) )
+	clockModel_names = seqs_df$clockModel_name[uniq_fn_rownums]
+	clockModel_relRates = seqs_df$clockModel_relRates[uniq_fn_rownums]
+	gammaShape_suffixes = seqs_df$gammaShape_suffix[uniq_fn_rownums]
+	
+	if (length(dataset_names) != length(uniq_fns) )
 		{
-		txt = paste("\n\nERROR in __: In worksheet 'data', the number of unique filenames (", length(fns),")\ndoes not match the number of unique dataset names (", length(dataset_names), ").\n\n", sep="")
+		txt = paste("\n\nERROR in parse_datasets(): In worksheet 'data', the number of unique filenames (", length(uniq_fns),")\ndoes not match the number of unique dataset names (", length(dataset_names), ").\n\n", sep="")
+		cat("\n\n")
+		cat(txt)
+		cat("\n\n")
+		stop(txt)
 		} # END if (length(dataset_names) != length(fns) )
 
 	
@@ -731,7 +928,7 @@ parse_datasets <- function(seqs_df, add_morphLength=TRUE, add_morphList=TRUE, OT
 	traits_TF = "continuous" %in% datatypes
 	traits_TF
 	
-	# Read the datasets
+	# Initialize XMLs for holding the datasets
 	data_XML = list()
 	prior_XML = list()
 	misc_XML = list()
@@ -749,63 +946,187 @@ parse_datasets <- function(seqs_df, add_morphLength=TRUE, add_morphList=TRUE, OT
 		operator_XMLs = list(bl(), xmlCommentNode(" Additional operators "))
 		tracelog_XMLs = list(bl(), xmlCommentNode(" Additional logs "))
 		screenlog_XMLs = list(bl(), xmlCommentNode(" Additional logs "))
-		}# END if (traits_TF == TRUE)
+		} # END if (traits_TF == TRUE)
 	
 	old_dataset_name = "not_used_yet"	# to avoid reloading morphology data
+	
+	####################################################
+	####################################################
+	# LOOP THROUGH DATA FILES
+	####################################################
+	####################################################
 	for (i in 1:length(uniq_fns))
-	#for (i in 1:1)
 		{
+		cat("\nparse_datasets() is starting read of file ", i, "/", length(uniq_fns), ": '", uniq_fns[i], "'...\n", sep="")
+		
 		dataset_name = dataset_names[i]
 		fn = uniq_fns[i]
-		datatype = datatypes[i]
+		file_type = tolower(file_types[i])
+		datatype = toupper(datatypes[i])
 		numGammaCat = numGammaCats[i]
 		clockModel_name = clockModel_names[i]
+		clockModel_relRate = clockModel_relRates[i]
+		gammaShape_suffix = gammaShape_suffixes[i]
 		
-		# Which characters (split "list" cell on comma)
-		charlist = charlists[i]
-		startchar = startchars[i]
-		endchar = endchars[i]
-		bynum = bynums[i]
-
-		if (isblank_TF(charlist) == TRUE)
+		# Error check: Check if the file exists
+		if (file.exists(fn) == FALSE)
 			{
-			# If the charnums are missing, use all characters
-			if ( isblank_TF(startchar) || isblank_TF(endchar) || isblank_TF(bynum) )
+			stoptxt = paste0("STOP ERROR in parse_datasets(): File #", i, "/", length(uniq_fns), " could not be found. This is the file that was sought:\n\n", fn, "\n\n")
+			
+			cat("\n\n")
+			cat(stoptxt)
+			cat("\n\n")
+			
+			stop(stoptxt)
+			} # END Error check: Check if the file exists
+
+		
+		
+		# If file_type is blank, try to guess the file type from the filename
+		if (isblank_TF(file_type) == TRUE)
+			{
+			if (endsWith(x=fn, suffix="fas") == TRUE)
 				{
-				charnums = 1:nrow(morph_df2_corrected)
-				} else {
-				# Otherwise, use the specified characters
-				charnums = seq(from=startchar, to=endchar, by=bynum)
-				} # END check for start/end/by
-			} else {
-			charnums = as.numeric(strsplit(x=charlist, split=",")[[1]])
-			} # END if (isblank_TF(charnums))
+				file_type = "fasta"
+				}
+			if (endsWith(x=fn, suffix="fasta") == TRUE)
+				{
+				file_type = "fasta"
+				}
+			if (endsWith(x=fn, suffix="nexus") == TRUE)
+				{
+				file_type = "nexus"
+				}
+			if (endsWith(x=fn, suffix="nex") == TRUE)
+				{
+				file_type = "nexus"
+				}
+			if (endsWith(x=fn, suffix="nxs") == TRUE)
+				{
+				file_type = "nexus"
+				}
+			# If it's STILL blank, say "nexus"
+			if (isblank_TF(file_type) == TRUE)
+				{
+				file_type = "nexus"
+				} # END if (isblank_TF(file_type) == TRUE)
 
-	
-		if (any(c("DNA", "AA", "morph", "continuous") == datatype) == FALSE)
+			txt = paste0("\nNOTE: for data file '", fn, "' BEASTmasteR is guessing that the file_type is '", file_type, "'.\n")
+			cat(txt)
+			} # END if (isblank_TF(file_type) == TRUE)
+		
+		
+		if (file_type == "fasta")
 			{
-			txt = paste0("\n\nERROR: datatype '", datatype, "' not recognized.\n\n")
+			newfn = paste0(fn, ".nex")
+			txt = paste0("\nNOTE: for data file '", fn, "' the file_type is '", file_type, "', so BEASTmasteR will copy and convert to a NEXUS file with name '", newfn, "'.\n")
+			cat(txt)
+			
+			# Save out to NEXUS, make that the filename
+			out_nexus_aln_fn = convert_NEXUS_to_FASTA(fasta_fn=fn, out_nexus_aln_fn=newfn)
+			file_type = "nexus"
+			fn = out_nexus_aln_fn
+			} # END if (file_type == "fasta")
+		
+		
+		if (any(toupper(c("DNA", "AA", "morph", "continuous")) == datatype) == FALSE)
+			{
+			txt = paste0("\n\nERROR in parse_dataset(): datatype '", datatype, "' not recognized.\n\n")
 			stop(txt)
 			}
 	
-		if (datatype == "DNA")
+		if (datatype == toupper("DNA"))
 			{
-			cmdstr = paste(dataset_name, " = read_nexus_data2(file=fn, convert_ambiguous_to_IUPAC=convert_ambiguous_to_IUPAC, printall=printall, check_ambig_chars=FALSE)")
+			if (seqs_read_functions[i] == "read_nex_phyloch_to_list")
+				{
+				cmdstr = paste(dataset_name, " = read_nex_phyloch_to_list(fn=fn)")
+				} else {
+				cmdstr = paste(dataset_name, " = read_nexus_data2(file=fn, convert_ambiguous_to_IUPAC=convert_ambiguous_to_IUPAC, printall=printall, check_ambig_chars=FALSE)")
+				} # END if (seqs_read_functions[i] == "read_nex_phyloch_to_list")
+
 			# Loads to whatever variable given by "dataset_name"
 			eval(parse(text=cmdstr))
 			
+			# Store the length (number of characters) of the raw dataset
+			cmdstr = paste0("dataset_lengths[i] = length(", dataset_name, "[[1]])")
+			eval(parse(text=cmdstr))
+
+			# Store the number of taxa of the raw dataset
+			cmdstr = paste0("dataset_ntaxa[i] = length(", dataset_name, ")")
+			eval(parse(text=cmdstr))
+			
+			
+			# Statistics on the DNA matrix
+			# typically seqs_DNA
+			cmdstr = paste0("DNAstats = DNA_matrix_stats(charslist=", dataset_name, ", charsdf=NULL)")
+			eval(parse(text=cmdstr))
+			matrices_stats_tmp = DNAstats
+			matrices_stats = c(matrices_stats, list(matrices_stats_tmp))
+						
+			
+			# Get the completeness stats by OTU
+			# numQs (number of nodata)
+			
+			# For this dataset, find numQs for the dataset
+			cmdstr = paste0("numQs_for_each_OTU = sapply(X=", dataset_name, ", FUN=count_ambig_DNA)")
+			eval(parse(text=cmdstr))
+			
+			meanQs[i] = mean(numQs_for_each_OTU, na.rm=TRUE)
+			maxQs[i] = max(numQs_for_each_OTU, na.rm=TRUE)
+			minQs[i] = min(numQs_for_each_OTU, na.rm=TRUE)
+			pctData_for_each_OTU = (1-(numQs_for_each_OTU / dataset_lengths[i])) * 100
+			pctData[i] = mean(pctData_for_each_OTU, na.rm=TRUE)
+			nMajData[i] = sum( pctData_for_each_OTU >= 50)
 			} # END if (datatype == "DNA")
 		
-		if (datatype == "AA")
+		
+		if (datatype == toupper("AA"))
 			{
-			cmdstr = paste(dataset_name, " = read_nexus_data2(file=fn, convert_ambiguous_to_IUPAC=FALSE, printall=printall, check_ambig_chars=FALSE)")
+			if (seqs_read_functions[i] == "read_nex_phyloch_to_list")
+				{
+				cmdstr = paste(dataset_name, " = read_nex_phyloch_to_list(fn=fn)")
+				} else {
+				cmdstr = paste(dataset_name, " = read_nexus_data2(file=fn, convert_ambiguous_to_IUPAC=convert_ambiguous_to_IUPAC, printall=printall, check_ambig_chars=FALSE)")
+				} # END if (seqs_read_functions[i] == "read_nex_phyloch_to_list")
+
 			# Loads to whatever variable given by "dataset_name"
 			eval(parse(text=cmdstr))
+
+			# Store the length (number of characters) of the raw dataset
+			cmdstr = paste0("dataset_lengths[i] = length(", dataset_name, "[[1]])")
+			eval(parse(text=cmdstr))
+
+			# Store the number of taxa of the raw dataset
+			cmdstr = paste0("dataset_ntaxa[i] = length(", dataset_name, ")")
+			eval(parse(text=cmdstr))
+
+			# Statistics on the AA matrix
+			cmdstr = paste0("AAstats = AA_matrix_stats(charslist=", dataset_name, ", charsdf=NULL)")
+			eval(parse(text=cmdstr))
+
+			matrices_stats_tmp = AAstats
+			matrices_stats = c(matrices_stats, list(matrices_stats_tmp))
+			
+
+
+			# Get the completeness stats
+			# numQs (number of nodata)
+			
+			# For this dataset, find numQs for the dataset
+			cmdstr = paste0("numQs_for_each_OTU = sapply(X=", dataset_name, ", FUN=count_ambig_nonDNA)")
+			eval(parse(text=cmdstr))
+			
+			meanQs[i] = mean(numQs_for_each_OTU, na.rm=TRUE)
+			maxQs[i] = max(numQs_for_each_OTU, na.rm=TRUE)
+			minQs[i] = min(numQs_for_each_OTU, na.rm=TRUE)
+			pctData_for_each_OTU = (1-(numQs_for_each_OTU / dataset_lengths[i])) * 100
+			pctData[i] = mean(pctData_for_each_OTU, na.rm=TRUE)
+			nMajData[i] = sum( pctData_for_each_OTU >= 50)
 			} # END if (datatype == "AA")
 		
 		# Continuous morphology data
 		# Assumes tab-delimited file
-		if (datatype == "continuous")
+		if (datatype == toupper("continuous"))
 			{
 			defaults='
 			fn="/drives/Dropbox/_njm/__packages/BEASTmasteR_permahelp/examples/ex_basic_venerid_morphDNA_v4/SABD_tipsVary_noOutg_v1/traits_table.tab"
@@ -852,6 +1173,31 @@ parse_datasets <- function(seqs_df, add_morphLength=TRUE, add_morphList=TRUE, OT
 			# Loads to whatever variable given by "dataset_name"
 			eval(parse(text=cmdstr))
 			
+			# Store the length (number of characters) of the raw dataset
+			cmdstr = paste0("dataset_lengths[i] = ncol(", dataset_name, ")")
+			eval(parse(text=cmdstr))
+
+			# Store the number of taxa of the raw dataset
+			cmdstr = paste0("dataset_ntaxa[i] = nrow(", dataset_name, ")")
+			eval(parse(text=cmdstr))
+			
+			cmdstr = paste0("TF1 = as.matrix(", dataset_name, ") == '?'")
+			eval(parse(text=cmdstr))
+			
+			cmdstr = paste0("TF2 = as.matrix(", dataset_name, ") == '-'")
+			eval(parse(text=cmdstr))
+
+			cmdstr = paste0("TF3 = isblank_TF(as.matrix(", dataset_name, "))")
+			eval(parse(text=cmdstr))
+			Q_TF = (TF1 + TF2 + TF3) > 0
+			meanQs = mean(Q_TF, na.rm=TRUE)
+			maxQs = max(Q_TF, na.rm=TRUE)
+			minQs = min(Q_TF, na.rm=TRUE)
+			
+			numQs_by_taxon = rowSums(Q_TF)
+			pctData_by_taxon = (1 - (numQs_by_taxon / ncol(Q_TF))) * 100
+			pctData = mean(pctData_by_taxon, na.rm=TRUE)
+			nMajData = sum(pctData_by_taxon >= 50)
 			
 			# Each different partition of continuous data 
 			# should come from a different file!
@@ -872,7 +1218,7 @@ parse_datasets <- function(seqs_df, add_morphLength=TRUE, add_morphList=TRUE, OT
 			} # END if (datatype == "continuous")
 
 
-		if (datatype == "morph")
+		if (datatype == toupper("morph"))
 			{
 			# Avoid re-loading twice, if two morph rows are adjacent
 			if (dataset_name == old_dataset_name)
@@ -881,25 +1227,94 @@ parse_datasets <- function(seqs_df, add_morphLength=TRUE, add_morphList=TRUE, OT
 				old_dataset_name = dataset_name
 				dataset_previously_loaded = TRUE
 				# Here, we are just using the old dataset name
+
+				# Get statistics for the morphology matrix
+				cmdstr = paste0("charslist = ", dataset_name)
+				eval(parse(text=cmdstr))
+				matrices_stats_tmp = morphology_matrix_stats(charslist, charsdf=NULL)
+				matrices_stats = c(matrices_stats, list(matrices_stats_tmp))
+
 				} else {
-				cmdstr = paste(dataset_name, " = read_nexus_data2(file=fn, convert_ambiguous_to_IUPAC=FALSE, check_ambig_chars=TRUE, printall=printall, convert_ambiguous_to=NULL)")
+				cmdstr = paste0(dataset_name, " = read_nexus_data2(file=fn, convert_ambiguous_to_IUPAC=FALSE, check_ambig_chars=TRUE, printall=printall, convert_ambiguous_to=NULL)")
 				old_dataset_name = dataset_name
 				dataset_previously_loaded = FALSE
 				# Loads to whatever variable given by "dataset_name"
 				eval(parse(text=cmdstr))
-				
+
 				# Get statistics for the morphology matrix
 				cmdstr = paste0("charslist = ", dataset_name)
 				eval(parse(text=cmdstr))
-				morphstats_tmp = morphology_matrix_stats(charslist, charsdf=NULL)
-				morphstats = c(morphstats, list(morphstats_tmp))
+				matrices_stats_tmp = morphology_matrix_stats(charslist, charsdf=NULL)
+				matrices_stats = c(matrices_stats, list(matrices_stats_tmp))
 				
 				if (return_charsdf == TRUE)
 					{
 					charsdf_list[[(cnum=cnum+1)]] = as.data.frame(charslist, stringsAsFactors=FALSE)
 					}
 				} # END if (dataset_name == old_dataset_name)
+
+			# Store the length (number of characters) of the raw dataset
+			cmdstr = paste0("dataset_lengths[i] = length(", dataset_name, "[[1]])")
+			eval(parse(text=cmdstr))
+
+			# Store the number of taxa of the raw dataset
+			cmdstr = paste0("dataset_ntaxa[i] = length(", dataset_name, ")")
+			eval(parse(text=cmdstr))
+
+			# Get the completeness stats
+			# numQs (number of nodata)
+			
+			# For this dataset, find numQs for the dataset
+			cmdstr = paste0("numQs_for_each_OTU = sapply(X=", dataset_name, ", FUN=count_ambig_nonDNA)")
+			eval(parse(text=cmdstr))
+			
+			meanQs[i] = mean(numQs_for_each_OTU, na.rm=TRUE)
+			maxQs[i] = max(numQs_for_each_OTU, na.rm=TRUE)
+			minQs[i] = min(numQs_for_each_OTU, na.rm=TRUE)
+			pctData_for_each_OTU = (1-(numQs_for_each_OTU / dataset_lengths[i])) * 100
+			pctData[i] = mean(pctData_for_each_OTU, na.rm=TRUE)
+			nMajData[i] = sum( pctData_for_each_OTU >= 50)
 			} # END if (datatype == "morph")
+
+
+		# Which characters (split "list" cell on comma)
+		charlist = charlists[i]
+		startchar = startchars[i]
+		endchar = endchars[i]
+		bynum = bynums[i]
+		
+		# Fill in the charnums/charlist 
+		# (the list of which
+		if (isblank_TF(charlist) == TRUE)
+			{
+			# Corrections
+			if (isblank_TF(startchar) == TRUE)
+				{
+				startchar = 1
+				}
+			if (isblank_TF(bynum) == TRUE)
+				{
+				bynum = 1
+				}
+			if (isblank_TF(endchar) == TRUE)
+				{
+				endchar = dataset_lengths[i]
+				} # END if (isblank_TF(endchar) == TRUE)
+		
+			# If the charnums are missing, use all characters
+# 			if ( isblank_TF(startchar) || isblank_TF(endchar) || isblank_TF(bynum) )
+# 				{
+# 				charnums = 1:nrow(morph_df2_corrected)
+# 				} else {
+				# Otherwise, use the specified characters
+			charnums = seq(from=startchar, to=endchar, by=bynum)
+# 				} # END check for start/end/by
+			} else {
+			# If the list is user-specified
+			charnums = as.numeric(strsplit(x=charlist, split=",")[[1]])
+			} # END if (isblank_TF(charnums))
+
+
 		
 
 		#########################################
@@ -926,21 +1341,43 @@ parse_datasets <- function(seqs_df, add_morphLength=TRUE, add_morphList=TRUE, OT
 			txtseqs = toupper(collapse_seqs(dataset))
 			OTU_names = names(txtseqs)
 			
-			cat("\n\n")
-			cat("Length of DNA seqs list before cutting unused OTUs: ", length(txtseqs))
-			cat("\n\n")
+			cat("\nLength of DNA seqs list before cutting unused OTUs: ", length(txtseqs))
+			cat("\n")
 			
 			# Subset DNA sequences, if OTUs list specified
-			if (is.null(OTUs) == FALSE)
+			# But, add back in any loci that are for gene trees, rather
+			# than species tree
+			if ((is.null(OTUs) == FALSE) && (isblank_TF(geneTreeNames[i]) == TRUE) )
 				{
-				TF = OTU_names %in% OTUs
-				OTU_names = OTU_names[TF]
-				txtseqs = as.list(txtseqs[TF])
+				keepTF = OTU_names %in% OTUs
+				OTU_names = OTU_names[keepTF]
+				
+				txtseqs = as.list(txtseqs[keepTF])
 				} # END if (is.null(OTUs) == FALSE)
 
-			cat("\n\n")
 			cat("Length of DNA seqs list after cutting unused OTUs: ", length(txtseqs))
-			cat("\n\n")
+			cat("\n")
+
+			# For a geneTree, you might want to cut some specific sequences from an
+			# alignment. These are listed in "seqNames_to_cut"
+			if (isblank_TF(geneTreeNames[i]) == FALSE)
+				{
+				if (isblank_TF(seqNames_to_cut[i]) == FALSE)
+					{
+					# Cut the listed sequences
+					words = trim(strsplit(seqNames_to_cut[i], split=",")[[1]])
+					keepTF = rep(TRUE, length(OTU_names))
+					for (w in 1:length(words))
+						{
+						cutTF = grepl(pattern=words[w], x=OTU_names)
+						keepTF[cutTF==TRUE] = FALSE
+						}
+					txtseqs = as.list(txtseqs[keepTF])
+					OTU_names = OTU_names[keepTF]
+					} # END if (isblank_TF(seqNames_to_cut[i]) == FALSE)
+				cat("Length of DNA seqs list after cutting unused seqNames_to_cut: ", length(txtseqs))
+				cat("\n(applies only if worksheet 'data', column 'geneTreeName' is not blank)\n\n")
+				} # END if (isblank_TF(geneTreeNames[i]) == FALSE)
 
 			
 			seq_XML = make_seq_XML(txtseqs[1], names(txtseqs[1]), dataset_name, totalcount)
@@ -1394,7 +1831,7 @@ parse_datasets <- function(seqs_df, add_morphLength=TRUE, add_morphList=TRUE, OT
 		#########################################
 		# Write discrete morphology to XML (and lots of other stuff)
 		#########################################
-		if (datatypes[i] == "morph")
+		if (toupper(datatypes[i]) == toupper("morph"))
 			{
 		
 			# Comment
@@ -1447,11 +1884,14 @@ parse_datasets <- function(seqs_df, add_morphLength=TRUE, add_morphList=TRUE, OT
 			#print(morph_df[353,])
 			# NO: print(morph_df[,353])
 		
-			res = get_numstates_per_char(morph_df, return_missing_chars="correct", printall=printall)
+			res = get_numstates_per_char(morph_df, ambig_to_remove=c("\\(", "\\)", " ", ","), return_missing_chars="correct", printall=printall, count_autapomorphies=TRUE, sort_ambigs=TRUE)
 			missing_charstates_list = res$missing_charstates_list
 			allQs_TF = res$allQs_TF
 			morph_df2_corrected = res$nexdf
-			
+			count_per_charstate_per_char = res$count_per_charstate_per_char
+			char_is_autapomorphic = res$char_is_autapomorphic
+			autapomorphies_desc_df = res$autapomorphies_desc_df
+			matrices_stats[[i]]$autapomorphies_desc_df = autapomorphies_desc_df
 			
 			# Keep track of the number of (used) morphology characters in 
 			# each morphology DATASET (not partition)
@@ -1544,7 +1984,7 @@ parse_datasets <- function(seqs_df, add_morphLength=TRUE, add_morphList=TRUE, OT
 			
 			if (dataset_previously_loaded == FALSE)
 				{
-				result2 = make_BEAST2_userDataTypes(numstates_morph_list_subset, nexd6=nexd6, dataset_name=dataset_name, ordering=order_types[i], numGammaCat=numGammaCat, clockModel_name=clockModel_name, add_morphList=add_morphList, printall=printall)
+				result2 = make_BEAST2_userDataTypes(numstates_morph_list_subset, nexd6=nexd6, dataset_name=dataset_name, ordering=order_types[i], morph_transition_rates=morph_transition_rates[i], baseFreqs=baseFreqs[i], numGammaCat=numGammaCat, clockModel_name=clockModel_name, clockModel_relRate=clockModel_relRate, gammaShape_suffix=gammaShape_suffix, add_morphList=add_morphList, printall=printall)
 				
 				# NJM edit for 2 different morphology matrices
 				if ( !is.null(morphList) && (dim(morphList) == dim(result2$morphList)) && all(morphList == result2$morphList) )
@@ -1556,7 +1996,7 @@ parse_datasets <- function(seqs_df, add_morphLength=TRUE, add_morphList=TRUE, OT
 				chars_wLT_2_states_df_list = c(chars_wLT_2_states_df_list, list(result2$chars_wLT_2_states_df))
 				nexd7 = result2$nexd5
 				} else {
-				result2 = make_BEAST2_userDataTypes(numstates_morph_list_subset, nexd6=nexd6, dataset_name=dataset_name, ordering=order_types[i], numGammaCat=numGammaCat, clockModel_name=clockModel_name, add_morphList=add_morphList, printall=printall)
+				result2 = make_BEAST2_userDataTypes(numstates_morph_list_subset, nexd6=nexd6, dataset_name=dataset_name, ordering=order_types[i], morph_transition_rates=morph_transition_rates[i], baseFreqs=baseFreqs[i], numGammaCat=numGammaCat, clockModel_name=clockModel_name, clockModel_relRate=clockModel_relRate, gammaShape_suffix=gammaShape_suffix, add_morphList=add_morphList, printall=printall)
 				morphList = rbind(morphList, result2$morphList)
 				chars_wLT_2_states_df_list = c(chars_wLT_2_states_df_list, list(result2$chars_wLT_2_states_df))
 				nexd7 = result2$nexd5
@@ -1567,18 +2007,24 @@ parse_datasets <- function(seqs_df, add_morphLength=TRUE, add_morphList=TRUE, OT
 			data_XML = c(data_XML, userDataType_nodes_list)
 		
 			# Add the morphology data to the XML
-			morph_alignment_nodes_list = write_BEAST2_morphology_characters(nexd7, numstates_morph_list=numstates_morph_list_subset, dataset_name=dataset_name, ordering=order_types[i], ascertainment=ascertainment[i])
+			morph_alignment_nodes_list = write_BEAST2_morphology_characters(nexd7, numstates_morph_list=numstates_morph_list_subset, dataset_name=dataset_name, ordering=order_types[i], morph_transition_rates=morph_transition_rates[i], baseFreqs=baseFreqs[i], ascertainment=ascertainment[i], max_num_patterns=max_num_patterns[i], assumed_nstates=assumed_nstates[i])
 		
 			seqs_node = c(list(bl()), list(XML_comment), morph_alignment_nodes_list)
 
 			# Store in big data XML list
 			data_XML = c(data_XML, seqs_node)
 			} # END if (datatypes[i] == "morph")
+
+		cat("\nparse_datasets() has finished reading of file ", i, "/", length(uniq_fns), ".\n", sep="")
+
 		} # END for (i in 1:length(uniq_fns))
 		#########################################
 		# END writing out characters
 		#########################################
 	
+	dataset_lengths_df = cbind(dataset_names, dataset_lengths, dataset_ntaxa, nMajData, round(pctData,1), round(minQs,2), round(meanQs,2), round(maxQs,2))
+	dataset_lengths_df = as.data.frame(dataset_lengths_df, stringsAsFactors=FALSE)
+	names(dataset_lengths_df) = c("dataset_names", "dataset_lengths", "dataset_ntaxa", "nMajData", "pctData", "minQs", "meanQs", "maxQs")
 	
 	# Output nodes, or xml
 	if (is.null(xml))
@@ -1596,6 +2042,7 @@ parse_datasets <- function(seqs_df, add_morphLength=TRUE, add_morphList=TRUE, OT
 		data_XMLs$tracelog_XMLs = tracelog_XMLs
 		data_XMLs$screenlog_XMLs = screenlog_XMLs
 		data_XMLs$chars_wLT_2_states_df_list = chars_wLT_2_states_df_list
+		data_XMLs$dataset_lengths_df = dataset_lengths_df
 		if (add_morphLength == TRUE)
 			{
 			data_XMLs$morphLengths = morphLengths
@@ -1604,10 +2051,15 @@ parse_datasets <- function(seqs_df, add_morphLength=TRUE, add_morphList=TRUE, OT
 			{
 			data_XMLs$morphList = morphList
 			}
-		if (!is.null(morphstats))
+		if (!is.null(matrices_stats))
 			{
-			data_XMLs$morphstats = morphstats
-			}
+			if (is.null(count_per_charstate_per_char) == FALSE)
+				{
+				#matrices_stats[[length(matrices_stats)]]$autapomorphies_desc_df = autapomorphies_desc_df
+				} # END if (is.null(count_per_charstate_per_char) == FALSE)
+			
+			data_XMLs$matrices_stats = matrices_stats
+			} # END if (!is.null(matrices_stats))
 		if (return_charsdf == TRUE)
 			{
 			data_XMLs$charsdf_list = charsdf_list
@@ -1631,10 +2083,18 @@ parse_datasets <- function(seqs_df, add_morphLength=TRUE, add_morphList=TRUE, OT
 			xml$morphLengths = morphLengths
 			xml$morphList = morphList
 			}
+		xml$dataset_lengths_df = dataset_lengths_df
+			
+			
 		morphList
-		if (!is.null(morphstats))
+		if (!is.null(matrices_stats))
 			{
-			xml$morphstats = c(xml$morphstats, list(morphstats))
+			if (is.null(count_per_charstate_per_char) == FALSE)
+				{
+				matrices_stats[[length(matrices_stats)]]$autapomorphies_desc_df = autapomorphies_desc_df
+				} # END if (is.null(count_per_charstate_per_char) == FALSE)
+
+			xml$matrices_stats = c(xml$matrices_stats, list(matrices_stats))
 			}		
 		if (return_charsdf == TRUE)
 			{
@@ -1651,10 +2111,10 @@ parse_datasets <- function(seqs_df, add_morphLength=TRUE, add_morphList=TRUE, OT
 
 # XML SECTION 4: Partitions 
 # (filters applied to the sequence alignments produce partitions)
-make_partitions_XML <- function(seqs_df, xml=NULL, add_partitionLength=TRUE)
+make_partitions_XML <- function(seqs_df, xml=NULL, add_partitionLength=TRUE, dataset_lengths_df=NULL)
 	{
-	nonmorph_TF = seqs_df$type != "morph"
-	noncontinuous_TF = seqs_df$type != "continuous"
+	nonmorph_TF = toupper(seqs_df$type) != toupper("morph")
+	noncontinuous_TF = toupper(seqs_df$type) != toupper("continuous")
 	keepTF = (nonmorph_TF + noncontinuous_TF) == 2
 	
 	# If morphology-only, return null
@@ -1668,6 +2128,11 @@ make_partitions_XML <- function(seqs_df, xml=NULL, add_partitionLength=TRUE)
 			} # END if (is.null(xml))
 		} # END if (length(seqs_df$type != "morph") == 0)
 
+	# If no dataset_lengths, get them from the xml
+	if (is.null(dataset_lengths_df))
+		{
+		dataset_lengths_df = xml$dataset_lengths_df
+		}
 
 	# For non-morphology datasets, extract partitions from the alignments
 	# Remove morphology from seqs
@@ -1676,11 +2141,16 @@ make_partitions_XML <- function(seqs_df, xml=NULL, add_partitionLength=TRUE)
 	
 	# Gather the partition lengths, if desired
 	partitionLengths = NULL
+	partitionNames = NULL
 	
 	# Make filters
 	uniq_partitions = unique(seqs_df$filteredAlignmentName)
 	uniq_partitions
-
+	
+	# Get the corresponding dataset names
+	rows_TF = seqs_df$filteredAlignmentName %in% uniq_partitions
+	uniq_partitions_datasetNames = seqs_df$datasetName[rows_TF]
+	
 	data_filtered_to_partitions_XML = NULL
 
 	for (i in 1:length(uniq_partitions))
@@ -1700,7 +2170,7 @@ make_partitions_XML <- function(seqs_df, xml=NULL, add_partitionLength=TRUE)
 		
 			# Get the source dataset
 			datasetName = seqs_df$datasetName[rownum]
-		
+			
 			# Get the partition information
 			# Which characters (split "list" cell on comma)
 			charlist = seqs_df$list[rownum]
@@ -1712,6 +2182,54 @@ make_partitions_XML <- function(seqs_df, xml=NULL, add_partitionLength=TRUE)
 				{
 				bynum = 1
 				}
+
+			# Fill in the charnums/charlist 
+			# (the list of which
+			if (isblank_TF(charlist) == TRUE)
+				{
+				# Corrections
+				if (isblank_TF(startchar) == TRUE)
+					{
+					startchar = 1
+					}
+				if (isblank_TF(bynum) == TRUE)
+					{
+					bynum = 1
+					}
+				if (isblank_TF(endchar) == TRUE)
+					{
+					#print(dataset_lengths_df$dataset_names)
+					#print(datasetName)
+					
+					TF = dataset_lengths_df$dataset_names == datasetName
+					#print(TF)
+					endchar = as.numeric(dataset_lengths_df$dataset_lengths[TF])
+					
+					# Error check if this didn't work
+					if (isblank_TF(endchar))
+						{
+						txt = paste0("STOP ERROR in make_partitions_XML(). For dataset '", datasetName, "' (partition '", partitionName, "'), rownum=", rownum, ", column 'endchar' was not specified, nor was make_partitions_XML() given the data.frame 'dataset_lengths_df' with columns 'dataset_names' and 'dataset_lengths'. Fix one of these so that make_partitions_XML() can know how long the dataset is.")
+						cat("\n\n")
+						cat(txt)
+						cat("\n\n")
+						stop(txt)
+						}
+					} # END if (isblank_TF(endchar) == TRUE)
+		
+				# If the charnums are missing, use all characters
+	# 			if ( isblank_TF(startchar) || isblank_TF(endchar) || isblank_TF(bynum) )
+	# 				{
+	# 				charnums = 1:nrow(morph_df2_corrected)
+	# 				} else {
+					# Otherwise, use the specified characters
+				charnums = seq(from=startchar, to=endchar, by=bynum)
+	# 				} # END check for start/end/by
+				} else {
+				# If the list is user-specified
+				charnums = as.numeric(strsplit(x=charlist, split=",")[[1]])
+				} # END if (isblank_TF(charnums))
+			
+
 	
 			if (isblank_TF(charlist) == TRUE)
 				{
@@ -1749,6 +2267,7 @@ make_partitions_XML <- function(seqs_df, xml=NULL, add_partitionLength=TRUE)
 
 		# Gather the partition lengths, if desired
 		partitionLengths = c(partitionLengths, partitionLengths_tmp)
+		partitionNames = c(partitionNames, partitionName)
 		
 		txt = paste(" Partition ", partitionName, " filter text: ", stored_filtertxt, sep="")
 		cat(" \n", txt)
@@ -1766,6 +2285,11 @@ make_partitions_XML <- function(seqs_df, xml=NULL, add_partitionLength=TRUE)
 		} # END for (i in 1:length(uniq_partitions))
 	data_filtered_to_partitions_XML
 	
+	partitionLengths_df = NULL
+	partitionLengths_df$partitionNames = partitionNames
+	partitionLengths_df$partitionLengths = partitionLengths
+	partitionLengths_df = as.data.frame(partitionLengths_df, stringsAsFactors=FALSE)
+		
 	if (is.null(xml))
 		{
 		# Just return the data_filtered_to_partitions_XML 
@@ -1773,7 +2297,7 @@ make_partitions_XML <- function(seqs_df, xml=NULL, add_partitionLength=TRUE)
 		# Gather the partition lengths, if desired
 		if (add_partitionLength == TRUE)
 			{
-			data_filtered_to_partitions_XML$partitionLengths = partitionLengths
+			data_filtered_to_partitions_XML$partitionLengths_df = partitionLengths_df
 			}
 		return(data_filtered_to_partitions_XML)
 		} else {
@@ -1782,7 +2306,7 @@ make_partitions_XML <- function(seqs_df, xml=NULL, add_partitionLength=TRUE)
 		# Gather the partition lengths, if desired
 		if (add_partitionLength == TRUE)
 			{
-			xml$partitionLengths = partitionLengths
+			xml$partitionLengths_df = partitionLengths_df
 			}
 		
 		return(xml)
@@ -1791,3 +2315,330 @@ make_partitions_XML <- function(seqs_df, xml=NULL, add_partitionLength=TRUE)
 	stop("ERROR in make_partitions_XML(): shouldn't get here")
 	} # END make_partitions_XML <- function(seqs_df, xml=NULL)
 
+
+# For StarBeast2 analyses:
+# Prune the sequences for just those that match the 
+# "taxonsets" worksheet, if this is a StarBeast2 run	
+prune_seqs_based_on_taxonsets <- function(data_XML, taxonsets_df, StarBeast2_TF)
+	{
+	# Exit, if not a StarBeast2 run
+	if (StarBeast2_TF == FALSE)
+		{
+		return(data_XML)
+		}
+	
+	# Filter taxonsets_df to the "use" column
+	taxonsets_df = readWorksheetFromFile(xlsfn, sheet="taxonsets", startRow=15)
+	taxonsets_df$use[isblank_TF(taxonsets_df$use)] = "yes"
+	keepTF = (taxonsets_df$use != "no")
+	taxonsets_df = taxonsets_df[keepTF, ]
+	
+	for (i in 1:length(data_XML))
+		{
+		namevals = names(data_XML[[i]])
+		if ( (length(namevals) > 0) && (namevals[1] == "sequence") )
+			{
+			# Go through the sequences
+			seqs = data_XML[[i]]
+			
+			for (j in 1:length(seqs))
+				{
+				taxon_val = xmlAttrs(seqs[[j]])$taxon
+				TF = taxon_val %in% taxonsets_df$specimenString
+				if (TF == FALSE)
+					{
+					txt = paste0(" Note: Sequence from specimen '", taxon_val, "' was removed as specimen was not found in taxonsets_df$specimenString. ")
+					seqs[[j]] = xmlCommentNode(txt)
+					} # END if (TF == FALSE)
+				} # END for (j in 1:length(seqs))
+			
+			# Provide edited sequences
+			data_XML[[i]] = seqs
+			} # END if ( (length(namevals) > 0) && (namevals[1] == "sequence") )
+		} # END for (i in 1:length(data_XML)
+	return(data_XML)
+	}
+
+
+
+get_numQs_from_XMLtag <- function(xmltag, isDNA=TRUE)
+	{
+	# Return NA for non-sequence xmltags
+	TF = is_XML_comment(xmltag)
+	if (TF == TRUE)
+		{
+		return(NA)
+		}
+	# E.g., exclude sequences named "text"
+# 	if (names(xmltag) != "sequence")
+# 		{
+# 		return(NA)
+# 		}
+	# OK, you have sequence, so extract it
+	# Get the DNA (or other sequence)
+	chars = xmlAttrs(xmltag)$value
+	if (isDNA == TRUE)
+		{
+		numQs = count_ambig_DNA_in_string(chars)
+		}
+	if (isDNA == FALSE)
+		{
+		numQs = count_ambig_nonDNA_in_string(chars)
+		}
+	return(numQs)
+	} # END get_numQs_from_XMLtag <- function(xmltag, isDNA=TRUE)
+
+get_lengths_from_XMLtag <- function(xmltag)
+	{
+	# Return NA for non-sequence xmltags
+	TF = is_XML_comment(xmltag)
+	if (TF == TRUE)
+		{
+		return(NA)
+		}
+	# E.g., exclude sequences named "text"
+# 	if (names(xmltag) != "sequence")
+# 		{
+# 		return(NA)
+# 		}
+	# OK, you have sequence, so extract it
+	# Get the DNA (or other sequence)
+	chars = xmlAttrs(xmltag)$value
+	lengths = nchar(chars)
+
+	return(lengths)
+	} # END get_lengths_from_XMLtag <- function(xmltag, isDNA=TRUE)
+
+
+is_XML_comment <- function(xmltag)
+	{
+	classes = class(xmltag)
+	if (("XMLCommentNode" %in% classes) == TRUE)
+		{
+		return(TRUE)
+		} else {
+		return(FALSE)
+		}
+	} # END is_XML_comment <- function(xmltag)
+
+
+prune_seqs_based_on_completeness <- function(data_XML, min_numseqs=0, min_fraction_to_keep_sequence=0.5)
+	{
+	XML_comments_TF = sapply(X=data_XML, FUN=is_XML_comment)
+	alignment_nums = (1:length(data_XML))[XML_comments_TF==FALSE]
+	
+#	for (i in 1:4)
+	for (i in 1:length(alignment_nums))
+		{
+		tmp_alignment = data_XML[[alignment_nums[i]]]
+		namevals = names(tmp_alignment)
+		
+		# Get the dataType
+		tmp_datatype = xmlAttrs(tmp_alignment)$dataType
+		if (isblank_TF(tmp_datatype) == TRUE)
+			{
+			# Then, it is morphology or something, don't cut
+			cat("\nNote: in dataXML, xmlAttrs(tmp_alignment)$dataType returns blank. This is probably morphology; prune_seqs_based_on_completeness() is tested only on DNA at the moment. Skipping...\n")
+			next()
+			#return(data_XML)
+			}
+		if (tmp_datatype == "nucleotide")
+			{
+			isDNA = TRUE
+			} else {
+			isDNA = FALSE
+			} # END if (tmp_datatype == "nucleotide")
+		
+		
+		# If this alignment (XML tag) has more than 0 names, and 
+		# if some of them are sequence, then this is an alignment
+		seqs_TF = "sequence" %in% namevals
+		xmltag_is_seqs_TF = namevals == "sequence"
+		dataset_ntaxa = sum(xmltag_is_seqs_TF)
+
+		if ( (length(namevals) > 0) && (sum(seqs_TF) > 0) )
+			{
+			# Get the lengths of each DNA sequence, and the number
+			# of nondata in each
+			seqnums = (1:length(namevals))[xmltag_is_seqs_TF]
+			children = xmlChildren(tmp_alignment)
+			seqs = children
+			#sapply(X=seqs, FUN=is_XML_comment)
+			lengths = unlist(sapply(X=seqs, FUN=get_lengths_from_XMLtag))
+			if (isDNA == TRUE)
+				{
+				numQ_vals = unlist(sapply(X=seqs, FUN=get_numQs_from_XMLtag, isDNA=TRUE))
+				}
+			if (isDNA == FALSE)
+				{
+				numQ_vals = unlist(sapply(X=seqs, FUN=get_numQs_from_XMLtag, isDNA=FALSE))
+				}
+			names(numQ_vals) = NULL
+			names(lengths) = NULL
+			
+			fract_data_vals = 1 - (numQ_vals / lengths)
+			fract_data_vals
+			
+			# Go through the sequences
+			seqnums_eval_TF = is.na(fract_data_vals) == FALSE
+			seqnums2 = (1:length(fract_data_vals))[seqnums_eval_TF]
+			
+			# Cut this locus entirely, if there are not enough sequences with enough data
+			num_seqs_that_are_complete_enough = sum( fract_data_vals[seqnums_eval_TF] >= min_fraction_to_keep_sequence )
+			if (num_seqs_that_are_complete_enough < min_numseqs)
+				{
+				cut_all_seqs = TRUE
+				} else {
+				cut_all_seqs = FALSE
+				}
+				
+			# For sequences that are being cut, replace the XML
+			for (j in 1:length(seqnums2))
+				{
+				# Get the DNA (or other sequence)
+				seqid = xmlAttrs(seqs[[seqnums2[j]]])$id
+				taxon_val = xmlAttrs(seqs[[seqnums2[j]]])$taxon
+				if (is.null(taxon_val) == TRUE)
+					{
+					taxon_val = "NULL"
+					}
+				chars = xmlAttrs(seqs[[seqnums2[j]]])$value
+				fract_data = fract_data_vals[seqnums2[j]]
+				
+				# If too much is missing, replace sequence with a comment
+				if (fract_data < min_fraction_to_keep_sequence)
+					{
+					txt = paste0(" Note: Sequence with id '", seqid, "' from specimen '", taxon_val, "' was removed as its fraction of data was only ", fract_data, ", and min_fraction_to_keep_sequence=", min_fraction_to_keep_sequence, ". ")
+					seqs[[seqnums2[j]]] = xmlCommentNode(txt)
+					next()
+					} # END if (fract_data < min_fraction_to_keep_sequence)
+				
+				if (cut_all_seqs == TRUE)
+					{
+					txt = paste0(" Note: Sequence with id '", seqid, "' from specimen '", taxon_val, "' was removed as this whole locus is being cut, because num_seqs_that_are_complete_enough=", num_seqs_that_are_complete_enough, ", and min_numseqs=", min_numseqs, ". ")
+					seqs[[seqnums2[j]]] = xmlCommentNode(txt)
+					next()
+					}
+				} # END for (j in 1:length(seqnums2))
+			
+			# Replace the XML children
+			xmlChildren(tmp_alignment) = seqs
+			} # END if ( (length(namevals) > 0) && (sum(seqs_TF) > 0) )
+		
+		# Save it; not sure what to do if ALL sequences were eliminated -- probably cut locus manually!
+		data_XML[[alignment_nums[i]]] = tmp_alignment
+		} # END for (i in 1:length(data_XML)
+	return(data_XML)
+	} # END prune_seqs_based_on_completeness <- function(data_XML, min_numseqs=0, min_fraction_to_keep_sequence=0.5, isDNA=TRUE)
+
+
+
+
+
+completeness_stats_from_data_XML <- function(data_XML)
+	{
+	XML_comments_TF = sapply(X=data_XML, FUN=is_XML_comment)
+	alignment_nums = (1:length(data_XML))[XML_comments_TF==FALSE]
+	dataset_names = rep(NA, length(alignment_nums))
+	
+	# Exclude XML tags with no children
+	keepTF = rep(TRUE, length(alignment_nums))
+	for (i in 1:length(alignment_nums))
+		{
+		tmp_alignment = data_XML[[alignment_nums[i]]]
+		dataset_names[i] = xmlAttrs(tmp_alignment)$id
+		namevals = names(tmp_alignment)
+		if (length(namevals) == 0)
+			{
+			keepTF[i] = FALSE
+			} # END if (length(namevals) == 0)
+		} # END for (i in 1:length(alignment_nums))
+	alignment_nums = alignment_nums[keepTF]
+	
+	dataset_names = rep(0, length(alignment_nums))
+	dataset_ntaxa = rep(0, length(alignment_nums))
+	dataset_lengths = rep(0, length(alignment_nums))
+	allSameLength = rep("", length(alignment_nums)) 
+	meanQs = rep(0, length(alignment_nums))
+	maxQs = rep(0, length(alignment_nums))
+	minQs = rep(0, length(alignment_nums))
+	pctData = rep(0, length(alignment_nums))
+	nMajData = rep(0, length(alignment_nums))
+	
+	for (i in 1:length(alignment_nums))
+		{
+		tmp_alignment = data_XML[[alignment_nums[i]]]
+		dataset_names[i] = xmlAttrs(tmp_alignment)$id
+
+		namevals = names(tmp_alignment)
+		
+		# Get the dataType
+		tmp_datatype = xmlAttrs(tmp_alignment)$dataType
+		if (isblank_TF(tmp_datatype) == TRUE)
+			{
+			# Then, it is morphology or something, don't cut
+			cat("\nNote: in dataXML, xmlAttrs(tmp_alignment)$dataType returns blank. This is probably morphology; completeness_stats_from_data_XML() is tested only on DNA at the moment. Skipping...\n")
+			#completeness_df = NULL
+			#return(completeness_df)
+			next()
+			}
+		if (tmp_datatype == "nucleotide")
+			{
+			isDNA = TRUE
+			} else {
+			isDNA = FALSE
+			} # END if (tmp_datatype == "nucleotide")
+		
+		# If this alignment (XML tag) has more than 0 names, and 
+		# if some of them are sequence, then this is an alignment
+		seqs_TF = "sequence" %in% namevals
+		xmltag_is_seqs_TF = namevals == "sequence"
+		dataset_ntaxa[i] = sum(xmltag_is_seqs_TF)
+		if ( (length(namevals) > 0) && (sum(seqs_TF) > 0) )
+			{
+			# Get the lengths of each DNA sequence, and the number
+			# of nondata in each
+			seqnums = (1:length(namevals))[xmltag_is_seqs_TF]
+			children = xmlChildren(tmp_alignment)
+			seqs = children[seqnums]
+			#sapply(X=seqs, FUN=is_XML_comment)
+			lengths = unlist(sapply(X=seqs, FUN=get_lengths_from_XMLtag))
+			
+			if (length(unique(lengths)) == 1)
+				{
+				dataset_lengths[i] = unique(lengths)
+				allSameLength[i] = "yes"
+				} else {
+				dataset_lengths[i] = mean(lengths, na.rm=TRUE)
+				allSameLength[i] = "no"
+				}
+			
+			if (isDNA == TRUE)
+				{
+				numQ_vals = unlist(sapply(X=seqs, FUN=get_numQs_from_XMLtag, isDNA=TRUE))
+				}
+			if (isDNA == FALSE)
+				{
+				numQ_vals = unlist(sapply(X=seqs, FUN=get_numQs_from_XMLtag, isDNA=FALSE))
+				}
+			names(numQ_vals) = NULL
+			names(lengths) = NULL
+			
+			fract_data_vals = 1 - (numQ_vals / lengths)
+			fract_data_vals
+
+			meanQs[i] = round(mean(numQ_vals, na.rm=TRUE), 2)
+			maxQs[i] = round(max(numQ_vals, na.rm=TRUE), 2)
+			minQs[i] = round(min(numQ_vals, na.rm=TRUE), 2)
+			pctData_for_each_OTU = round(fract_data_vals * 100, 1)
+			pctData[i] = round(mean(pctData_for_each_OTU, na.rm=TRUE),1)
+			nMajData[i] = sum( pctData_for_each_OTU >= 50)				
+			} # END if ( (length(namevals) > 0) && (sum(seqs_TF) > 0) )
+		} # END for (i in 1:length(alignment_nums))
+
+	completeness_df = cbind(dataset_names, dataset_lengths, allSameLength, dataset_ntaxa, nMajData, pctData, minQs, meanQs, maxQs)
+	completeness_df = as.data.frame(completeness_df, stringsAsFactors=FALSE)
+	names(completeness_df) = c("dataset_names", "dataset_lengths", "allSameLength", "dataset_ntaxa", "nMajData", "pctData", "minQs", "meanQs", "maxQs")
+	completeness_df = dfnums_to_numeric(completeness_df)	
+	return(completeness_df)
+	} # END completeness_stats_from_data_XML_seqs_based_on_completeness(data_XML)

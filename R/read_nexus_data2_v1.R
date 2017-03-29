@@ -35,23 +35,43 @@ convert_ambiguous_to_IUPAC=FALSE
 # substantially modified to take into account morphology data, common 
 # ambiguities, etc.
 
+# Slight modification of the APE function read.data.nexus, to allow the input of characters
+# listed as DATATYPE=STANDARD
+# (defaults allow only "DNA" and "PROTEIN")
+#
+#' Obj The output is a "charslist": a list of species, each with a 
+#' list of textual character states. This is the same format as 
+#' produced by read_nexus_data2(). A charlist can be converted to a 
+#' charsdf (a data.frame) with as.data.frame(x=..., stringsAsFactors=FALSE).
+#' The reverse operation can occur with as.list().
+
 read_nexus_data2 <- function(file, check_ambig_chars=TRUE, convert_ambiguous_to=NULL, printall="short", convert_ambiguous_to_IUPAC=FALSE) 
 	{
 	
 	
 	if (printall != "none")
 		{
-		cat("\n\nRunning read_nexus_data2(). This function modifies APE's read.nexus.data() in order to\nsuccessfully parse ambiguous morphological characters and other issues.  It might not \nwork perfectly, as NEXUS is a very complex format. Also, just because it reads the file\ndoes not mean that functions in other packages will magically be able to handle\nyour weird morphology data.\n")
+		cat("\n\nRunning read_nexus_data2(). This function modifies APE's read.nexus.data() in order to\nsuccessfully parse ambiguous morphological characters and other issues.  It might not \nwork perfectly, as NEXUS is a very complex format. Also, just because it reads the file\ndoes not mean that functions in other R packages will magically be able to handle\nyour weird morphology data.\n")
 
-		cat("\nPlease read TIPS (below). If you can't figure it out, or find a bug, you can ask the author, Nick Matzke, at the BEASTmasteR Google Group\n")
+		cat("\nIf you have a crash or other problem on this function:\n\nPlease read TIPS (below). If you can't figure it out, or find a bug, you can ask the author, Nick Matzke, at the BEASTmasteR Google Group.\n")
 		
-		cat("\nTIPS:")
-		cat("\n- You should use Mesquite to export your data to 'simplified\n  NEXUS' format before using this function.")
-		cat("\n- Taxon/OTU names should include *NO* spaces or ' characters!")		
-		cat("\n- Filenames should also have *NO* spaces or ' characters!")		
-		cat("\n- If convert_ambiguous_to==TRUE (default), the script will check for\n  spaces in the character rows in the data matrix, e.g. due to '(0 1)'.", sep="")
+		cat("\nTIPS for read_nexus_data2():")
+		cat("\n- You should use Mesquite to export your data to 'Simplified\n  NEXUS' format before using this function.")
+		cat("\n- After getting a Simplified NEXUS file, double-check these things (in a plain-text editor):")		
+		cat("\n")		
+		cat("\n- (Advice on plain-text editors is at: http://phylo.wikidot.com/biogeobears#texteditors")		
+		cat("\n")		
+		cat("\n- After getting a Simplified NEXUS file, double-check (in a plain-text editor):")		
+		cat("\n- Taxon/OTU names should include *NO* spaces.")		
+		cat("\n- Taxon/OTU names should include *NO* ' characters")		
+		cat("\n- Taxon/OTU names should have a SPACE or TAB between the name and the beginning of the data. (Mesquite sometimes leaves this out for some reason.)")
+		cat("\n")	
+		cat("\n- Also: filenames should also have *NO* spaces other special characters.")		
+		cat("\n- If check_ambig_chars==TRUE (default), the script will check for\n  spaces in the character rows in the data matrix, e.g. due to '(0 1)'.", sep="")
 		cat("\n- But your names still need to have no spaces, no apostrophes (')...\n\n", sep="")
-		cat("\n\n====================================================================\n", sep="")
+		cat("\n====================================================================\n", sep="")
+		cat("\n- Notes specifically for DNA data:")
+		cat("\n====================================================================\n", sep="")
 		cat("\n- DNA data: convert_ambiguous_to_IUPAC=TRUE runs some Perl scripts to\n  attempt to convert non-IUPAC stuff like e.g. {A C}\n  to IUPAC like M\n  See DNA IUPAC codes at: http://www.dna.affrc.go.jp/misc/MPsrch/InfoIUPAC.html\n")
 		cat("\n- Those Perl command may fail on e.g. Windows. If so change\n  convert_ambiguous_to_IUPAC=FALSE and make sure your data is IUPAC!\n")	
 		cat("\n- Amino acids: *NO* '(' or '{' ambiguities!  You should convert these\n  manually to '?', or figure how how to let Beast2 read these.\n")	
@@ -112,7 +132,7 @@ read_nexus_data2 <- function(file, check_ambig_chars=TRUE, convert_ambiguous_to=
 	
 	if (printall != 'none')
 		{
-		cat("\n\nReading in data...\n\n")
+		cat("\n\nReading in data...\n")
 		}
 	
 	# Find the number of taxa
@@ -616,7 +636,7 @@ read_nexus_data2 <- function(file, check_ambig_chars=TRUE, convert_ambiguous_to=
     
     if (printall != "none")
     	{
-		cat("\n...read_nexus_data2() done.\n\n")
+		cat("\n...read_nexus_data2() done.\n")
 		} # END if (printall != "none")
     return(Obj)
 	} # END read_nexus_data2
@@ -628,6 +648,13 @@ read_nexus_data2 <- function(file, check_ambig_chars=TRUE, convert_ambiguous_to=
 # Slight modification of the APE function, to allow the output of characters
 # listed as DATATYPE=STANDARD
 # (defaults allow only "DNA" and "PROTEIN")
+#
+#' x The input is a "charslist": a list of species, each with a 
+#' list of textual character states. This is the same format as 
+#' produced by read_nexus_data2(). A charlist can be converted to a 
+#' charsdf (a data.frame) with as.data.frame(x=..., stringsAsFactors=FALSE).
+#' The reverse operation can occur with as.list().
+#
 write_nexus_data2 <- function(x, file, format = "dna", datablock = TRUE, interleaved = TRUE, charsperline = NULL, gap = NULL, missing = NULL) 
 	{
 	# Convert the "format" string to lowercase
@@ -787,7 +814,7 @@ write_nexus_data2 <- function(x, file, format = "dna", datablock = TRUE, interle
         fcat("\nEND;\n\n")
     }
     close(zz)
-	}
+	} # END write_nexus_data2
 
 
 
@@ -801,7 +828,16 @@ write_nexus_data2 <- function(x, file, format = "dna", datablock = TRUE, interle
 # Hannah's data: 69 morphological characters
 # return_missing_chars = "list", "correct", or "none"
 # (for listing the sites with missing character states, correcting them, or neither)
-get_numstates_per_char <- function(nexd, ambig_to_remove=c("\\(", "\\)", " ", ","), return_missing_chars="list", printall="short")
+#
+#
+# INPUT nexd is a morph_df. Get a morph_df from a charslist (dataset) as follows
+# 			# Convert dataset to data.frame
+#			morph_df = as.data.frame(x=dataset, col.names=names(dataset), stringsAsFactors=FALSE)
+#			morph_df
+# 
+#           nexd = morph_df
+
+get_numstates_per_char <- function(nexd, ambig_to_remove=c("\\(", "\\)", " ", ","), return_missing_chars="list", printall="short", count_autapomorphies=FALSE, sort_ambigs=TRUE)
 	{
 	defaults='
 	ambig_to_remove=c("\\(", "\\)", " ", ",")
@@ -817,6 +853,7 @@ get_numstates_per_char <- function(nexd, ambig_to_remove=c("\\(", "\\)", " ", ",
 		cat("\n\n")
 		stop(txt)
 		} # END if (is.null(nexd))
+	
 	
 	
 	# Make a list of all ? (allQs)
@@ -848,6 +885,13 @@ get_numstates_per_char <- function(nexd, ambig_to_remove=c("\\(", "\\)", " ", ",
 	missing_charstates = FALSE
 	
 	
+	if (count_autapomorphies == TRUE)
+		{
+		count_per_charstate_per_char = list()
+		char_is_autapomorphic = rep(FALSE, nrow(nexdf))
+		} # END if (count_autapomorphies == TRUE)
+
+	
 	# Go through each column, count the number of states
 	# (but remove "(", ")" )
 	cat("\n\nCounting the number of states in each column:\n")
@@ -874,7 +918,11 @@ get_numstates_per_char <- function(nexd, ambig_to_remove=c("\\(", "\\)", " ", ",
 		
 		# Is the column a "standard" character?
 		# (contains some digits, i.e. "0s" (or 1s!) == "\\d" covers all digits)
-		standard_TF = sum(grepl("\\d", nexdf[rownum,])) > 0
+		#standard_TF = sum(grepl("\\d", nexdf[rownum,])) > 0
+		alphabet = LETTERS
+		statecodes = c(0:9, LETTERS[1:22])
+		# new: 2016-05-16 -- use statecodes, to account for states A, B, C, etc. above 0-9
+		standard_TF = sum(nexdf[rownum,] %in% statecodes) > 0		
 		#print(standard_TF)
 		
 		#cat("\n")
@@ -886,6 +934,12 @@ get_numstates_per_char <- function(nexd, ambig_to_remove=c("\\(", "\\)", " ", ",
 			print(nexdf[rownum,])
 			numstates = 0
 			numstates_morph_list = c(numstates_morph_list, numstates)
+
+			if (count_autapomorphies == TRUE)
+				{
+				count_per_charstate_per_char = c(count_per_charstate_per_char, list(NA))
+				}
+
 			
 			} else {
 			# are there any ambiguous characters?
@@ -896,7 +950,7 @@ get_numstates_per_char <- function(nexd, ambig_to_remove=c("\\(", "\\)", " ", ",
 			if (sum(ambiguous_TF) > 0)
 				{
 				ambig_chars = nexdf[rownum,][ambiguous_TF]
-				
+
 				for (i in 1:length(ambig_to_remove))
 					{
 					# replace "(", ")", " "
@@ -905,20 +959,49 @@ get_numstates_per_char <- function(nexd, ambig_to_remove=c("\\(", "\\)", " ", ",
 					ambig_chars = gsub(ambig_to_remove[i], "", ambig_chars)
 					ambig_chars = gsub(ambig_to_remove[i], "", ambig_chars)
 					}
+
+
+				# Sort the characters so that e.g. 10 becomes 01 instead of 10
+				if (sort_ambigs == TRUE)
+					{
+					for (iii in 1:length(ambig_chars))
+						{
+						ambig_char_text = ambig_chars[iii]
+						ambig_char_words = strsplit(ambig_char_text, split="")[[1]]
+						ambig_char_words = sort(ambig_char_words)
+						ambig_char_text = paste(ambig_char_words, sep="", collapse="")
+						ambig_chars[iii] = ambig_char_text
+						}			
+					} # END if (sort_ambigs == TRUE)			
 				
+				# Store revised character in nexdf				
 				nexdf[rownum,][ambiguous_TF] = ambig_chars
 				}
 			# add these to the list
-			unique_characters = unique(strsplit(list2str_fast(nexdf[rownum,]), split="")[[1]])
-			
+			list_of_charstates = sort(strsplit(list2str_fast(nexdf[rownum,]), split="")[[1]])
+
+			# Check for characters missing states (the highest character
+			# should equal the one you get from counting up states)
+			unique_characters = unique(list_of_charstates)
+	
 			# drop "-" and "?"
 			unique_characters = unique_characters[unique_characters != "-"]
 			unique_characters = unique_characters[unique_characters != "?"]
+			unique_characters = unique_characters[order(unique_characters)]
 			numstates = length(unique_characters)
 			
-			# Check for characters missing states (the highest character
-			# should equal the one you get from counting up states)
-			unique_characters = unique_characters[order(unique_characters)]
+			# Count autapomorphies, if desired
+			if (count_autapomorphies == TRUE)
+				{
+				tmpres = get_counts_per_charstate_for_a_char(list_of_charstates=list_of_charstates, unique_characters=unique_characters)
+
+				count_per_charstate_per_char = c(count_per_charstate_per_char, list(tmpres$tmpcounts_of_each_state))
+
+				# Save the TF
+				char_is_autapomorphic[rownum] = tmpres$TF_char_autapomorphic
+				} # END if (count_autapomorphies == TRUE)
+			
+			
 			
 			# if (rownum == 353)
 			# 	{
@@ -1035,6 +1118,30 @@ get_numstates_per_char <- function(nexd, ambig_to_remove=c("\\(", "\\)", " ", ",
 		# end forloop
 		} #END for (rownum in 1:nrow(nexdf))
 	cat("\n...done counting the number of states in each column.\n")
+
+	#######################################################
+	# Assess autapomorphies
+	#######################################################
+	nstates_per_char = unlist(lapply(X=count_per_charstate_per_char, FUN=length))
+	#print(nstates_per_char)
+	max_nstates_per_char = max(nstates_per_char)
+	autapomorphies_desc_matrix = matrix(data=0, nrow=length(nstates_per_char), ncol=max_nstates_per_char)
+	headers_statenum = paste0("state", seq(0, max_nstates_per_char-1))
+
+	for (autapo_i in 1:nrow(autapomorphies_desc_matrix))
+		{
+		tmprow = autapomorphies_desc_matrix[autapo_i,]
+		tmprow[1:nstates_per_char[autapo_i]] = count_per_charstate_per_char[[autapo_i]]
+		autapomorphies_desc_matrix[autapo_i,] = tmprow
+		} # END for (i in 1:nrow(autapomorphies_desc_matrix))
+
+	# Make data.frame
+	autapomorphies_desc_df = cbind(char_is_autapomorphic, nstates_per_char, autapomorphies_desc_matrix)
+	autapomorphies_desc_df = as.data.frame(autapomorphies_desc_df, stringsAsFactors=FALSE)
+	names(autapomorphies_desc_df) = c("char_is_autapomorphic", "nstates_per_char", headers_statenum)
+
+
+
 		
 	# If missing character states were detected, 
 	# print "...done. No missing character states detected."
@@ -1081,8 +1188,16 @@ get_numstates_per_char <- function(nexd, ambig_to_remove=c("\\(", "\\)", " ", ",
 		results$allQs_TF = allQs_TF
 		results$invariant_TF = invariant_TF
 		results$invariant_characters_list = invariant_characters_list
+
+		if (count_autapomorphies == TRUE)
+			{
+			results$count_per_charstate_per_char = count_per_charstate_per_char
+			results$char_is_autapomorphic = char_is_autapomorphic
+			results$autapomorphies_desc_df = autapomorphies_desc_df
+			} # END if (count_autapomorphies == TRUE)
+
 		return(results)
-		}
+		} # END if (return_missing_chars == "list")
 
 	if (return_missing_chars == "correct")
 		{
@@ -1093,18 +1208,28 @@ get_numstates_per_char <- function(nexd, ambig_to_remove=c("\\(", "\\)", " ", ",
 		results$allQs_TF = allQs_TF
 		results$invariant_TF = invariant_TF
 		results$invariant_characters_list = invariant_characters_list
+
+		if (count_autapomorphies == TRUE)
+			{
+			results$count_per_charstate_per_char = count_per_charstate_per_char
+			results$char_is_autapomorphic = char_is_autapomorphic
+			results$autapomorphies_desc_df = autapomorphies_desc_df
+			} # END if (count_autapomorphies == TRUE)
+
 		return(results)
-		}
+		} # END if (return_missing_chars == "correct")
 	
 	retrieve_cmds='
 	numstates_morph_list = res$numstates_morph_list
 	missing_charstates_list = res$missing_charstates_list
 	allQs_TF = res$allQs_TF
 	morph_df2_corrected = res$nexdf
+	autapomorphies_desc_df = results$autapomorphies_desc_df
+	
 	'
 			
 	return(numstates_morph_list)
-	}
+	} # END get_numstates_per_char <- function(nexd, ambig_to_remove=c("\\(", "\\)", " ", ","), return_missing_chars="list", printall="short", count_autapomorphies=FALSE)
 
 
 # Count question marks
@@ -1211,6 +1336,12 @@ dtf_to_phylip <- function(char_dtf, outfn="tmpdata.phylip", txtTF=FALSE, max_nam
 	}
 
 
+
+
+
+
+
+
 # Get statistics for a morphology matrix
 # morphstats = morphology_matrix_stats(charslist, charsdf=NULL)
 morphology_matrix_stats <- function(charslist=NULL, charsdf=NULL)
@@ -1224,14 +1355,15 @@ morphology_matrix_stats <- function(charslist=NULL, charsdf=NULL)
 	numtaxa = ncol(charsdf)
 
 	# invariant_characters
-	uniq_chars = apply(X=charsdf, MAR=1, FUN=unique)
+	uniq_chars = apply(X=charsdf, MAR=1, FUN=unique_of_toupper)
 	num_uniq = NULL
 	for (u in 1:length(uniq_chars))
 		{
 		tmpchars = uniq_chars[[u]]
-		TF = grepl(pattern="\\?", x=tmpchars)
-		tmpchars = tmpchars[TF == FALSE]
-		TF = grepl(pattern="\\(", x=tmpchars)
+		TF1 = grepl(pattern="\\?", x=tmpchars)
+		TF2 = grepl(pattern="\\(", x=tmpchars)
+		TF3 = grepl(pattern="-", x=tmpchars)
+		TF = (TF1 + TF2 + TF3) > 0
 		tmpchars = tmpchars[TF == FALSE]
 		num_uniq = c(num_uniq, length(tmpchars))
 		}
@@ -1239,52 +1371,64 @@ morphology_matrix_stats <- function(charslist=NULL, charsdf=NULL)
 	LT_2states_TF = num_uniq < 2
 
 	numQs = NULL
-	numParens = NULL
+	numAmbig = NULL
 	nQ_woInvar = NULL
 	for (i in 1:numtaxa)
 		{
 		tmpcol = charsdf[,i]
 		paren_TF = grepl(pattern="\\(", x=tmpcol)
-		Qs_TF = grepl(pattern="\\?", x=tmpcol)
-		Qs_TF
-	
-		numParens = c(numParens, sum(paren_TF))
+		Qs_TF1 = grepl(pattern="\\?", x=tmpcol)
+		Qs_TF2 = grepl(pattern="-", x=tmpcol)
+		Qs_TF = (Qs_TF1 + Qs_TF2) > 0
+			
+		numAmbig = c(numAmbig, sum(paren_TF))
 		numQs = c(numQs, sum(Qs_TF))
 	
 		# Convert invariant characters to all Qs, and recount
 		#print(sum(Qs_TF))
 		tmpcol[LT_2states_TF] = "?"
-		Qs_TF_wo_Invar = grepl(pattern="\\?", x=tmpcol)
+		Qs_TF_wo_Invar1 = grepl(pattern="\\?", x=tmpcol)
+		Qs_TF_wo_Invar2 = grepl(pattern="-", x=tmpcol)
+		Qs_TF_wo_Invar = (Qs_TF_wo_Invar1 + Qs_TF_wo_Invar2) > 0
+		
 		#print(sum(Qs_TF_wo_Invar))
-	
 		nQ_woInvar = c(nQ_woInvar, sum(Qs_TF_wo_Invar))
+		
+		# Convert non-parsimony informative characters to all Qs,
+		# and re-count
+		
+		
 		}
 	nQ_woInvar
-	completeness_df = as.data.frame(cbind(names(charsdf), numParens, numQs, nQ_woInvar), stringsAsFactors=FALSE)
-	names(completeness_df) = c("OTU", "nPar", "nQ", "nQ_woInvar")
-	completeness_df$nPar = as.numeric(completeness_df$nPar)
+	completeness_df = as.data.frame(cbind(names(charsdf), numAmbig, numQs, nQ_woInvar), stringsAsFactors=FALSE)
+	names(completeness_df) = c("OTU", "nAmbig", "nQ", "nQ_woInvar")
+	completeness_df$nAmbig = as.numeric(completeness_df$nAmbig)
 	completeness_df$nQ = as.numeric(completeness_df$nQ)
 	completeness_df$nQ_woInvar = as.numeric(completeness_df$nQ_woInvar)
-	completeness_df$numchars = numchars - (completeness_df$nPar + completeness_df$nQ)
-	completeness_df$completePercent = round(100*(completeness_df$numchars/numchars), digits=2)
+	completeness_df$numchars = numchars - (completeness_df$nAmbig + completeness_df$nQ)
+	completeness_df$PctData = round(100*(completeness_df$numchars/numchars), digits=2)
 
-	completeness_df$numchars2 = numchars - (completeness_df$nPar + completeness_df$nQ_woInvar)
-	completeness_df$completePercent2 = round(100*(completeness_df$numchars2/numchars), digits=2)
+	completeness_df$numchars_woInvar = numchars - (completeness_df$nAmbig + completeness_df$nQ_woInvar)
+	completeness_df$PctData_woInvar = round(100*(completeness_df$numchars_woInvar/numchars), digits=2)
 	completeness_df
+	
+	# Rearrange
+	completeness_df = completeness_df[, c("OTU", "numchars", "nAmbig", "nQ", "PctData", "numchars_woInvar", "nQ_woInvar", "PctData_woInvar")]
+	
 
-	ttl_nPar = sum(completeness_df$nPar)
+	ttl_nAmbig = sum(completeness_df$nAmbig)
 	ttl_nQ = sum(completeness_df$nQ)
 	ttl_nQ_woInvar = sum(completeness_df$nQ_woInvar)
 
 	ttl_nchar = numchars * numtaxa
 	complete_chars = sum(completeness_df$numchars)
 	complete_percent = round(complete_chars / ttl_nchar * 100, digits=2)
-	complete_chars2 = sum(completeness_df$numchars2)
+	complete_chars2 = sum(completeness_df$numchars_woInvar)
 	complete_percent2 = round(complete_chars2 / ttl_nchar * 100, digits=2)
 
-	matrix_stats = c(numtaxa, numchars, ttl_nchar, ttl_nPar, ttl_nQ, ttl_nQ_woInvar, complete_chars, complete_percent, complete_chars2, complete_percent2)
+	matrix_stats = c(numtaxa, numchars, ttl_nchar, ttl_nAmbig, ttl_nQ, ttl_nQ_woInvar, complete_chars, complete_percent, complete_chars2, complete_percent2)
 	matrix_stats_df = as.data.frame(as.matrix(matrix_stats, ncol=1), stringsAsFactors=FALSE)
-	row.names(matrix_stats_df) = c("numtaxa", "numchars", "ttl_nchar", "ttl_nPar", "ttl_nQ", "ttl_nQ_woInvar", "complete_chars", "complete_percent", "complete_chars2", "complete_percent2")
+	row.names(matrix_stats_df) = c("numtaxa", "numchars", "ttl_nchar", "ttl_nAmbig", "ttl_nQ", "ttl_nQ_woInvar", "complete_chars", "complete_percent", "complete_chars_woInvar", "complete_percent_woInvar")
 	names(matrix_stats_df) = "matrix_stats"
 	matrix_stats_df
 	
@@ -1300,3 +1444,321 @@ morphology_matrix_stats <- function(charslist=NULL, charsdf=NULL)
 	
 	return(morphstats)
 	} # END morphology_matrix_stats <- function(charslist=NULL, charsdf=NULL)
+
+
+
+	# invariant_characters will depend on upper vs. lower-case
+	unique_of_toupper <- function(x)
+		{
+		unique(toupper(x))
+		}
+	
+
+# Get statistics for a DNA matrix
+# DNAstats = DNA_matrix_stats(charslist=seqs_DNA, charsdf=NULL)
+DNA_matrix_stats <- function(charslist=NULL, charsdf=NULL)
+	{
+	defaults='
+	charslist=seqs_DNA
+	charsdf = NULL
+	DNAstats = DNA_matrix_stats(charslist=seqs_DNA, charsdf=NULL)
+	'
+	
+	if (is.null(charsdf))
+		{
+		charsdf = as.data.frame(charslist, stringsAsFactors=FALSE)
+		}
+	numchars = nrow(charsdf)
+	numtaxa = ncol(charsdf)
+
+
+	uniq_chars = apply(X=charsdf, MAR=1, FUN=unique_of_toupper)
+	num_uniq = NULL
+	for (u in 1:length(uniq_chars))
+		{
+		tmpchars = uniq_chars[[u]]
+		TF1 = grepl(pattern="\\?", x=tmpchars)
+		TF2 = grepl(pattern="\\(", x=tmpchars)
+		TF3 = grepl(pattern="-", x=tmpchars)
+		TF4 = grepl(pattern="N", x=tmpchars, ignore.case=TRUE)
+		TF = (TF1 + TF2 + TF3 + TF4) > 0
+		tmpchars = tmpchars[TF == FALSE]
+		num_uniq = c(num_uniq, length(tmpchars))
+		}
+	num_uniq
+	LT_2states_TF = num_uniq < 2
+
+	numQs = NULL
+	numAmbig = NULL
+	nQ_woInvar = NULL
+	for (i in 1:numtaxa)
+		{
+		tmpcol = charsdf[,i]
+		
+		# For DNA, there are other ways to have
+		# ambiguous characters
+		# http://www.bioinformatics.org/sms/iupac.html
+		paren_TF1 = grepl(pattern="\\(", x=tmpcol)
+		paren_TF2 = grepl(pattern="R", x=tmpcol, ignore.case=TRUE)
+		paren_TF3 = grepl(pattern="Y", x=tmpcol, ignore.case=TRUE)
+		paren_TF4 = grepl(pattern="S", x=tmpcol, ignore.case=TRUE)
+		paren_TF5 = grepl(pattern="W", x=tmpcol, ignore.case=TRUE)
+		paren_TF6 = grepl(pattern="K", x=tmpcol, ignore.case=TRUE)
+		paren_TF7 = grepl(pattern="M", x=tmpcol, ignore.case=TRUE)
+		paren_TF8 = grepl(pattern="B", x=tmpcol, ignore.case=TRUE)
+		paren_TF9 = grepl(pattern="D", x=tmpcol, ignore.case=TRUE)
+		paren_TF10 = grepl(pattern="H", x=tmpcol, ignore.case=TRUE)
+		paren_TF11 = grepl(pattern="V", x=tmpcol, ignore.case=TRUE)
+		paren_TF = (paren_TF1 + paren_TF2 + paren_TF3 + paren_TF4 + paren_TF5 + paren_TF6 + paren_TF7 + paren_TF8 + paren_TF9 + paren_TF10 + paren_TF11) > 0
+
+
+		# For DNA, "?" can also be "-" or "N" or "n"
+		Qs_TF1 = grepl(pattern="\\?", x=tmpcol)
+		Qs_TF2 = grepl(pattern="-", x=tmpcol)
+		Qs_TF3 = grepl(pattern="N", x=tmpcol, ignore.case=TRUE)
+		Qs_TF = (Qs_TF1 + Qs_TF2 + Qs_TF3) > 0
+	
+		numAmbig = c(numAmbig, sum(paren_TF))
+		numQs = c(numQs, sum(Qs_TF))
+	
+		# Convert invariant characters to all Qs, and recount
+		#print(sum(Qs_TF))
+		tmpcol[LT_2states_TF] = "?"
+		Qs_TF_wo_Invar1 = grepl(pattern="\\?", x=tmpcol)
+		Qs_TF_wo_Invar2 = grepl(pattern="-", x=tmpcol)
+		Qs_TF_wo_Invar = (Qs_TF_wo_Invar1 + Qs_TF_wo_Invar2) > 0
+		
+		#print(sum(Qs_TF_wo_Invar))
+		nQ_woInvar = c(nQ_woInvar, sum(Qs_TF_wo_Invar))
+		
+		# Convert non-parsimony informative characters to all Qs,
+		# and re-count
+		}
+
+	nQ_woInvar
+	completeness_df = as.data.frame(cbind(names(charsdf), numAmbig, numQs, nQ_woInvar), stringsAsFactors=FALSE)
+	names(completeness_df) = c("OTU", "nAmbig", "nQ", "nQ_woInvar")
+	completeness_df$nAmbig = as.numeric(completeness_df$nAmbig)
+	completeness_df$nQ = as.numeric(completeness_df$nQ)
+	completeness_df$nQ_woInvar = as.numeric(completeness_df$nQ_woInvar)
+	completeness_df$numchars = numchars - (completeness_df$nAmbig + completeness_df$nQ)
+	completeness_df$PctData = round(100*(completeness_df$numchars/numchars), digits=2)
+
+	completeness_df$numchars_woInvar = numchars - (completeness_df$nAmbig + completeness_df$nQ_woInvar)
+	completeness_df$PctData_woInvar = round(100*(completeness_df$numchars_woInvar/numchars), digits=2)
+	completeness_df
+	
+	# Rearrange
+	completeness_df = completeness_df[, c("OTU", "numchars", "nAmbig", "nQ", "PctData", "numchars_woInvar", "nQ_woInvar", "PctData_woInvar")]
+	
+
+	ttl_nAmbig = sum(completeness_df$nAmbig)
+	ttl_nQ = sum(completeness_df$nQ)
+	ttl_nQ_woInvar = sum(completeness_df$nQ_woInvar)
+
+	ttl_nchar = numchars * numtaxa
+	complete_chars = sum(completeness_df$numchars)
+	complete_percent = round(complete_chars / ttl_nchar * 100, digits=2)
+	complete_chars2 = sum(completeness_df$numchars_woInvar)
+	complete_percent2 = round(complete_chars2 / ttl_nchar * 100, digits=2)
+
+	matrix_stats = c(numtaxa, numchars, ttl_nchar, ttl_nAmbig, ttl_nQ, ttl_nQ_woInvar, complete_chars, complete_percent, complete_chars2, complete_percent2)
+	matrix_stats_df = as.data.frame(as.matrix(matrix_stats, ncol=1), stringsAsFactors=FALSE)
+	row.names(matrix_stats_df) = c("numtaxa", "numchars", "ttl_nchar", "ttl_nAmbig", "ttl_nQ", "ttl_nQ_woInvar", "complete_chars", "complete_percent", "complete_chars_woInvar", "complete_percent_woInvar")
+	names(matrix_stats_df) = "matrix_stats"
+	matrix_stats_df
+	
+	cat("\n\nStatistics on the completeness of the DNA data matrix, by taxon:\n\n")
+	print(completeness_df)
+
+	cat("\n\nStatistics on the completeness of the DNA data matrix, overall:\n\n")
+	print(matrix_stats_df)
+	
+	DNAstats = NULL
+	DNAstats$completeness_df = completeness_df
+	DNAstats$matrix_stats_df = matrix_stats_df
+	
+	return(DNAstats)
+	} # END DNA_matrix_stats <- function(charslist=NULL, charsdf=NULL)
+
+
+
+# Get statistics for a AA matrix
+# AAstats = AA_matrix_stats(charslist=seqs_AA, charsdf=NULL)
+AA_matrix_stats <- function(charslist=NULL, charsdf=NULL)
+	{
+	defaults='
+	charslist=seqs_AA
+	charsdf = NULL
+	AAstats = AA_matrix_stats(charslist=seqs_AA, charsdf=NULL)
+	'
+	
+	if (is.null(charsdf))
+		{
+		charsdf = as.data.frame(charslist, stringsAsFactors=FALSE)
+		}
+	numchars = nrow(charsdf)
+	numtaxa = ncol(charsdf)
+
+
+	uniq_chars = apply(X=charsdf, MAR=1, FUN=unique_of_toupper)
+	num_uniq = NULL
+	for (u in 1:length(uniq_chars))
+		{
+		tmpchars = uniq_chars[[u]]
+		TF1 = grepl(pattern="\\?", x=tmpchars)
+		TF2 = grepl(pattern="\\(", x=tmpchars)
+		TF3 = grepl(pattern="-", x=tmpchars)
+		TF4 = grepl(pattern="X", x=tmpchars, ignore.case=TRUE)
+		TF = (TF1 + TF2 + TF3 + TF4) > 0
+		tmpchars = tmpchars[TF == FALSE]
+		num_uniq = c(num_uniq, length(tmpchars))
+		}
+	num_uniq
+	LT_2states_TF = num_uniq < 2
+
+	numQs = NULL
+	numAmbig = NULL
+	nQ_woInvar = NULL
+	for (i in 1:numtaxa)
+		{
+		tmpcol = charsdf[,i]
+		
+		# For AA, there are other ways to have
+		# ambiguous characters
+		# http://www.bioinformatics.org/sms/iupac.html
+		paren_TF1 = grepl(pattern="\\(", x=tmpcol)
+		paren_TF2 = grepl(pattern="R", x=tmpcol, ignore.case=TRUE)
+		paren_TF3 = grepl(pattern="Y", x=tmpcol, ignore.case=TRUE)
+		paren_TF4 = grepl(pattern="S", x=tmpcol, ignore.case=TRUE)
+		paren_TF5 = grepl(pattern="W", x=tmpcol, ignore.case=TRUE)
+		paren_TF6 = grepl(pattern="K", x=tmpcol, ignore.case=TRUE)
+		paren_TF7 = grepl(pattern="M", x=tmpcol, ignore.case=TRUE)
+		paren_TF8 = grepl(pattern="B", x=tmpcol, ignore.case=TRUE)
+		paren_TF9 = grepl(pattern="D", x=tmpcol, ignore.case=TRUE)
+		paren_TF10 = grepl(pattern="H", x=tmpcol, ignore.case=TRUE)
+		paren_TF11 = grepl(pattern="V", x=tmpcol, ignore.case=TRUE)
+		paren_TF = (paren_TF1) > 0
+
+
+		# For AA, "?" can also be "-" or "X" or "x"
+		Qs_TF1 = grepl(pattern="\\?", x=tmpcol)
+		Qs_TF2 = grepl(pattern="-", x=tmpcol)
+		Qs_TF3 = grepl(pattern="X", x=tmpcol, ignore.case=TRUE)
+		Qs_TF = (Qs_TF1 + Qs_TF2 + Qs_TF3) > 0
+	
+		numAmbig = c(numAmbig, sum(paren_TF))
+		numQs = c(numQs, sum(Qs_TF))
+	
+		# Convert invariant characters to all Qs, and recount
+		#print(sum(Qs_TF))
+		tmpcol[LT_2states_TF] = "?"
+		Qs_TF_wo_Invar1 = grepl(pattern="\\?", x=tmpcol)
+		Qs_TF_wo_Invar2 = grepl(pattern="-", x=tmpcol)
+		Qs_TF_wo_Invar = (Qs_TF_wo_Invar1 + Qs_TF_wo_Invar2) > 0
+		
+		#print(sum(Qs_TF_wo_Invar))
+		nQ_woInvar = c(nQ_woInvar, sum(Qs_TF_wo_Invar))
+		
+		# Convert non-parsimony informative characters to all Qs,
+		# and re-count
+		}
+
+	nQ_woInvar
+	completeness_df = as.data.frame(cbind(names(charsdf), numAmbig, numQs, nQ_woInvar), stringsAsFactors=FALSE)
+	names(completeness_df) = c("OTU", "nAmbig", "nQ", "nQ_woInvar")
+	completeness_df$nAmbig = as.numeric(completeness_df$nAmbig)
+	completeness_df$nQ = as.numeric(completeness_df$nQ)
+	completeness_df$nQ_woInvar = as.numeric(completeness_df$nQ_woInvar)
+	completeness_df$numchars = numchars - (completeness_df$nAmbig + completeness_df$nQ)
+	completeness_df$PctData = round(100*(completeness_df$numchars/numchars), digits=2)
+
+	completeness_df$numchars_woInvar = numchars - (completeness_df$nAmbig + completeness_df$nQ_woInvar)
+	completeness_df$PctData_woInvar = round(100*(completeness_df$numchars_woInvar/numchars), digits=2)
+	completeness_df
+	
+	# Rearrange
+	completeness_df = completeness_df[, c("OTU", "numchars", "nAmbig", "nQ", "PctData", "numchars_woInvar", "nQ_woInvar", "PctData_woInvar")]
+	
+
+	ttl_nAmbig = sum(completeness_df$nAmbig)
+	ttl_nQ = sum(completeness_df$nQ)
+	ttl_nQ_woInvar = sum(completeness_df$nQ_woInvar)
+
+	ttl_nchar = numchars * numtaxa
+	complete_chars = sum(completeness_df$numchars)
+	complete_percent = round(complete_chars / ttl_nchar * 100, digits=2)
+	complete_chars2 = sum(completeness_df$numchars_woInvar)
+	complete_percent2 = round(complete_chars2 / ttl_nchar * 100, digits=2)
+
+	matrix_stats = c(numtaxa, numchars, ttl_nchar, ttl_nAmbig, ttl_nQ, ttl_nQ_woInvar, complete_chars, complete_percent, complete_chars2, complete_percent2)
+	matrix_stats_df = as.data.frame(as.matrix(matrix_stats, ncol=1), stringsAsFactors=FALSE)
+	row.names(matrix_stats_df) = c("numtaxa", "numchars", "ttl_nchar", "ttl_nAmbig", "ttl_nQ", "ttl_nQ_woInvar", "complete_chars", "complete_percent", "complete_chars_woInvar", "complete_percent_woInvar")
+	names(matrix_stats_df) = "matrix_stats"
+	matrix_stats_df
+	
+	cat("\n\nStatistics on the completeness of the AA data matrix, by taxon:\n\n")
+	print(completeness_df)
+
+	cat("\n\nStatistics on the completeness of the AA data matrix, overall:\n\n")
+	print(matrix_stats_df)
+	
+	AAstats = NULL
+	AAstats$completeness_df = completeness_df
+	AAstats$matrix_stats_df = matrix_stats_df
+	
+	return(AAstats)
+	} # END AA_matrix_stats <- function(charslist=NULL, charsdf=NULL)
+
+
+
+
+# Count the number of characters in each state (for a single 
+# list of charstates, pre-processed to deal with e.g. (0 1))
+get_counts_per_charstate_for_a_char <- function(list_of_charstates, unique_characters=NULL)
+	{
+	if (is.null(unique_characters) == TRUE)
+		{
+		# Get the unique character states for this character
+		unique_characters = unique(list_of_charstates)
+	
+		# drop "-" and "?"
+		unique_characters = unique_characters[unique_characters != "-"]
+		unique_characters = unique_characters[unique_characters != "?"]
+		unique_characters = unique_characters[order(unique_characters)]
+		}
+	numstates = length(unique_characters)
+
+	# Get counts for each character state
+	tmpcounts_of_each_state = NULL
+	tmpcount = 0
+	for (nn in 1:numstates)
+		{
+		charstate = unique_characters[nn]
+		tmpcount = sum(list_of_charstates == charstate)
+		tmpcounts_of_each_state = c(tmpcounts_of_each_state, tmpcount)
+		} # END for (nn in 1:numstates)
+	names(tmpcounts_of_each_state) = unique_characters
+	
+	# The character is an autapomorphy IFF the counts
+	# are all 1s or 0s, except 1
+	TF0 = tmpcounts_of_each_state == 0
+	TF1 = tmpcounts_of_each_state == 1
+	TF_autapos = (TF0 + TF1) > 0
+	TF_char_autapomorphic = (sum(TF_autapos) == (length(unique_characters)-1))
+	
+	tmpres = NULL
+	tmpres$tmpcounts_of_each_state = tmpcounts_of_each_state
+	tmpres$TF_char_autapomorphic = TF_char_autapomorphic
+	
+	extract='
+	tmpcounts_of_each_state = tmpres$tmpcounts_of_each_state
+	TF_char_autapomorphic = tmpres$TF_char_autapomorphic
+	
+	'
+	
+	return(tmpres)
+	}
+
+
+

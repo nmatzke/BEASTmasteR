@@ -1,4 +1,42 @@
 
+#######################################################
+# Convert dates to decimal years
+#######################################################
+# Copied from Biograph::Date_as_year, after that package 
+# went offline on the CRAN archive:
+# https://cran.r-project.org/src/contrib/Archive/Biograph/
+
+Date_as_year <- function(x, format.in) 
+	{
+    if (missing(format.in)) 
+        format.in <- "%Y-%m-%d"
+    if (substr(format.in, 1, 1) != "%") 
+        stop("Date_as_year: format.in is not date format")
+    if (is.character(x)) 
+        x <- as.Date(x, format.in)
+    d2 <- as.POSIXlt(x)
+    year <- d2$year + 1900
+    
+    if (length(na.omit(year)) == 0)
+    	{
+        year.frac <- rep(NA, length(year))
+        return(year.frac)
+    	} # END if (length(na.omit(year)) == 0)
+    	
+    if (min(year, na.rm = TRUE) < 32) 
+        stop(paste("Date_as_year: Please check date format. Year = ", 
+            year, sep = ""))
+    k <- ifelse(is.na(year), NA, paste(year, "-01-01", sep = ""))
+    k <- as.Date(k)
+    m <- ifelse(is.na(year), NA, paste(year + 1, "-01-01", sep = ""))
+    m <- as.Date(m)
+    frac <- (as.double(difftime(x, k, units = "days")))/(as.double(difftime(m, 
+        k, units = "days")))
+    year.frac <- year + frac
+    return(year.frac)
+	} # END Date_as_year <- function (x, format.in) 
+
+
 
 #######################################################
 # Run some basic checks on tipdates
@@ -6,6 +44,12 @@
 
 check_tipdates <- function(OTUs_df)
 	{
+	
+	# Subset to "use" column:
+	OTUs_df$use[isblank_TF(OTUs_df$use)==TRUE] = "yes"
+	OTUs_df = OTUs_df[OTUs_df$use == "yes",]
+	
+	
 	# Are any of the distributions NA/missing?
 	blankTF = isblank_TF(OTUs_df$distribution)
 	if ( any(blankTF) == TRUE )
@@ -175,6 +219,11 @@ find_sampling_gaps_from_tipdates <- function(OTUs_df, bintops=seq(0,200,10), bot
 	TF = tipdates_orig >= psiSamplingStopsAt
 	# Add psiSamplingStopsAt as the top bin (before 0, added at the end)
 	tipdates = sort(tipdates_orig[TF])
+	
+	if (length(tipdates) == 0)
+		{
+		return(NULL)
+		}
 	
 	# Gaps between them
 	bintops = c(bintops, bot_of_bins)
@@ -602,6 +651,11 @@ find_bins_sampled_from_tipdate_ranges <- function(OTUs_df, bintops=seq(0,200,10)
 	# Add psiSamplingStopsAt as the top bin (before 0, added at the end)
 	tipdates = sort(tipdates_orig[fossil_TF])
 
+	if (length(tipdates) == 0)
+		{
+		return(NULL)
+		}
+
 	# Tipdate ranges
 	# Convert non-uniform tipdates to uniform
 	unifOTUs_df = convert_nonUniform_dates_to_uniform(OTUs_df[fossil_TF, ], CI=0.999)
@@ -740,5 +794,181 @@ find_bins_sampled_from_tipdate_ranges <- function(OTUs_df, bintops=seq(0,200,10)
 	
 	return(counts_bybin)
 	}
+
+
+# Look at your sampling according to 
+# Geological Time Scale 2012 (GTS2012) bins
+# Since, usually, fossil dates are assigned by bin
+# (tight radiometric dates are typically rare)
+# Note that your fossil date range can depend on
+# what the GTS bins were when it was published!
+
+# Examples
+# Count tipdates by bin, AND collapse the timebins into groups that do, 
+# or don't, have the starting point tipdates (0 versus some sampling)
+# This gives you blocks with or without sampling
+count_tipdates_by_collapsing_timebins <- function(OTUs_df, bintops=bintops, bot_of_bins=1000, collapse="count_tipdates", psiSamplingStopsAt=0.01, min_precision=0.1)
+	{
+	defaults='
+	bintops=c(0.01, 41.20, 83.60)
+	bot_of_bins=1000
+	collapse="count_tipdates"
+	psiSamplingStopsAt=0.01
+	min_precision=0.1
+	'
+
+	gts2012 = get_GTS2012(quiet=TRUE)
+	
+	counts_bybin2 = find_bins_sampled_from_tipdate_ranges(OTUs_df, bintops=bintops, bot_of_bins=1000, collapse="count_tipdates", psiSamplingStopsAt=0.01, min_precision=0.1)
+	rownums_bintops = match(counts_bybin2$tops, gts2012$tops)
+	rownums_binbots = match(counts_bybin2$bots, gts2012$tops) - 1
+	if (length(rownums_binbots) == 0)
+		{
+		return(NULL)
+		} else {
+		if (is.na(rownums_bintops[1]))
+			{
+			rownums_bintops[1] = 1
+			} # END if (is.na(rownums_bintops[1]))
+		rownums_binbots
+		rownames_bintops = paste(gts2012$Series.Epoch[rownums_bintops], gts2012$Stage.Age[rownums_bintops], sep="/")
+		rownames_binbots = paste(gts2012$Series.Epoch[rownums_binbots], gts2012$Stage.Age[rownums_binbots], sep="/")
+		rownames_binbots[length(rownames_binbots)] = "older"
+		row.names(counts_bybin2) = paste(rownames_bintops, rownames_binbots, sep=" -> ")
+		counts_bybin2
+		return(counts_bybin2)
+		}
+	} # END count_tipdates_by_collapsing_timebins <- function(OTUs_df, bintops=bintops, bot_of_bins=1000, collapse="count_tipdates", psiSamplingStopsAt=0.01, min_precision=0.1)
+
+
+
+
+count_starting_tipdates_in_manual_bins <- function(OTUs_df, bintops=c(0.01, 41.20, 83.60), bot_of_bins=1000, collapse=FALSE, psiSamplingStopsAt=0.01, min_precision=0.1)
+	{
+	defaults='
+	bintops=c(0.01, 41.20, 83.60)
+	bot_of_bins=1000
+	collapse=FALSE
+	psiSamplingStopsAt=0.01
+	min_precision=0.1
+	'
+	gts2012 = get_GTS2012(quiet=TRUE)
+	
+	# Counting starting tipdates in manual bins (collapse=FALSE)
+	bintops = c(0.01, 41.20, 83.60)
+	counts_bybin2 = find_bins_sampled_from_tipdate_ranges(OTUs_df, bintops=bintops, bot_of_bins=1000, collapse=FALSE, psiSamplingStopsAt=0.01, min_precision=0.1)
+	rownums_bintops = match(counts_bybin2$tops, gts2012$tops)
+	rownums_binbots = match(counts_bybin2$bots, gts2012$tops) - 1
+	if (length(rownums_binbots) == 0)
+		{
+		return(NULL)
+		} else {
+		if (is.na(rownums_bintops[1]))
+			{
+			rownums_bintops[1] = 1
+			} # END if (is.na(rownums_bintops[1]))
+		rownums_binbots
+		rownames_bintops = paste(gts2012$Series.Epoch[rownums_bintops], gts2012$Stage.Age[rownums_bintops], sep="/")
+		rownames_binbots = paste(gts2012$Series.Epoch[rownums_binbots], gts2012$Stage.Age[rownums_binbots], sep="/")
+		rownames_binbots[length(rownames_binbots)] = "older"
+		row.names(counts_bybin2) = paste(rownames_bintops, rownames_binbots, sep=" -> ")
+		counts_bybin2
+		return(counts_bybin2)
+		}
+	} # END count_starting_tipdates_in_manual_bins <- function(OTUs_df, bintops=c(0.01, 41.20, 83.60), bot_of_bins=1000, collapse=FALSE, psiSamplingStopsAt=0.01, min_precision=0.1)
+
+
+
+
+count_starting_tipdates_from_approximate_ranges <- function(OTUs_df, bintops=bintops, bot_of_bins=1000, collapse="count_overlap", psiSamplingStopsAt=0.01, min_precision=0.1)
+	{
+	gts2012 = get_GTS2012(quiet=TRUE)
+	
+	# Attempt to count starting tipdates, taking into 
+	# account their approximate time-ranges (hard!)
+	# The "count_overlap" column is really a sum( max within each sub-bin )
+	bintops = gts2012$tops[gts2012$tops < 200]
+	counts_bybin2 = find_bins_sampled_from_tipdate_ranges(OTUs_df, bintops=bintops, bot_of_bins=1000, collapse="count_overlap", psiSamplingStopsAt=0.01, min_precision=0.1)
+	rownums_bintops = match(counts_bybin2$tops, gts2012$tops)
+	rownums_binbots = match(counts_bybin2$bots, gts2012$tops) - 1
+	if (length(rownums_binbots) == 0)
+		{
+		return(NULL)
+		} else {
+		if (is.na(rownums_bintops[1]))
+			{
+			rownums_bintops[1] = 1
+			} # END if (is.na(rownums_bintops[1]))
+		rownums_binbots
+		rownames_bintops = paste(gts2012$Series.Epoch[rownums_bintops], gts2012$Stage.Age[rownums_bintops], sep="/")
+		rownames_binbots = paste(gts2012$Series.Epoch[rownums_binbots], gts2012$Stage.Age[rownums_binbots], sep="/")
+		rownames_binbots[length(rownames_binbots)] = "older"
+		row.names(counts_bybin2) = paste(rownames_bintops, rownames_binbots, sep=" -> ")
+		counts_bybin2
+		return(counts_bybin2)
+		}
+	} # END count_starting_tipdates_from_approximate_ranges <- function(OTUs_df, bintops=bintops, bot_of_bins=1000, collapse="count_overlap", psiSamplingStopsAt=0.01, min_precision=0.1)
+
+
+
+
+#######################################################
+# Analyze tipDates for gaps in sampling (experimental, just to look at)
+#######################################################
+
+analyze_tipdates_for_gaps_in_sampling_EXAMPLES <- function(OTUs_df)
+	{
+	# GTS2012 = 2012 Geological Time Scale
+	gts2012 = get_GTS2012(quiet=TRUE)
+	head(gts2012)
+
+	check_tipdates(OTUs_df)
+
+	bintops=seq(0,200,by=10)
+	sampling1 = find_sampling_gaps_from_tipdates(OTUs_df, bintops=bintops)
+
+	bintops = gts2012$tops[gts2012$tops < 200]
+	sampling2 = find_sampling_gaps_from_tipdates(OTUs_df, bintops=bintops, collapse=TRUE)
+
+	# Conversion of nonuniform date priors to (approximate 95%) uniform prior
+	convert_nonUniform_dates_to_uniform(OTUs_df, CI=0.999)
+
+	# Conversion of dates to a reasonable normal (might be useful
+	# for e.g. a starting tree)
+	convert_dates_to_normal(OTUs_df)
+
+	# The "count_overlap" column is really a sum( max within each sub-bin )
+	counts_bybin1 = find_bins_sampled_from_tipdate_ranges(OTUs_df, bintops=seq(0,200,10), bot_of_bins=1000, collapse="count_overlap", psiSamplingStopsAt=0.01, min_precision=0.1)
+	counts_bybin1
+
+	# You can see that you get somewhat different timebins when collapsing with tipdates
+	counts_bybin2 = find_bins_sampled_from_tipdate_ranges(OTUs_df, bintops=seq(0,200,10), bot_of_bins=1000, collapse="count_tipdates", psiSamplingStopsAt=0.01, min_precision=0.1)
+	counts_bybin2
+
+	# E.g. you might chose these bin tops:
+	counts_bybin2$tops
+
+
+	counts_bybin3 = count_tipdates_by_collapsing_timebins(OTUs_df, bintops=bintops, bot_of_bins=1000, collapse="count_tipdates", psiSamplingStopsAt=0.01, min_precision=0.1)
+
+	counts_bybin4 = count_starting_tipdates_in_manual_bins(OTUs_df, bintops=c(0.01, 41.20, 83.60), bot_of_bins=1000, collapse=FALSE, psiSamplingStopsAt=0.01, min_precision=0.1)
+
+	counts_bybin5 = count_starting_tipdates_from_approximate_ranges(OTUs_df, bintops=bintops, bot_of_bins=1000, collapse="count_overlap", psiSamplingStopsAt=0.01, min_precision=0.1)
+
+	#######################################################
+	# END Analyze tipDates for gaps in sampling
+	#######################################################
+	# NJM: put the above in a function; Not needed really
+	
+	res = NULL
+	res$sampling1 = sampling1
+	res$sampling2 = sampling2
+	res$counts_bybin1 = counts_bybin1
+	res$counts_bybin2 = counts_bybin2
+	res$counts_bybin3 = counts_bybin3
+	res$counts_bybin4 = counts_bybin4
+	res$counts_bybin5 = counts_bybin5
+	return(res)
+	} # END analyze_tipdates_for_gaps_in_sampling_EXAMPLES <- function(OTUs_df)
 
 

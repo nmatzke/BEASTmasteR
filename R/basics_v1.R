@@ -34,7 +34,7 @@ testfunc <- function(a,b)
 #######################################################
 # Combine XML lists appropriately in XML
 #######################################################
-cl <- function(A, B)
+cl <- function(A, B, C=NULL, D=NULL, E=NULL, F=NULL, G=NULL, H=NULL, I=NULL, J=NULL, K=NULL, L=NULL, M=NULL, N=NULL, O=NULL, P=NULL, Q=NULL, R=NULL)
 	{
 	if (class(A)[1] != "list")
 		{
@@ -63,8 +63,203 @@ cl <- function(A, B)
 			B = list(B)
 			}
 		} # END if (is.list(B) == FBLSE)
-		
-	AB = c(A, B)
+
+
+	# Additional...
+	if ((is.null(C)==FALSE) && (class(C)[1] != "list"))
+		{
+		# Check the class; if it's an XMLNode, 
+		# make it a part of a bigger node
+		classC = class(C)
+		if ("XMLNode" %in% classC)
+			{
+			C = c(list(xmlCommentNode(" blank tag to make a bigger list ")), list(C))
+			} else {
+			C = list(C)
+			}
+		} # END 
+	if ((is.null(D)==FALSE) && (class(D)[1] != "list"))
+		{
+		# Check the class; if it's an XMLNode, 
+		# make it a part of a bigger node
+		classD = class(D)
+		if ("XMLNode" %in% classD)
+			{
+			D = c(list(xmlCommentNode(" blank tag to make a bigger list ")), list(D))
+			} else {
+			D = list(D)
+			}
+		} # END
+	if ((is.null(E)==FALSE) && (class(E)[1] != "list"))
+		{
+		# Check the class; if it's an XMLNode, 
+		# make it a part of a bigger node
+		classE = class(E)
+		if ("XMLNode" %in% classE)
+			{
+			E = c(list(xmlCommentNode(" blank tag to make a bigger list ")), list(E))
+			} else {
+			E = list(E)
+			}
+		} # END 
+	if ((is.null(F)==FALSE) && (class(F)[1] != "list"))
+		{
+		# Check the class; if it's an XMLNode, 
+		# make it a part of a bigger node
+		classF = class(F)
+		if ("XMLNode" %in% classF)
+			{
+			F = c(list(xmlCommentNode(" blank tag to make a bigger list ")), list(F))
+			} else {
+			F = list(F)
+			}
+		} # END 
+	if ((is.null(G)==FALSE) && (class(G)[1] != "list"))
+		{
+		# Check the class; if it's an XMLNode, 
+		# make it a part of a bigger node
+		classval = class(G)
+		if ("XMLNode" %in% classval)
+			{
+			G = c(list(xmlCommentNode(" blank tag to make a bigger list ")), list(G))
+			} else {
+			G = list(G)
+			}
+		} # END 
+	if ((is.null(H)==FALSE) && (class(H)[1] != "list"))
+		{
+		# Check the class; if it's an XMLNode, 
+		# make it a part of a bigger node
+		classval = class(H)
+		if ("XMLNode" %in% classval)
+			{
+			H = c(list(xmlCommentNode(" blank tag to make a bigger list ")), list(H))
+			} else {
+			H = list(H)
+			}
+		} # END 
+	if ((is.null(I)==FALSE) && (class(I)[1] != "list"))
+		{
+		# Check the class; if it's an XMLNode, 
+		# make it a part of a bigger node
+		classval = class(I)
+		if ("XMLNode" %in% classval)
+			{
+			I = c(list(xmlCommentNode(" blank tag to make a bigger list ")), list(I))
+			} else {
+			I = list(I)
+			}
+		} # END 
+	if ((is.null(J)==FALSE) && (class(J)[1] != "list"))
+		{
+		# Check the class; if it's an XMLNode, 
+		# make it a part of a bigger node
+		classval = class(J)
+		if ("XMLNode" %in% classval)
+			{
+			J = c(list(xmlCommentNode(" blank tag to make a bigger list ")), list(J))
+			} else {
+			J = list(J)
+			}
+		} # END 
+	if ((is.null(K)==FALSE) && (class(K)[1] != "list"))
+		{
+		# Check the class; if it's an XMLNode, 
+		# make it a part of a bigger node
+		classval = class(K)
+		if ("XMLNode" %in% classval)
+			{
+			K = c(list(xmlCommentNode(" blank tag to make a bigger list ")), list(K))
+			} else {
+			K = list(K)
+			}
+		} # END 
+	if ((is.null(L)==FALSE) && (class(L)[1] != "list"))
+		{
+		# Check the class; if it's an XMLNode, 
+		# make it a part of a bigger node
+		classval = class(L)
+		if ("XMLNode" %in% classval)
+			{
+			L = c(list(xmlCommentNode(" blank tag to make a bigger list ")), list(L))
+			} else {
+			L = list(L)
+			}
+		} # END 
+	if ((is.null(M)==FALSE) && (class(M)[1] != "list"))
+		{
+		# Check the class; if it's an XMLNode, 
+		# make it a part of a bigger node
+		classval = class(M)
+		if ("XMLNode" %in% classval)
+			{
+			M = c(list(xmlCommentNode(" blank tag to make a bigger list ")), list(M))
+			} else {
+			M = list(M)
+			}
+		} # END 
+	if ((is.null(N)==FALSE) && (class(N)[1] != "list"))
+		{
+		# Check the class; if it's an XMLNode, 
+		# make it a part of a bigger node
+		classval = class(N)
+		if ("XMLNode" %in% classval)
+			{
+			N = c(list(xmlCommentNode(" blank tag to make a bigger list ")), list(N))
+			} else {
+			N = list(N)
+			}
+		} # END 
+	if ((is.null(O)==FALSE) && (class(O)[1] != "list"))
+		{
+		# Check the class; if it's an XMLNode, 
+		# make it a part of a bigger node
+		classval = class(O)
+		if ("XMLNode" %in% classval)
+			{
+			O = c(list(xmlCommentNode(" blank tag to make a bigger list ")), list(O))
+			} else {
+			O = list(O)
+			}
+		} # END 
+	if ((is.null(P)==FALSE) && (class(P)[1] != "list"))
+		{
+		# Check the class; if it's an XMLNode, 
+		# make it a part of a bigger node
+		classval = class(P)
+		if ("XMLNode" %in% classval)
+			{
+			P = c(list(xmlCommentNode(" blank tag to make a bigger list ")), list(P))
+			} else {
+			P = list(P)
+			}
+		} # END 
+	if ((is.null(Q)==FALSE) && (class(Q)[1] != "list"))
+		{
+		# Check the class; if it's an XMLNode, 
+		# make it a part of a bigger node
+		classval = class(Q)
+		if ("XMLNode" %in% classval)
+			{
+			Q = c(list(xmlCommentNode(" blank tag to make a bigger list ")), list(Q))
+			} else {
+			Q = list(Q)
+			}
+		} # END 
+	if ((is.null(R)==FALSE) && (class(R)[1] != "list"))
+		{
+		# Check the class; if it's an XMLNode, 
+		# make it a part of a bigger node
+		classval = class(R)
+		if ("XMLNode" %in% classval)
+			{
+			R = c(list(xmlCommentNode(" blank tag to make a bigger list ")), list(R))
+			} else {
+			R = list(R)
+			}
+		} # END 
+				
+	AB = c(A, B, C, D, E, F)
 	return(AB)
 	} # END cl <- function(A, B)
 
@@ -114,6 +309,36 @@ list2str_fast_nosplit <- function(list1, spacer="")
 	return(tmpstr)
 	}
 
+
+#######################################################
+# List subsetting
+#######################################################
+listextract_bynum <- function(listnum, listvals)
+	{
+	return(listvals[[listnum]])
+	} # END listextract_bynum <- function(listnum, listvals)
+
+# Subset a list by a vector of indices (1-based)
+list_subset_bynum <- function(listnums, listvals)
+	{
+	newlist = lapply(X=listnums, FUN=listextract_bynum, listvals=listvals)
+	return(newlist)
+	} # END list_subset_bynum <- function(listnums, listvals)
+
+# Subset a list by a vector of TF (TRUE/FALSE)
+list_subset_byTF <- function(TF, listvals)
+	{
+	listnums = (1:length(listvals))[TF]
+	newlist = lapply(X=listnums, FUN=listextract_bynum, listvals=listvals)
+	return(newlist)
+	} # END list_subset_byTF <- function(TF, listvals)
+
+# TRUE/FALSE to numbers
+TFs_to_nums <- function(TF)
+	{
+	listnums = (1:length(TF))[TF]
+	return(listnums)
+	} # END TFs_to_nums <- function(TF)
 
 
 
@@ -1048,6 +1273,11 @@ addslash <- function(tmpstr)
 	tmpchars = strsplit(tmpstr, split="")[[1]]
 	last_char = tmpchars[length(tmpchars)]
 	
+	if (nchar(tmpstr) == 0)
+		{
+		return("/")
+		}
+	
 	if (last_char != "/")
 		{
 		outstr = paste(tmpstr, "/", sep="")
@@ -1252,7 +1482,7 @@ prflag <- function(x, printflag=TRUE)
 #' 
 np <- function(path=path, ...)
 	{
-	path = normalizePath(path, ...)
+	path = suppressWarnings(normalizePath(path, ...))
 	return(path)
 	}
 
@@ -2148,6 +2378,123 @@ prt <- function(t, printflag=TRUE, relabel_nodes = FALSE, time_bp_digits=7, add_
 	#root_str = get_node_info(root_nodenum, t)
 	return(dtf)
 	} # END prt()
+
+
+
+
+
+
+# Drop tip NAs
+
+# If you remove 4 tips from a monophyletic group with drop.tip, you can get 2 NA tips
+# This is annoying!
+# To fix:
+# 1. identify monophyletic NAs
+# 2. drop those tips
+# 3. repeat until there is just 1 NA
+
+drop_tips_NA <- function(tmptr, copied_tiplabel_to_drop="NA")
+	{
+	TF = tmptr$tip.label == "NA"
+
+	if (sum(TF) > 1)
+		{
+		tipnums_to_drop = (1:length(tmptr$tip.label))[TF]
+	
+		# Check for monophyly of the NA clade
+		nodenum = getMRCA(phy=tmptr, tip=tipnums_to_drop)
+		skeleton_subtree = extract.clade(phy=tmptr, node=nodenum)
+		ntips = length(skeleton_subtree$tip.label)
+
+		# If the clade isn't actually monophyletic in the sampled
+		# skeleton tree, don't try to add it; skip this skeleton tree
+		if (ntips != sum(TF))
+			{
+			stoptxt = paste0("STOP ERROR in drop_tips_NA(): in your input tree 'tmptr', the ", sum(TF), " tips labeled 'NA' did not form a monophyletic group. Monophyly of NA tips is required for this function.")
+			cat("\n\n")
+			cat(stoptxt)
+			cat("\n\n")
+			stop(stoptxt)
+			} # END if (ntips != sum(TF))
+
+		tmptr = drop.tip(phy=tmptr, tip=tipnums_to_drop, trim.internal=FALSE)
+		tmptr = read.tree(file="", text=write.tree(phy=tmptr, file=""))
+		} # END if (sum(TF) > 1)
+	
+	# Nest the function:
+	TF = tmptr$tip.label == "NA"
+	if (sum(TF) > 1)
+		{
+		tmptr = drop_tips_NA(tmptr=tmptr, copied_tiplabel_to_drop=copied_tiplabel_to_drop)
+		tmptr = read.tree(file="", text=write.tree(phy=tmptr, file=""))
+		} # END if (sum(TF) > 1)
+	
+	return(tmptr)
+	} # END drop_tips_NA <- function(tmptr, copied_tiplabel_to_drop="NA")
+
+
+
+
+
+
+
+manual_boxplot <- function(x, y, y_med, y0025, y0975, ymin, ymax, width=1, lwd=1, col="gray", border="black", extreme_width=0.1, logt=TRUE)
+	{
+	if (logt == TRUE)
+		{
+		# Absolute minimum
+		y_all = c(y, y_med, y0025, y0975, ymin, ymax)
+		y_pretty = pretty(y_all)
+		y_observed_nonzero_min = min(y_all[y_all > 0])
+		y_replacement_for_0 = y_observed_nonzero_min / 10
+		y_pretty = c(y_observed_nonzero_min, y_pretty)
+		log10_y_pretty = log10(y_pretty)
+		
+		y[y==0] = y_replacement_for_0
+		y_med[y_med==0] = y_replacement_for_0
+		y0025[y0025==0] = y_replacement_for_0
+		y0975[y0975==0] = y_replacement_for_0
+		ymin[ymin==0] = y_replacement_for_0
+		ymax[ymax==0] = y_replacement_for_0
+		
+		y = log10(y)
+		y_med = log10(y_med)
+		y0025 = log10(y0025)
+		y0975 = log10(y0975)
+		ymin = log10(ymin)
+		ymax = log10(ymax)
+		} # END if (logt == TRUE)
+	
+	# Draw the box
+	xl = x - width/2
+	xr = x + width/2
+	
+	# Draw the little extreme line
+	ew = extreme_width
+	x_extr_l = x - ew
+	x_extr_r = x + ew
+	
+	
+	# Draw a rectangle
+	rect(xleft=xl, ybottom=y0025, xright=xr, ytop=y0975, col=col, border=border, lwd=lwd)
+	
+	# Draw the mean line
+	segments(x0=xl, x1=xr, y0=y, y1=y, col=border, lwd=lwd*2)
+	
+	# Median
+	segments(x0=xl, x1=xr, y0=y, y1=y, col=border, lwd=lwd*2, lty="dashed")
+	
+	# Extremes
+	segments(x0=x, x1=x, y0=y0975, y1=ymax, col=border, lwd=lwd, lty="solid")
+	segments(x0=x_extr_l, x1=x_extr_r, y0=ymax, y1=ymax, col=border, lwd=lwd, lty="solid")
+	segments(x0=x, x1=x, y0=y0025, y1=ymin, col=border, lwd=lwd, lty="solid")
+	segments(x0=x_extr_l, x1=x_extr_r, y0=ymin, y1=ymin, col=border, lwd=lwd, lty="solid")
+	
+	return(NULL)
+	}
+
+
+
 
 
 

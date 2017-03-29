@@ -24,7 +24,7 @@ get_phylo3_plotcoords <- function()
 # posterior probs, etc.
 #######################################################
 
-plotMCC <- function(nexfn, titletxt="", pdffn=TRUE, tipnames_right_justified=TRUE, plot_node_heights=TRUE, plotPP=TRUE, minage=0, ladderize_tree=TRUE, fliptree=FALSE, tips_to_rotate=NULL, tipcex=1, italics_tiplabels=TRUE, digits=2, xmin=-5, xmax_mult=1.3, pdfheight=11, pdfwidth=9, newick=FALSE, tipdates_table=NULL, plot_tiplabels=TRUE, plot_axisPhylo=TRUE, tipbarcol=rgb(red=255,green=0,blue=0,alpha=100,max=255), nodebarcol=rgb(red=0,green=0,blue=255,alpha=100,max=255), bar_width=5, vlines=NULL, vline_col="black", vline_type="dotted", xtext="millions of years ago", space_tipnames=NULL, space_spaces=NULL)
+plotMCC <- function(nexfn, titletxt="", pdffn=TRUE, plot_node_heights=TRUE, plotPP=TRUE, minage=0, ladderize_tree=TRUE, fliptree=FALSE, tips_to_rotate=NULL, tipcex=par("cex"), digits=2, xmin=-5, xmax_mult=1.3, pdfheight=11, pdfwidth=9, newick=FALSE, tipdates_table=NULL, plot_axisPhylo=TRUE, tipbarcol=rgb(red=255,green=0,blue=0,alpha=100,max=255), nodebarcol=rgb(red=0,green=0,blue=255,alpha=100,max=255), bar_width=5, vlines=NULL, vline_col="black", vline_type="dotted", xtext="millions of years ago", show.tip.label=TRUE, default_tiplabels=TRUE, space_tipnames=NULL, space_spaces=NULL, tiplabel_underscores=FALSE, tipnames_right_justified=TRUE, italics_tiplabels=TRUE, tips_with_italics=NULL, fonts=NULL, use_substitute=FALSE)
 	{
 	defaults='
 	library(BioGeoBEARS)	# for axisPhylo2()
@@ -36,7 +36,6 @@ plotMCC <- function(nexfn, titletxt="", pdffn=TRUE, tipnames_right_justified=TRU
 	
 	titletxt=""
 	pdffn=TRUE
-	tipnames_right_justified=TRUE
 	plot_node_heights = TRUE
 	plotPP = TRUE
 	minage = 0
@@ -65,7 +64,6 @@ plotMCC <- function(nexfn, titletxt="", pdffn=TRUE, tipnames_right_justified=TRU
 	
 	
 	# DEFAULTS
-	plot_tiplabels=TRUE
 	plot_axisPhylo=TRUE
 	tipbarcol = rgb(red=255, green=0, blue=0, alpha=100, max=255)
 	nodebarcol=rgb(red=150, green=150, blue=150, alpha=100, max=255)
@@ -73,11 +71,41 @@ plotMCC <- function(nexfn, titletxt="", pdffn=TRUE, tipnames_right_justified=TRU
 	vlines=NULL
 	vline_col="black"
 	vline_type="dotted"
+
+	# Tip label options
+	xtext="millions of years ago"
+	show.tip.label=TRUE
+	default_tiplabels=TRUE
 	space_tipnames=NULL
 	space_spaces=NULL
+	tiplabel_underscores=FALSE
+	tipnames_right_justified=FALSE
+	italics_tiplabels=TRUE
+	tips_with_italics=NULL
+	fonts=NULL
+	use_substitute=FALSE
 	
 	' # END defaults
+	
+	
+	if (!is.null(space_tipnames) && is.null(space_spaces))
+		{
+		stoptxt = "STOP ERROR in plotMCC(). space_tipnames is not NULL, but space_spaces is NULL. Either both must be NULL, or neither of them must be NULL."
+		cat("\n\n")
+		cat(stoptxt)
+		cat("\n\n")
+		stop(stoptxt)
+		} # END if (!is.null(space_tipnames) && is.null(space_spaces))
 
+	if (!is.null(space_spaces) && is.null(space_tipnames))
+		{
+		stoptxt = "STOP ERROR in plotMCC(). space_spaces is not NULL, but space_tipnames is NULL. Either both must be NULL, or neither of them must be NULL."
+		cat("\n\n")
+		cat(stoptxt)
+		cat("\n\n")
+		stop(stoptxt)
+		} # END if (!is.null(space_tipnames) && is.null(space_spaces))
+	
 	#######################################################
 	# Plot a Beast2 MCC tree with nice node bars, etc.
 	#######################################################
@@ -101,6 +129,7 @@ plotMCC <- function(nexfn, titletxt="", pdffn=TRUE, tipnames_right_justified=TRU
 		par(yaxs = "i") 
 		}
 
+
 	# Allow Newick if desired
 	#nexfn = "treeLog.mcc"
 	if (newick == FALSE)
@@ -113,7 +142,10 @@ plotMCC <- function(nexfn, titletxt="", pdffn=TRUE, tipnames_right_justified=TRU
 		tr = read.tree(nexfn)
 		} # END if (newick == FALSE)
 	
-	
+		
+	#######################################################
+	# LADDERIZING, ROTATING, AND FLIPPING THE TREE
+	#######################################################
 	if (ladderize_tree == TRUE)
 		{
 		ltr = ladderize(tr, right=FALSE)
@@ -181,18 +213,42 @@ plotMCC <- function(nexfn, titletxt="", pdffn=TRUE, tipnames_right_justified=TRU
 	#par(usr=c(xlims[1], xlims[2], ylims[1], ylims[2]))
 	#tipcex = 0.55
 	
-	# Plot the tree, and tiplabels if desired
+	
+	
+	#######################################################
+	# EDIT THE TIPLABELS
+	#######################################################
+	# Reasons you can't use default tiplabels
 	if (tipnames_right_justified == TRUE)
 		{
-		# Tipnames plotted in clear (can't see them)
+		default_tiplabels = FALSE
+		}
+	if (is.null(tips_with_italics) == FALSE)
+		{
+		default_tiplabels = FALSE
+		italics_tiplabels = FALSE
+		}
+	if (tiplabel_underscores == TRUE)
+		{
+		default_tiplabels = FALSE
+		}
+	
+	# Color tiplabels clear, if you are going to right-justify
+	# or any other non-default tiplabels
+	if (default_tiplabels == FALSE)
+		{
+		# Tipnames plotted in clear (so we can't see them)
 		tipcol = rgb(red=0, green=0, blue=0, alpha=0, maxColorValue=255)
 		} else {
 		# Tipnames plotted in black
 		tipcol = "black"
 		} # END if (tipnames_right_justified == TRUE)
-		
+	
+	# Add spaces to tip labels
 	if (!is.null(space_tipnames))
 		{
+		# Modify the tiplabels *in the tree*, so they are
+		# plotted 
 		for (i in 1:length(space_tipnames))
 			{
 			space_tipname = space_tipnames[i]
@@ -201,64 +257,37 @@ plotMCC <- function(nexfn, titletxt="", pdffn=TRUE, tipnames_right_justified=TRU
 			newname = paste0(spaces, ltr$tip.label[TF])
 			ltr$tip.label[TF] = newname
 			}
-		}		
-	plotvals = plot(ltr, show.tip.label=plot_tiplabels, cex=tipcex, tip.color=tipcol, x.lim=xlims, y.lim=ylims)
+		} # END if (!is.null(space_tipnames))
+	
+	plotvals = plot(ltr, show.tip.label=show.tip.label, cex=tipcex, tip.color=tipcol, x.lim=xlims, y.lim=ylims)
 	title(titletxt)
 	
 	
-	
-
 	
 	# Get the node coordinates
 	xy = get_phylo3_plotcoords()
 	tr_height = get_max_height_tree(ltr)
 
 	# Plot the tiplabels
-	if (italics_tiplabels == TRUE)
+	if ((default_tiplabels == FALSE) && (show.tip.label == TRUE))
 		{
-		tiplabels_to_plot = gsub(pattern="_", replacement=" ", x=ltr_table$label[tipnums])
-		} else {
-		tiplabels_to_plot = ltr_table$label[tipnums]
-		} # END if (italics_tiplabels == TRUE)
-	
-	# Plot the tip labels at the right edge
-	if (tipnames_right_justified == TRUE)
-		{
-		for (i in 1:length(tiplabels_to_plot))
-			{
-			if (italics_tiplabels == TRUE)
-				{
-				label_txt = paste0("substitute(italic('", tiplabels_to_plot[i], "'))")
-				} else {
-				label_txt = tiplabels_to_plot[i]
-				} # END if (italics_tiplabels == TRUE)
-	
-			#text(x=tr_height, y=tipnums, labels=tiplabels_to_plot, pos=4, cex=tipcex)
-			cmdstr = paste0("text(x=tr_height, y=tipnums[i], labels=", label_txt, ", pos=4, cex=tipcex)")
-			eval(parse(text=cmdstr))
-			} # END for (i in 1:length(tiplabels_to_plot))
-		} # END if (tipnames_right_justified == TRUE)
-
-	# Plot dotted lines up to present
-	# tips_in_plot_order = ltr$tip.label
-	#rows_in_ltr_table = match(x=tips_in_plot_order, table=ltr_table$label)
-	if (tipnames_right_justified == TRUE)
-		{
-		tip_TF = ltr_table$node.type == "tip"
-		x0 = tr_height-ltr_table$time_bp[tip_TF]
-		x1 = rep(tr_height, length(x0))
-		y0 = ltr_table$node[tip_TF]
-		y1 = y0
-		segments(x0=x0, x1=x1, y0=y0, y1=y1, col="gray60", lwd=0.5, lty="dotted")
-		} # END if (tipnames_right_justified == TRUE)
-
+		manually_plot_tiplabels(ltr, ltr_table=ltr_table, space_tipnames=space_tipnames, space_spaces=space_spaces, tiplabel_underscores=tiplabel_underscores, tipnames_right_justified=tipnames_right_justified, italics_tiplabels=italics_tiplabels, tips_with_italics=tips_with_italics, fonts=fonts, use_substitute=use_substitute)
+		} # END if (default_tiplabels == FALSE)
+		
+		
+		
+	#######################################################
+	# NODE BARS
+	#######################################################	
 	# Plot bars at nodes
 	if ( (plot_node_heights==TRUE) && (newick==FALSE))
 		{
-		x0 = tr_height-beastcon$prt_beast_nodestats$"height_95%_HPD_MIN"
-		x1 = tr_height-beastcon$prt_beast_nodestats$"height_95%_HPD_MAX"
+		x0 = tr_height-beastcon$prt_beast_nodestats$"height_95%_HPD_MIN"[intnums]
+		x1 = tr_height-beastcon$prt_beast_nodestats$"height_95%_HPD_MAX"[intnums]
+		yvals = xy$y[intnums]
+		# Color for node bars
 		nodebarcol = nodebarcol
-		segments(x0=x0, x1=x1, y0=xy$y, y1=xy$y, col=nodebarcol, lwd=bar_width)
+		segments(x0=x0, x1=x1, y0=yvals, y1=yvals, col=nodebarcol, lwd=bar_width)
 		} # END if ( (plot_node_heights==TRUE) && (newick==FALSE))
 
 	# Plot bars at tips
@@ -289,7 +318,6 @@ plotMCC <- function(nexfn, titletxt="", pdffn=TRUE, tipnames_right_justified=TRU
 			segments(x0=x0, x1=x1, y0=y0, y1=y1, col=tipbarcol, lwd=bar_width)
 			} # END for (i in 1:nrow(tipdates_table))
 		} # END if ( !isnull(tipdates_table) )
-
 
 
 	# Plot posterior probabilities, if desired
@@ -384,6 +412,51 @@ fliptree <- function(tr)
 	}
 
 
+# Various problems emerge from "ladderize" in some versions
+# https://www.mail-archive.com/r-sig-phylo@r-project.org/msg04176.html
+ladderize_and_reorder <- function(phy, right=TRUE)
+	{
+	ltr = ladderize(phy, right=right)
+	# MAKE FREAKING SURE that this tree has the right node order etc.
+	ltr = read.tree(file="", text=write.tree(phy=ltr, file="") )
+	return(ltr)
+	} # END ladderize_and_reorder <- function(tr, right=TRUE)
+
+
+
+
+#######################################################
+# Rotate the tree around 2 named tips
+#######################################################
+rotate_tips <- function(tr, tipname1, tipname2)
+	{
+	TF1 = tipname1 %in% tr$tip.label
+	TF2 = tipname1 %in% tr$tip.label
+	
+	if (TF1 == FALSE)
+		{
+		txt = paste0("STOP ERROR in rotate_tips: tipname '", tipname1, "' is not found in the tree.")
+		cat("\n\n")
+		cat(txt)
+		cat("\n\n")
+		stop(txt)
+		}
+
+	if (TF2 == FALSE)
+		{
+		txt = paste0("STOP ERROR in rotate_tips: tipname '", tipname1, "' is not found in the tree.")
+		cat("\n\n")
+		cat(txt)
+		cat("\n\n")
+		stop(txt)
+		}
+		
+	
+	node_to_rotate = getMRCA(phy=tr, tip=c(tipname1, tipname2))
+	tr = rotate(phy=tr, node=node_to_rotate)
+	tr = read.tree(file="", text=write.tree(tr, file=""))
+	return(tr)
+	}
 
 
 #######################################################
@@ -402,6 +475,12 @@ get_tipdates_from_logfile <- function(logfn, tr, burnin_skipnum=500, sample_ever
 	burnin_skipnum=500
 	sample_every=1
 	'
+	
+	if (is.null(logfn))
+		{
+		res = NULL
+		return(res)
+		}
 	
 	tdf = read.table(logfn, header=TRUE, sep="\t", stringsAsFactors=FALSE)
 	head(tdf)
@@ -761,5 +840,245 @@ merge_traceLogs <- function(fns, outfn=NULL, sample_num_col="Sample", pburnin=10
 	
 	return(newlog)
 	}
+
+
+# Returns:
+# indexes_to_convert_tr2nodes_to_tr1
+# NA for non-matches
+
+# E.g. 
+# tr1 = new tree
+# tr2 = original tree, used the BioGeoBEARS analysis
+ordernodes <- function(tr1, tr2)
+	{
+	tr1_table = prt(tr1, printflag=FALSE, get_tipnames=TRUE)
+	tr2_table = prt(tr2, printflag=FALSE, get_tipnames=TRUE)
+	indexes_to_convert_tr2nodes_to_tr1 = match(x=tr1_table$tipnames, table=tr2_table$tipnames)
+	
+	if (any(is.na(indexes_to_convert_tr2nodes_to_tr1)) == TRUE)
+		{
+		txt = "WARNING in ordernodes() or BioGeoBEARS_reorder() -- not all nodes match between tr1 and tr2. Any non-matching nodes will get NAs."
+		cat("\n\n")
+		cat(txt)
+		cat("\n\n")
+		
+		warning(txt)
+		} # END if (any(is.na(indexes_to_convert_tr2nodes_to_tr1)) == TRUE)
+	
+	return(indexes_to_convert_tr2nodes_to_tr1)
+	} # END ordernodes <- function(tr1, tr2)
+
+
+
+
+
+
+
+manually_plot_tiplabels <- function(ltr, ltr_table=prt(ltr, printflag=FALSE, get_tipnames=TRUE), default_tiplabels=TRUE, space_tipnames=NULL, space_spaces=NULL, tiplabel_underscores=FALSE, tipnames_right_justified=FALSE, italics_tiplabels=TRUE, tips_with_italics=NULL, fonts=NULL, use_substitute=FALSE)
+	{
+	# Error checks
+	if (!is.null(space_tipnames) && is.null(space_spaces))
+		{
+		stoptxt = "STOP ERROR in manually_plot_tiplabels(). space_tipnames is not NULL, but space_spaces is NULL. Either both must be NULL, or neither of them must be NULL."
+		cat("\n\n")
+		cat(stoptxt)
+		cat("\n\n")
+		stop(stoptxt)
+		} # END if (!is.null(space_tipnames) && is.null(space_spaces))
+
+	if (!is.null(space_spaces) && is.null(space_tipnames))
+		{
+		stoptxt = "STOP ERROR in manually_plot_tiplabels(). space_spaces is not NULL, but space_tipnames is NULL. Either both must be NULL, or neither of them must be NULL."
+		cat("\n\n")
+		cat(stoptxt)
+		cat("\n\n")
+		stop(stoptxt)
+		} # END if (!is.null(space_tipnames) && is.null(space_spaces))
+	
+
+
+	# Basic data
+	tipnums = 1:length(ltr$tip.label)
+	tr_height = get_max_height_tree(ltr)
+	
+	if (is.null(fonts))
+		{
+		if (italics_tiplabels == TRUE)
+			{
+			# font=3 means italics
+			fonts = rep(3, length(tipnums))
+			} else {
+			fonts = rep(1, length(tipnums))
+			} # END if (italics_tiplabels == TRUE)
+		} # END if (is.null(fonts))
+	
+	
+	# Use original table (avoid the spaces)
+	original_tiplabels_to_plot = ltr_table$label[tipnums]
+	tiplabels_to_plot = ltr_table$label[tipnums]
+
+	# Add spaces to tip labels
+	# Assemble the italics code for some/all tiplabels
+	if (!is.null(space_tipnames))
+		{
+		for (i in 1:length(space_tipnames))
+			{
+			space_tipname = space_tipnames[i]
+			TF = original_tiplabels_to_plot == space_tipname
+			spaces = paste0(rep(" ", times=space_spaces[i]), collapse="")
+			newname = paste0(spaces, tiplabels_to_plot[TF])
+			tiplabels_to_plot[TF] = newname					
+			}
+		} # END if (!is.null(space_tipnames))
+
+
+	# Convert underscores to spaces, if desired
+	if (tiplabel_underscores == FALSE)
+		{
+		tiplabels_to_plot = gsub(pattern="_", replacement=" ", x=tiplabels_to_plot)
+		} else {
+		tiplabels_to_plot = tiplabels_to_plot
+		} # END if (italics_tiplabels == TRUE)
+
+
+	#################################################################
+	# Use font=3 for italics (easier)
+	# (inserting a "3" into the fonts list)
+	#################################################################
+	if (use_substitute == FALSE)
+		{
+		for (i in 1:length(tiplabels_to_plot))
+			{
+			# Check, regardless of _ or " "
+			check1 = gsub(pattern="_", replacement=" ", x=original_tiplabels_to_plot[i])
+			check2 = gsub(pattern="_", replacement=" ", x=tips_with_italics)
+			TF = check1 %in% check2
+			if (TF == TRUE)
+				{
+				fonts[i] = 3
+				}
+			# Either way, put 'this' around tiplabels
+			label_txt = paste0("'", tiplabels_to_plot[i], "'")
+			tiplabels_to_plot[i] = label_txt
+			} # END for (i in 1:length(tiplabels_to_plot))
+		} # END if (use_substitute == FALSE)
+
+
+	#################################################################
+	# Use substitute(italic()) to do italics
+	# This is cumbersome, and introduces weird character spacing.
+	# Using font=3 is easier
+	#################################################################
+	if (use_substitute == TRUE)
+		{
+		# Assemble the italics code for some/all tiplabels
+		if (is.null(tips_with_italics))
+			{
+			for (i in 1:length(tiplabels_to_plot))
+				{
+				if (italics_tiplabels == TRUE)
+					{
+					label_txt = paste0('substitute(italic(', tiplabels_to_plot[i], '))')
+					} else {
+					label_txt = paste0('', tiplabels_to_plot[i], '')
+					} # END if (italics_tiplabels == TRUE)
+				label_txt = paste0("'", tiplabels_to_plot[i], "'")
+				tiplabels_to_plot[i] = label_txt
+				} # END for (i in 1:length(tiplabels_to_plot))
+			}
+
+		# Some italics, some not
+		if (!is.null(tips_with_italics))
+			{
+			for (i in 1:length(tiplabels_to_plot))
+				{
+				# Check, regardless of _ or " "
+				check1 = gsub(pattern="_", replacement=" ", x=original_tiplabels_to_plot[i])
+				check2 = gsub(pattern="_", replacement=" ", x=tips_with_italics)
+				TF = check1 %in% check2
+				label_txt = tiplabels_to_plot[i]
+				if (TF == TRUE)
+					{
+					# Account for spaces
+					if (grepl(pattern=" ", x=label_txt) == TRUE)
+						{
+						# Yes spaces
+						words = strsplit(label_txt, split=" ")[[1]]
+						words2 = list()
+						tmpstr = ""
+						for (w in 1:length(words))
+							{
+							tmpstr1 = paste("italic(", words[w], ")", sep="")
+							if (w == length(words))
+								{
+								words2 = c(words2, tmpstr1)
+								} else {
+								words2 = c(words2, tmpstr1, "~")
+								}
+							} # END for (w in 1:length(words))
+						tmpstr_final = paste0(words2, collapse="")
+
+						label_txt = paste0("substitute(", tmpstr_final, ")")
+						} else {
+						# No spaces, yes italic
+						label_txt = paste0("substitute(italic(", label_txt, "))")
+						} # END if (grepl(pattern=" ", x=label_txt) == TRUE)
+					} else {
+					label_txt = paste0("'", tiplabels_to_plot[i], "'")
+					}
+				tiplabels_to_plot[i] = label_txt
+				}
+			} # END if (!is.null(tips_with_italics))
+		} # END if (use_substitute == TRUE)
+
+
+	# Plot the tip labels at the right edge
+	if (tipnames_right_justified == TRUE)
+		{
+		for (i in 1:length(tiplabels_to_plot))
+			{
+			label_txt = tiplabels_to_plot[i]
+	
+			#text(x=tr_height, y=tipnums, labels=tiplabels_to_plot, pos=4, cex=tipcex)
+			cmdstr = paste0("text(x=tr_height, y=tipnums[i], labels=", label_txt, ", pos=4, cex=tipcex, font=fonts[i])")
+			eval(parse(text=cmdstr))
+
+			} # END for (i in 1:length(tiplabels_to_plot))
+		} # END if (tipnames_right_justified == TRUE)
+
+
+	# Plot the tip labels at the tips
+	if (tipnames_right_justified == FALSE)
+		{
+		tipheights = ltr_table$node_ht[tipnums]
+
+		for (i in 1:length(tiplabels_to_plot))
+			{
+			label_txt = tiplabels_to_plot[i]
+			#print("label_txt:")
+			#print(label_txt)
+			#label_txt = gsub(pattern="''", replacement="", x=label_txt)
+			#text(x=tr_height, y=tipnums, labels=tiplabels_to_plot, pos=4, cex=tipcex)
+			cmdstr = paste0("text(x=tipheights[i], y=tipnums[i], labels=", label_txt, ", cex=tipcex, adj=0, font=fonts[i])")
+			eval(parse(text=cmdstr))
+			} # END for (i in 1:length(tiplabels_to_plot))
+		} # END if (tipnames_right_justified == TRUE)
+
+
+	# Plot dotted lines up to present
+	# tips_in_plot_order = ltr$tip.label
+	#rows_in_ltr_table = match(x=tips_in_plot_order, table=ltr_table$label)
+	if (tipnames_right_justified == TRUE)
+		{
+		tip_TF = ltr_table$node.type == "tip"
+		x0 = tr_height-ltr_table$time_bp[tip_TF]
+		x1 = rep(tr_height, length(x0))
+		y0 = ltr_table$node[tip_TF]
+		y1 = y0
+		segments(x0=x0, x1=x1, y0=y0, y1=y1, col="gray60", lwd=0.5, lty="dotted")
+		} # END if (tipnames_right_justified == TRUE)
+
+	} # END manually_plot_tiplabels
+
 
 

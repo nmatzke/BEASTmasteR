@@ -34,13 +34,14 @@ setup_master_XML <- function()
 	# 8. Starting tree
 	# 9. Tree model
 	# 10. MCMC states
-	# 11. Priors
-	# 12. Likelihoods
-	# 13. Operators
-	# 14. Trace Log
-	# 15. Screen Log
-	# 16. Tree Log
-	# 17. Substitutions Tree Log
+	# 11. Initializers
+	# 12. Priors
+	# 13. Likelihoods
+	# 14. Operators
+	# 15. Trace Log
+	# 16. Screen Log
+	# 17. Tree Log
+	# 18. Substitutions Tree Log
 	
 	# Setup
 	master_list_of_sections = NULL
@@ -134,9 +135,19 @@ setup_master_XML <- function()
 	state = list(blankline, blankline, section_description1, section_description2, blankline)
 	state
 
+	# MCMC init section
+	txt1 = " XML SECTION 11: MCMC states: initializers, with 'init' tags "
+	txt2 = "                          "
+	section_description1 = xmlCommentNode(txt1)
+	section_description2 = xmlCommentNode(txt2)
+	
+	init = list(blankline, blankline, section_description1, section_description2, blankline)
+	init
+
+
 
 	# Priors section
-	txt1 = " XML SECTION 11: Priors "
+	txt1 = " XML SECTION 12: Priors "
 	section_description1 = xmlCommentNode(txt1)
 	
 	priors = list(blankline, blankline, section_description1,  blankline)
@@ -144,7 +155,7 @@ setup_master_XML <- function()
 
 
 	# Likelihoods section
-	txt1 = " XML SECTION 12: Likelihoods "
+	txt1 = " XML SECTION 13: Likelihoods "
 	section_description1 = xmlCommentNode(txt1)
 	
 	likes = list(blankline, blankline, section_description1,  blankline)
@@ -152,7 +163,7 @@ setup_master_XML <- function()
 	
 	
 	# Operators section
-	txt1 = " XML SECTION 13: Operators. These specify how the parameter values can change at MCMC time-steps. "
+	txt1 = " XML SECTION 14: Operators. These specify how the parameter values can change at MCMC time-steps. "
 	section_description1 = xmlCommentNode(txt1)
 	
 	operators = list(blankline, blankline, section_description1)
@@ -160,7 +171,7 @@ setup_master_XML <- function()
 	
 	
 	# Trace log section
-	txt1 = " XML SECTION 14: Trace log. This logs the parameters in a .log file, which may be viewed in Tracer. "
+	txt1 = " XML SECTION 15: Trace log. This logs the parameters in a .log file, which may be viewed in Tracer. "
 	section_description1 = xmlCommentNode(txt1)
 	
 	tracelog = list(blankline, blankline, section_description1)
@@ -168,7 +179,7 @@ setup_master_XML <- function()
 
 
 	# Screen log section
-	txt1 = " XML SECTION 15: Screen log. Which parameters print to screen, and how often? "
+	txt1 = " XML SECTION 16: Screen log. Which parameters print to screen, and how often? "
 	section_description1 = xmlCommentNode(txt1)
 	
 	screenlog = list(blankline, blankline, section_description1,  blankline)
@@ -176,7 +187,7 @@ setup_master_XML <- function()
 
 
 	# Tree log section
-	txt1 = " XML SECTION 16: Tree log. How often should time trees from the MCMC chain be saved, and what data should they have? "
+	txt1 = " XML SECTION 17: Tree log. How often should time trees from the MCMC chain be saved, and what data should they have? "
 	txt1a = "       (these are trees where the branch lengths are in time units, e.g. millions of years )                    "
 	txt2 = "   NOTE: this file can get HUGE if you sample too frequently. You just want a few thousand samples at the end.       "   
 	section_description1 = xmlCommentNode(txt1)
@@ -188,7 +199,7 @@ setup_master_XML <- function()
 
 
 	# Substitutions Tree log section
-	txt1 = " XML SECTION 17: Substitutions Tree log. How often should these trees be saved, and what data should they have?      "
+	txt1 = " XML SECTION 18: Substitutions Tree log. How often should these trees be saved, and what data should they have?      "
 	txt1a = "         (these are trees where the branch lengths are the expected number of substitutions, i.e. rate * time)      "
 	txt2 = "   NOTE: this file can get HUGE if you sample too frequently. You just want a few thousand samples at the end.      "
 	section_description1 = xmlCommentNode(txt1)
@@ -197,6 +208,17 @@ setup_master_XML <- function()
 	
 	subslog = list(blankline, blankline, section_description1, section_description1a, section_description2, blankline)
 	subslog
+
+
+	# Substitutions Tree log section
+	txt1 = " XML SECTION 19: Species Tree log. How often should these trees be saved, and what data should they have?      "
+	txt1a = " (these are from a gene-tree/species-tree analysis in StarBeast2      "
+
+	section_description1 = xmlCommentNode(txt1)
+	section_description1a = xmlCommentNode(txt1a)
+	
+	speciestreelog = list(blankline, blankline, section_description1, section_description1a, blankline)
+	speciestreelog
 
 	
 	# Make a list of the sections
@@ -210,6 +232,7 @@ setup_master_XML <- function()
 	master_list_of_sections$starting_tree = starting_tree
 	master_list_of_sections$tree = tree
 	master_list_of_sections$state = state
+	master_list_of_sections$init = init
 	master_list_of_sections$priors = priors
 	master_list_of_sections$likes = likes
 	master_list_of_sections$operators = operators
@@ -217,6 +240,7 @@ setup_master_XML <- function()
 	master_list_of_sections$screenlog = screenlog
 	master_list_of_sections$treelog = treelog
 	master_list_of_sections$subslog = subslog
+	master_list_of_sections$speciestreelog = speciestreelog
 	master_list_of_sections
 	
 	return(master_list_of_sections)

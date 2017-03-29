@@ -1,11 +1,981 @@
+
+#######################################################
+# List of taxa, for a starBEAST analysis
+#######################################################
+taxa_list_for_starBEAST <- function(xlsfn, sheet="taxonsets")
+	{
+	taxonsets_df = readWorksheetFromFile(xlsfn, sheet="taxonsets", startRow=15)
+	taxonsets_df$use[isblank_TF(taxonsets_df$use)] = "yes"
+	keepTF = (taxonsets_df$use != "no")
+	taxonsets_df = taxonsets_df[keepTF, ]
+	taxa_list = unique(taxonsets_df$speciesName)
+	return(taxa_list)
+	}
+
+
+#######################################################
+# speciesTreeLogger
+#######################################################
+make_speciesTreeLogger <- function(fileName="species.trees.txt", logEvery=50000, speciesTree_default="speciesTree", xml=NULL, treemodel_df=NULL)
+	{
+	# Check for BEASTmasteR-programmed population models
+	if (is.null(treemodel_df$popModel))
+		{
+		treemodel_df$popModel = "constant"
+		} # END if (is.null(treemodel_df$popModel))
+	if (isblank_TF(treemodel_df$popModel))
+		{
+		treemodel_df$popModel = "constant"
+		} # END if (is.null(treemodel_df$popModel))
+	popModel = treemodel_df$popModel
+
+	if (popModel == "constant")
+		{
+		popModel_prefix = "constantPopModel"
+		}
+	if (popModel == "analytic")
+		{
+		popModel_prefix = "constantPopIOModel"
+		}
+	if ((treemodel_df$popModel == "linear"))
+		{
+		popModel_prefix = "lwcrPopModel"
+		}
+	
+	popModel_id = paste0(popModel_prefix, "_for_", speciesTree_default)
+	popModel_idref = paste0("@", popModel_id)
+	popSizes_id = paste0(popModel_prefix, "_popSizes.Species")
+	popSizes_idref = paste0("@", popSizes_id)
+	popSizesMean_id = paste0(popModel_prefix, "_popSizesMean.Species")
+	popSizesShape_id = paste0(popModel_prefix, "_popSizesShape.Species")
+	popSizes_idref = paste0("@", popModel_prefix, "_popSizes.Species")
+	popSizesMean_idref = paste0("@", popModel_prefix, "_popSizesMean.Species")
+	popSizesShape_idref = paste0("@", popModel_prefix, "_popSizesShape.Species")
+	popModelBridge_id = "popModelBridge.Species"
+	
+	
+	speciesTree_default_idref = paste0("@", speciesTree_default)
+	
+	child = xmlNode(name="log", attrs=list(id="SpeciesTreeLoggerX", spec="starbeast2.SpeciesTreeLogger", populationmodel="@constantPopModel.Species", speciesTree=speciesTree_default_idref))
+	
+	# Convert logEvery to text
+	logEvery = as.numeric(logEvery)
+	logEvery = sprintf("%0.0f", as.numeric(logEvery))
+	
+	
+	logger_XML = xmlNode(name="logger", attrs=list(id="speciesTreeLogger", fileName=fileName, logEvery=logEvery, mode="tree"), .children=list(child))
+	
+	if (is.null(xml))
+		{
+		return(logger_XML)
+		} else {
+		xml$species
+		}
+	return(stop("make_speciesTreeLogger() ERROR: Shouldn't get here!"))
+	} # END make_speciesTreeLogger <- function(fileName="species.trees.txt", logEvery=50000, speciesTree_default="speciesTree", xml=NULL)
+
+#make_geneTreeLoggers <- function()
+
+
+
+#######################################################
+# Multispecies coalescent for StarBeast2
+#######################################################
+make_speciescoalescent_for_starBeast2 <- function(OTUs_df, seqs_df, treemodel_df, tree_name="shared_tree", speciesTree_default="speciesTree", xml=NULL)
+	{
+	# Check for ploidy column in the sequences column
+	if (is.null(seqs_df$ploidy))
+		{
+		seqs_df$ploidy = rep(2.0, times=nrow(seqs_df))
+		} # END if (is.null(seqs_df$ploidy))
+	
+	
+	# Check for BEASTmasteR-programmed population models
+	if (is.null(treemodel_df$popModel))
+		{
+		treemodel_df$popModel = "constant"
+		} # END if (is.null(treemodel_df$popModel))
+	if (isblank_TF(treemodel_df$popModel))
+		{
+		treemodel_df$popModel = "constant"
+		} # END if (is.null(treemodel_df$popModel))
+	popModel = treemodel_df$popModel
+
+	if (popModel == "constant")
+		{
+		popModel_prefix = "constantPopModel"
+		}
+	if (popModel == "analytic")
+		{
+		popModel_prefix = "constantPopIOModel"
+		}
+	if ((treemodel_df$popModel == "linear"))
+		{
+		popModel_prefix = "lwcrPopModel"
+		}
+	
+	popModel_id = paste0(popModel_prefix, "_for_", speciesTree_default)
+	popModel_idref = paste0("@", popModel_id)
+	popSizes_id = paste0(popModel_prefix, "_popSizes.Species")
+	popSizes_idref = paste0("@", popSizes_id)
+	popSizesMean_id = paste0(popModel_prefix, "_popSizesMean.Species")
+	popSizesShape_id = paste0(popModel_prefix, "_popSizesShape.Species")
+	popSizes_idref = paste0("@", popModel_prefix, "_popSizes.Species")
+	popSizesMean_idref = paste0("@", popModel_prefix, "_popSizesMean.Species")
+	popSizesShape_idref = paste0("@", popModel_prefix, "_popSizesShape.Species")
+	popModelBridge_id = "popModelBridge.Species"
+
+	tip_popSizes_id = paste0("tip_", popModel_prefix, "_popSizes.Species")
+	tip_popSizes_idref = paste0("@", popSizes_id)
+	tip_popShape_id = paste0("Shape_for_", popSizes_id)
+	
+	top_popSizes_id = paste0("top_", popModel_prefix, "_popSizes.Species")
+	top_popSizes_idref = paste0("@", popSizes_id)
+	lwcrPopScale_id = paste0(popModel_prefix, "_popScale.Species")
+	lwcrPopScale_idref = paste0("@", lwcrPopScale_id)
+		
+	
+	OTUs_df = OTUs_df[OTUs_df$use != "no"]
+	numspecies = nrow(OTUs_df)
+	popSizes_dimension = numspecies + (numspecies-2)
+
+	
+	# Define parameters, put in stateNodes
+	if (popModel == "constant")
+		{
+		# No dimension needed (should just be 1 popSize for everybody)
+		stateNode1_XML = xmlNode(name="parameter", 1.0, attrs=list(id=popSizes_id, lower="0.0", name="stateNode"))
+		} else {
+		stateNode1_XML = xmlNode(name="parameter", 1.0, attrs=list(id=popSizes_id, dimension=numspecies, lower="0.0", name="stateNode"))
+		} # END if (popModel == "constant")
+		
+	# Mean on population size
+	stateNode2_XML = xmlNode(name="parameter", 1.0, attrs=list(id=popSizesMean_id, lower="0.0", name="stateNode"))
+	stateNode3_XML = NULL
+	
+	if ((treemodel_df$popModel == "linear"))
+		{
+		stateNode3_XML = xmlNode(name="parameter", 1.0, attrs=list(id=lwcrPopScale_id, lower="0.0", name="stateNode"))
+		}
+	if ((treemodel_df$popModel == "analytic"))
+		{
+		# populationShape
+		#stateNode3_XML = xmlNode(name="parameter", 3.0, attrs=list(id=popSizesShape_id, lower="0.0", estimate="false", name="stateNode"))
+		}
+	
+	# Define priors
+	if ((treemodel_df$popModel == "old2.4.2"))
+		{
+		child1 = xmlNode(name="parameter", 3.0, attrs=list(id=popSizesShape_id, estimate="false", lower="0.0", name="alpha"))
+		child2 = xmlNode(name="distr", attrs=list(id="AltInverseGamma.0", spec="starbeast2.AltInverseGamma", mean=popSizesMean_idref), .children=list(child1))
+		popSizesShape_prior_id = paste0("prior_on_", popSizesShape_id)
+		prior1_XML = xmlNode(name="prior", attrs=list(id=popSizesShape_prior_id, name="distribution", x=popSizes_idref), .children=list(child2))
+	
+		popSizesMeanPrior_id = paste0("OneOnX_prior_for_", popSizesMean_id)
+		child2 = xmlNode(name="OneOnX", attrs=list(id="OneOnX_distrib_for_popSizesMeanPrior", name="distr"))
+		prior2_XML = xmlNode(name="prior", attrs=list(id=popSizesMeanPrior_id, name="distribution", x=popSizesMean_idref), .children=list(child2))
+		
+		prior3_XML = NULL
+		} # END if ((treemodel_df$popModel == "constant"))
+
+
+	if ((treemodel_df$popModel == "constant"))
+		{
+		child1 = xmlNode(name="parameter", 2.0, attrs=list(id=popSizesShape_id, estimate="false", lower="0.0", name="alpha"))
+		child2 = xmlNode(name="Gamma", attrs=list(id="Gamma.0", beta=popSizesMean_idref, mode="ShapeMean", name="distr", spec="beast.math.distributions.Gamma"), .children=list(child1))
+		popSizesShape_prior_id = paste0("prior_on_", popSizesShape_id)
+		prior1_XML = xmlNode(name="prior", attrs=list(id=popSizesShape_prior_id, name="distribution", x=popSizes_idref), .children=list(child2))
+
+		popSizesMeanPrior_id = paste0("OneOnX_prior_for_", popSizesMean_id)
+		child2 = xmlNode(name="OneOnX", attrs=list(id="OneOnX_distrib_for_popSizesMeanPrior", name="distr"))
+		prior2_XML = xmlNode(name="prior", attrs=list(id=popSizesMeanPrior_id, name="distribution", x=popSizesMean_idref), .children=list(child2))
+			
+# 		popSizesMeanPrior_id = paste0("GammaShapePrior_for_", popSizesShape_id)
+# 		child1 = xmlNode(name="parameter", 1.0, attrs=list(id="FixedMean_for_GammaShapePrior", estimate="false", lower="0.0", name="mean"))
+# 		child2 = xmlNode(name="Exponential", attrs=list(id="Exponential_distrib_for_Gamma_distrib_popSizesShape", name="distr"), .children=list(child1))
+# 		prior2_XML = xmlNode(name="prior", attrs=list(id=popSizesMeanPrior_id, name="distribution", x=popSizesMean_idref), .children=list(child2))
+		
+		prior3_XML = NULL
+		} # END if ((treemodel_df$popModel == "constant"))
+
+
+
+	if ((treemodel_df$popModel == "analytic"))
+		{
+		child1 = xmlNode(name="parameter", 3.0, attrs=list(id=popSizesShape_id, estimate="false", lower="0.0", name="populationShape"))
+
+		popSizesShapePrior_id = paste0("Uniform_prior_for_", popSizesShape_id)
+		child2 = xmlNode(name="Uniform", attrs=list(id="Uniform_distrib_for_popSizesShapePrior", name="distr", lower=0, upper=10000))
+
+		prior1_XML = xmlNode(name="prior", attrs=list(id=popSizesShape_prior_id, name="distribution"), .children=list(child1, child2))
+
+		
+		OneOnX_child_XML = xmlNode(name="OneOnX", attrs=list(id="OneOnX_prior_for_popSizesMean", name="distr"))
+		prior2_XML = xmlNode(name="prior", attrs=list(id=popSizesMeanPrior_id, name="distribution", x=popSizesMean_idref), .children=list(OneOnX_child_XML))
+		
+		prior3_XML = NULL
+		} # END if ((treemodel_df$popModel == "constant"))
+
+
+	if ((treemodel_df$popModel == "linear"))
+		{
+		# Tip Population sizes
+		child1 = xmlNode(name="parameter", 4.0, attrs=list(id=tip_popShape_id, estimate="false", lower="0.0", name="alpha"))
+		child2 = xmlNode(name="Gamma", attrs=list(id="Gamma.01", beta=lwcrPopScale_idref, name="distr"), .children=list(child1))
+		prior_on_tip_popSizes_id = paste0("prior_on_", tip_popSizes_id)
+		prior1_XML = xmlNode(name="prior", attrs=list(id=prior_on_tip_popSizes_id, name="distribution", x=tip_popSizes_idref), .children=list(child2))
+
+		# Top Population sizes
+		child1 = xmlNode(name="parameter", 2.0, attrs=list(id=top_popShape_id, estimate="false", lower="0.0", name="alpha"))
+		child2 = xmlNode(name="Gamma", attrs=list(id="Gamma.02", beta=lwcrPopScale_idref, name="distr"), .children=list(child1))
+		prior_on_top_popSizes_id = paste0("prior_on_", top_popSizes_id)
+		prior2_XML = xmlNode(name="prior", attrs=list(id=prior_on_top_popSizes_id, name="distribution", x=top_popSizes_idref), .children=list(child2))
+	
+		popScalePrior_id = paste0("OneOnX_prior_for_", lwcrPopScale_id)
+		child2 = xmlNode(name="OneOnX", attrs=list(id="OneOnX_distrib_for_popScalePrior", name="distr"))
+		prior3_XML = xmlNode(name="prior", attrs=list(id=popScalePrior_id, name="distribution", x=lwcrPopScale_idref), .children=list(child2))
+		} # END if ((treemodel_df$popModel == "linear"))	
+
+
+	# Define operators
+	if ((treemodel_df$popModel == "constant"))
+		{
+		op1_XML = xmlNode(name="operator", attrs=list(id="popSizesSwap.Species", spec="SwapOperator", parameter=popSizes_idref, weight="3.0"))
+
+		op2_XML = xmlNode(name="operator", attrs=list(id="popSizesScale.Species", spec="ScaleOperator", parameter=popSizes_idref, scaleFactor="0.5", weight="3.0"))
+
+		op3_XML = xmlNode(name="operator", attrs=list(id="popSizesMeanScale.Species", spec="ScaleOperator", parameter=popSizesMean_idref, scaleFactor="0.75", weight="1.0"))
+		}
+
+	# Define operators
+	if ((treemodel_df$popModel == "analytic"))
+		{
+		op1_XML = NULL
+
+		op2_XML = NULL
+
+		op3_XML = xmlNode(name="operator", attrs=list(id="popSizesMeanScale.Species", spec="ScaleOperator", parameter=popSizesMean_idref, scaleFactor="0.75", weight="1.0"))
+		}
+
+	if ((treemodel_df$popModel == "linear"))
+		{
+		op1_XML = xmlNode(name="operator", attrs=list(id="tipPopSizesScale.Species", spec="ScaleOperator", parameter=tip_popSizes_idref, scaleFactor="0.5", weight="3.0"))
+
+		op2_XML = xmlNode(name="operator", attrs=list(id="topPopSizesScale.Species", spec="ScaleOperator", parameter=top_popSizes_idref, scaleFactor="0.5", weight="3.0"))
+
+		op3_XML = xmlNode(name="operator", attrs=list(id="lwcrPopScaleScale.Species", spec="ScaleOperator", parameter=lwcrPopScale_idref, scaleFactor="0.75", weight="1.0"))
+		}
+
+	# Define logs
+	if ((treemodel_df$popModel == "constant"))
+		{
+		log1_xml = xmlNode(name="log", attrs=list(idref=popSizes_id))
+		log2_xml = xmlNode(name="log", attrs=list(idref=popSizesMean_id))
+		log3_xml = NULL
+		}
+	if ((treemodel_df$popModel == "analytic"))
+		{
+		log1_xml = xmlNode(name="log", attrs=list(idref=popSizesMean_id))
+		log2_xml = xmlNode(name="log", attrs=list(idref=popSizesShape_id))
+		log3_xml = NULL
+		}
+	if ((treemodel_df$popModel == "linear"))
+		{
+		log1_xml = xmlNode(name="log", attrs=list(idref=tip_popSizes_id))
+		log2_xml = xmlNode(name="log", attrs=list(idref=top_popSizes_id))
+		log3_xml = xmlNode(name="log", attrs=list(idref=lwcrPopScale_id))
+		}
+
+
+	# Likelihood of the multispecies coalescence process
+	speciesTree_default_idref = paste0("@", speciesTree_default)
+	tree_idref = paste0("@", tree_name)
+
+	# Get the geneTreeNames	
+	geneTreeNames = unique(seqs_df$geneTreeName)
+	rownums = match(x=geneTreeNames, table=seqs_df$geneTreeName)
+
+	# Get the ploidy:
+	# 2 for an autosomal locus
+	# 0.5 for an mtDNA or Y-chromosome locus
+	# For an X-chromosome?
+	ploidy_vals = seqs_df$ploidy[rownums]
+	ploidy_vals[isblank_TF(ploidy_vals)] = 2.0
+	
+	geneTree_XML_list = list()
+	speciesTree_XML = xmlNode(name="speciesTree", attrs=list(id=speciesTree_default, spec="starbeast2.SpeciesTree", tree=tree_idref))
+	geneTree_XML_list = NULL
+
+
+	
+if (popModel == "old2.4.2")
+	{
+	geneTree_XML_list = c(geneTree_XML_list, list(speciesTree_XML))
+	for (i in 1:length(geneTreeNames))
+		{
+		genetree_idref = paste0("@", geneTreeNames[i])
+		# Beast2, 2.4.2
+		genetree_speciesCoal_id = paste0("genetree_speciesCoal_", geneTreeNames[i])
+		tmpXML = xmlNode(name="geneTree", attrs=list(id=genetree_speciesCoal_id, spec="starbeast2.GeneTree", speciesTree=speciesTree_default_idref, tree=genetree_idref, ploidy=ploidy_vals[i]))
+		geneTree_XML_list = c(geneTree_XML_list, list(tmpXML))
+		}
+
+	speciesCoal_XML = xmlNode(name="distribution", attrs=list(id="speciescoalescent", spec="starbeast2.MultispeciesCoalescent", populationModel="@constantPopModel.Species"), .children=geneTree_XML_list)
+	} # END if (popModel == "old2.4.2")
+
+
+if (popModel == "analytic")
+	{
+	# Add population shape to the genetree distribution list
+	param_XML = xmlNode(name="distribution", attrs=list(idref=popSizesShape_id))
+	geneTree_XML_list = c(param_XML, geneTree_XML_list)
+	
+	for (i in 1:length(geneTreeNames))
+		{
+		genetree_idref = paste0("@", geneTreeNames[i])
+		# Beast2, 2.4.3
+		genetree_speciesCoal_id = paste0("genetree_speciesCoal_", geneTreeNames[i])
+		popModel_idref = paste0("@", popModel_id)
+		
+		popModelBridge_idref = paste0("@", popModelBridge_id)
+		tmpXML = xmlNode(name="distribution", attrs=list(id=genetree_speciesCoal_id, spec="starbeast2.GeneTree", speciesTree=speciesTree_default_idref, tree=genetree_idref, populationModel=popModelBridge_idref, ploidy=ploidy_vals[i]))
+
+		geneTree_XML_list = c(geneTree_XML_list, list(tmpXML))
+		}
+
+	speciesCoal_XML = xmlNode(name="distribution", attrs=list(id="speciescoalescent", spec="starbeast2.MultispeciesCoalescent"), .children=geneTree_XML_list, populationMean=popSizesMean_idref)
+	} # END if (popModel == "analytic")
+
+
+if ( (popModel == "constant") || (popModel == "linear"))
+	{
+	for (i in 1:length(geneTreeNames))
+		{
+		genetree_idref = paste0("@", geneTreeNames[i])
+		# Beast2, 2.4.3
+		genetree_speciesCoal_id = paste0("genetree_speciesCoal_", geneTreeNames[i])
+		popModel_idref = paste0("@", popModel_id)
+		
+		popModelBridge_idref = paste0("@", popModelBridge_id)
+		tmpXML = xmlNode(name="distribution", attrs=list(id=genetree_speciesCoal_id, spec="starbeast2.GeneTree", speciesTree=speciesTree_default_idref, tree=genetree_idref, populationModel=popModelBridge_idref, ploidy=ploidy_vals[i]))
+
+		geneTree_XML_list = c(geneTree_XML_list, list(tmpXML))
+		}
+
+	speciesCoal_XML = xmlNode(name="distribution", attrs=list(id="speciescoalescent", spec="starbeast2.MultispeciesCoalescent"), .children=geneTree_XML_list)
+	} # END if (popModel == "constant") || (popModel == "linear"))
+
+
+
+
+	speciesCoal_XMLs = list(bl(), xmlCommentNode(" Likelihood of the multispecies coalescent "), speciesCoal_XML)
+	
+	# Log the speciescoalescent
+	xml1 = xmlCommentNode(" Likelihood of the multispecies coalescent ")
+	xml2 = xmlNode(name="log", attrs=list(idref="speciescoalescent"))
+	log3_xml = cl(xml1, xml2)
+	
+	# Return
+	if (is.null(xml))
+		{
+		res = NULL
+		res$state = cl(res$state, stateNode1_XML, stateNode2_XML, stateNode3_XML)
+		res$priors = cl(res$priors, prior1_XML, prior2_XML, prior3_XML)
+		res$likes = cl(res$likes, speciesCoal_XMLs)
+		res$operators = cl(res$operators, op1_XML, op2_XML, op3_XML)
+		res$tracelog = cl(res$tracelog, log1_xml, log2_xml, log3_xml)
+		return(res)
+		} else {
+		xml$state = cl(xml$state, stateNode1_XML, stateNode2_XML, stateNode3_XML)
+		xml$priors = cl(xml$priors, prior1_XML, prior2_XML, prior3_XML)
+		xml$likes = cl(xml$likes, speciesCoal_XMLs)
+		xml$operators = cl(xml$operators, op1_XML, op2_XML, op3_XML)
+		xml$tracelog = cl(xml$tracelog, log1_xml, log2_xml, log3_xml)
+		return(xml)
+		}
+	return(stop("make_popSizes_for_starBeast2() ERROR: Shouldn't get here!"))
+	} # END make_popSizes_for_starBeast2 <- function(OTUs_df, tree_name="shared_tree", speciesTree_default="speciesTree", xml=NULL)
+
+
 #######################################################
 # Tree model and starting tree
 #######################################################
-
-make_BDSKY_model <- function(strat_df, tree_name="shared_tree", clockModel_name="shared_clock", clock_type="ucld", alignment_name_w_taxa, taxonset_w_taxa="list_of_OTUs", tipDates_id="tipDates", OTUs=NULL, xml=NULL, printall="short", relscale_fraction=0.05, XML_mod_for_cont_chars=FALSE)
+make_starting_tree_for_starBeast2 <- function(treemodel_df, taxonset_XML, xlsfn=xlsfn, speciesTree_default="shared_tree", min_brlen=0.001, xml=NULL)
 	{
 	defaults='
-	strat_df = readWorksheetFromFile(file=xlsfn, sheet="treemodel", startRow=15, startCol=1, header=TRUE)
+	
+	'
+	
+	# Setup / error fixes
+	if (is.null(treemodel_df$use))
+		{
+		treemodel_df$use = rep("yes", times=nrow(treemodel_df))
+		}
+	treemodel_df$use[isblank_TF(treemodel_df$use) == TRUE] = "yes"
+	treemodel_df$use = tolower(treemodel_df$use)
+	treemodel_df = treemodel_df[treemodel_df$use == "yes"]
+	
+	tree_name = treemodel_df$speciesTreeName
+	tree_name_idref = paste0("@", tree_name)
+	
+	# Check for BEASTmasteR-programmed population models
+	if (is.null(treemodel_df$popModel))
+		{
+		treemodel_df$popModel = "constant"
+		} # END if (is.null(treemodel_df$popModel))
+	if (isblank_TF(treemodel_df$popModel))
+		{
+		treemodel_df$popModel = "constant"
+		} # END if (is.null(treemodel_df$popModel))
+	popModel = treemodel_df$popModel
+
+
+	# file_type: Newick or NEXUS
+	if (is.null(treemodel_df$file_type))
+		{
+		treemodel_df$file_type = rep("newick", times=nrow(treemodel_df))
+		}
+	treemodel_df$file_type[isblank_TF(treemodel_df$file_type) == TRUE] = "newick"
+	treemodel_df$file_type = tolower(treemodel_df$file_type)
+	file_type = treemodel_df$file_type[1]
+	
+	if ((file_type %in% c("newick", "nexus")) == FALSE)
+		{
+		txt = paste0("STOP ERROR in make_starting_tree_for_starBeast2(): The starting tree type must be 'newick' or 'nexus', in treemodel_df$file_type.  Blank means 'newick'. However, you have: '", file_type, "'. Fix this in the Excel settings file, and re-run.")
+		
+		cat("\n\n")
+		cat(txt)
+		cat("\n\n")
+		stop(txt)
+		}
+	
+	
+	
+	###################################################
+	# Make the tree stateNode for the species tree
+	###################################################
+
+	# Random starting tree
+	random = FALSE
+	if (isblank_TF(treemodel_df$starting_tree[1]) || treemodel_df$starting_tree[1]=="random" || treemodel_df$starting_tree[1]=="upgma")
+		{
+		# Make the tree stateNode for the species tree
+		if ((popModel == "constant") || (popModel == "linear")  || (popModel == "analytic"))
+			{
+			speciesTree_statenode_XML = make_speciesTree_statenode2(tree_name=tree_name, taxonset_XML)
+			} else {
+			speciesTree_statenode_XML = make_speciesTree_statenode(tree_name=tree_name, taxonset_XML)
+			}
+
+		random = TRUE
+		} # END random startBeast2 starting tree
+	
+	# Constructed starting tree
+	if (treemodel_df$starting_tree[1]=="construct_starting_tree")
+		{
+		random = FALSE
+		constructed_starting_tree_fn = "constructed_starting_tree.newick"
+		starting_tree = construct_starting_tree(xlsfn=xlsfn, min_brlen=min_brlen, outfn=constructed_starting_tree_fn)
+		#trstr = write_tree_noSci(starting_tree, file="")
+		treemodel_df$starting_tree[1] = constructed_starting_tree_fn
+		} # END random startBeast2 starting tree
+	
+	# Read in the newick tree
+	if ((random == FALSE) && (treemodel_df$starting_tree[1] != "construct_starting_tree"))
+		{
+		if (file_type == "newick")
+			{
+			trstr = write_tree_noSci(read.tree(file=treemodel_df$starting_tree[1]), file="")
+			} 
+		if (file_type == "nexus")
+			{
+			trstr = write_tree_noSci(read.nexus(file=treemodel_df$starting_tree[1]), file="")
+			} 
+		
+		# Make the tree stateNode for the species tree
+		if ((popModel == "constant") || (popModel == "linear")  || (popModel == "analytic"))
+			{
+			speciesTree_statenode_XML = make_speciesTree_statenode2(tree_name=tree_name, taxonset_XML)
+			} else {
+			speciesTree_statenode_XML = make_speciesTree_statenode(tree_name=tree_name, taxonset_XML, starting_tree_string=trstr)
+			}
+		}
+
+	
+	
+	if (is.null(xml) == TRUE)
+		{
+		res = NULL
+		res$state = speciesTree_statenode_XML
+		res$starting_tree = speciesTree_starting_XML
+		return(res)
+		} else {
+		xml$state = cl(xml$state, speciesTree_statenode_XML)
+		xml$starting_tree = cl(xml$starting_tree, speciesTree_starting_XML)
+		return(xml)
+		}
+	
+	return(stop("ERROR in make_starting_tree_for_starBeast2(): shouldn't get here."))
+	} # END make_starting_tree_for_starBeast2 <- function(treemodel_df, taxonset_XML, xlsfn=xlsfn, min_brlen=0.001)
+
+
+make_BD_model_for_starBeast2 <- function(treemodel_df, seqs_df, taxonset_XML, tree_name="shared_tree", speciesTree_default="speciesTree", birthRate_id="netDiversificationRate", deathRate_id="ExtinctionFraction", logEvery=50000, xml=NULL, nodes_df=NULL, min_brlen=0.001)
+	{
+	defaults='
+	tree_name="shared_tree"
+	birthRate_id="netDiversificationRate"
+	xml=NULL
+	'
+
+	# Check for BEASTmasteR-programmed population models
+	if (is.null(treemodel_df$popModel))
+		{
+		treemodel_df$popModel = "constant"
+		} # END if (is.null(treemodel_df$popModel))
+	if (isblank_TF(treemodel_df$popModel))
+		{
+		treemodel_df$popModel = "constant"
+		} # END if (is.null(treemodel_df$popModel))
+	popModel = treemodel_df$popModel
+
+	if (popModel == "constant")
+		{
+		popModel_prefix = "constantPopModel"
+		}
+	if (popModel == "analytic")
+		{
+		popModel_prefix = "constantPopIOModel"
+		}
+	if ((treemodel_df$popModel == "linear"))
+		{
+		popModel_prefix = "lwcrPopModel"
+		}
+	
+	speciesTree_default_idref = paste0("@", speciesTree_default)
+	
+	popModel_id = paste0(popModel_prefix, "_for_", speciesTree_default)
+	popModel_idref = paste0("@", popModel_id)
+	popSizes_id = paste0(popModel_prefix, "_popSizes.Species")
+	popSizes_idref = paste0("@", popSizes_id)
+	tip_popSizes_id = paste0("tip_", popModel_prefix, "_popSizes.Species")
+	tip_popSizes_idref = paste0("@", popSizes_id)
+	top_popSizes_id = paste0("top_", popModel_prefix, "_popSizes.Species")
+	top_popSizes_idref = paste0("@", popSizes_id)
+	lwcrPopScale_id = paste0(popModel_prefix, "_popScale.Species")
+	lwcrPopScale_idref = paste0("@", lwcrPopScale_id)
+	
+	popSizesMean_id = paste0(popModel_prefix, "_popSizesMean.Species")
+	popSizesShape_id = paste0(popModel_prefix, "_popSizesShape.Species")
+	popSizes_idref = paste0("@", popModel_prefix, "_popSizes.Species")
+	popSizesMean_idref = paste0("@", popModel_prefix, "_popSizesMean.Species")
+	popSizesShape_idref = paste0("@", popModel_prefix, "_popSizesShape.Species")
+	popModelBridge_id = "popModelBridge.Species"
+
+
+
+	# file_type: Newick or NEXUS
+	if (is.null(treemodel_df$file_type))
+		{
+		treemodel_df$file_type = rep("newick", times=nrow(treemodel_df))
+		}
+	treemodel_df$file_type[isblank_TF(treemodel_df$file_type) == TRUE] = "newick"
+	treemodel_df$file_type = tolower(treemodel_df$file_type)
+	file_type = treemodel_df$file_type[1]
+	
+	if ((file_type %in% c("newick", "nexus")) == FALSE)
+		{
+		txt = paste0("STOP ERROR in make_starting_tree_for_starBeast2(): The starting tree type must be 'newick' or 'nexus', in treemodel_df$file_type.  Blank means 'newick'. However, you have: '", file_type, "'. Fix this in the Excel settings file, and re-run.")
+		
+		cat("\n\n")
+		cat(txt)
+		cat("\n\n")
+		stop(txt)
+		}
+
+
+	
+	tree_name_idref = paste0("@", tree_name)
+	
+	# Convert logEvery to text
+	logEvery = as.numeric(logEvery)
+	logEvery = sprintf("%0.0f", as.numeric(logEvery))
+
+	
+	# Error check
+	treemodel_df$use[isblank_TF(treemodel_df$use)==TRUE] = "yes"
+	useTF = treemodel_df$use == "yes"
+	treemodel_df = treemodel_df[useTF,]
+	if (nrow(treemodel_df) > 1)
+		{
+		txt = paste0("STOP ERROR in make_BD_model_for_starBeast2(): this function assumes you are doing a starBeast2 analysis. However, starBeast2 assumes a simple birth-death model (constant rate, not skyline models), so you should only have one row in treemodel. However, you have ", nrow(treemodel_df), " rows with 'use' as 'yes' or blank.  Printing treemodel_df:")
+		cat("\n\n")
+		cat(txt)
+		cat("\n\n")
+		stop(txt)
+		}
+
+
+
+
+
+	
+	###################################################
+	# Make the tree stateNode for the species tree
+	###################################################
+
+	# Random starting tree
+	random = FALSE
+	if (isblank_TF(treemodel_df$starting_tree[1]) || treemodel_df$starting_tree[1]=="random" || treemodel_df$starting_tree[1]=="upgma")
+		{
+		# Make the tree stateNode for the species tree
+		if ((popModel == "constant") || (popModel == "linear")  || (popModel == "analytic"))
+			{
+			speciesTree_statenode_XML = make_speciesTree_statenode2(tree_name=tree_name, taxonset_XML)
+			} else {
+			speciesTree_statenode_XML = make_speciesTree_statenode(tree_name=tree_name, taxonset_XML)
+			}
+
+		random = TRUE
+		} # END random startBeast2 starting tree
+	
+	# Constructed starting tree
+	if (treemodel_df$starting_tree[1]=="construct_starting_tree")
+		{
+		random = FALSE
+		constructed_starting_tree_fn = "constructed_starting_tree.newick"
+		starting_tree = construct_starting_tree(xlsfn=xlsfn, min_brlen=min_brlen, outfn=constructed_starting_tree_fn)
+		#trstr = write_tree_noSci(starting_tree, file="")
+		treemodel_df$starting_tree[1] = constructed_starting_tree_fn
+		} # END random startBeast2 starting tree
+	
+	# Read in the newick tree
+	if ((random == FALSE) && (treemodel_df$starting_tree[1] != "construct_starting_tree"))
+		{
+		if (file_type == "newick")
+			{
+			trstr = write_tree_noSci(read.tree(file=treemodel_df$starting_tree[1]), file="")
+			} 
+		if (file_type == "nexus")
+			{
+			trstr = write_tree_noSci(read.nexus(file=treemodel_df$starting_tree[1]), file="")
+			} 
+		
+		# Make the tree stateNode for the species tree
+		if ((popModel == "constant") || (popModel == "linear")  || (popModel == "analytic"))
+			{
+			speciesTree_statenode_XML = make_speciesTree_statenode2(tree_name=tree_name, taxonset_XML)
+			} else {
+			speciesTree_statenode_XML = make_speciesTree_statenode(tree_name=tree_name, taxonset_XML, starting_tree_string=trstr)
+			}
+		}
+
+
+
+
+
+
+	
+	# Check for BEASTmasterR-programmed treemodels in starBeast2 
+	treeprior = treemodel_df$treeModel
+	allowed_models = c("starBeast2_BD", "starBeast2_CalibratedYule")
+	if (treeprior %in% allowed_models)
+		{
+		pass = 1
+		} else {
+		txt = paste0("STOP ERROR in make_BD_model_for_starBeast2(): Your choice of tree model is not programmed for make_BD_model_for_starBeast2(). In worksheet 'treemodel', column 'treeModel', you have '", treeprior, "', but the programmed models are just: ", paste0(allowed_models, collapse=", "), ".")
+		cat("\n\n")
+		cat(txt)
+		cat("\n\n")
+		stop(txt)
+		} # END if (treeprior %in% allowed_models)
+	
+	
+	# If CalibratedYule, a nodes_df object is required
+	if (treeprior == "starBeast2_CalibratedYule")
+		{
+		if (is.null(nodes_df) == TRUE)
+			{
+			txt = "STOP ERROR in make_BD_model_for_starBeast2(): You have specified a CalibratedYule tree prior, with 'starBeast2_CalibratedYule' in worksheet 'treemodel', column 'treeModel', but this requires that you give make_BD_model_for_starBeast2() a 'nodes_df' input. Instead, currently you have the default, nodes_df=NULL"
+			cat("\n\n")
+			cat(txt)
+			cat("\n\n")
+			stop(txt)
+			}
+		}
+	
+
+	
+
+	
+	# Initialize the StarBeast2 tree
+	geneTreeNames = unique(seqs_df$geneTreeName)
+	geneTree_XML_list = list()
+	for (i in 1:length(geneTreeNames))
+		{
+		tmpXML = xmlNode(name="geneTree", attrs=list(idref=geneTreeNames[i]))
+		geneTree_XML_list = c(geneTree_XML_list, list(tmpXML))
+		}
+	
+	# Add the population size model
+	if (treemodel_df$popModel == "old2.4.2")
+		{
+		popModel_id = "constantPopModel.Species"
+		}
+	if (treemodel_df$popModel == "old2.4.2")
+		{
+		popmodel_XML = xmlNode(name="populationModel", attrs=list(id=popModel_id, spec="starbeast2.ConstantPopulation", populationSizes="@popSizes.Species"))
+		}
+
+	
+	if (popModel == "constant")
+		{
+		childModel_XML = xmlNode(name="childModel", attrs=list(id=popModel_id, spec="starbeast2.ConstantPopulations", populationSizes=popSizes_idref, speciesTree=speciesTree_default_idref))
+		
+		popmodel_XML = xmlNode(name="populationModel", attrs=list(id=popModelBridge_id, spec="starbeast2.PassthroughModel"), .children=list(childModel_XML))
+		}
+
+	if (popModel == "analytic")
+		{
+		childModel_XML = xmlNode(name="childModel", attrs=list(id=popModel_id, spec="starbeast2.DummyModel"))
+		
+		popmodel_XML = xmlNode(name="populationModel", attrs=list(id=popModelBridge_id, spec="starbeast2.PassthroughModel"), .children=list(childModel_XML))
+		}
+
+	if (popModel == "linear")
+		{
+		# lwcr = LinearWithConstantRoot
+		childModel_XML = xmlNode(name="childModel", attrs=list(id=popModel_id, spec="starbeast2.LinearWithConstantRoot", speciesTree=speciesTree_default_idref, tipPopulationSizes=tip_popSizes_idref, topPopulationSizes=top_popSizes_idref))
+		
+		popmodel_XML = xmlNode(name="populationModel", attrs=list(id=popModelBridge_id, spec="starbeast2.PassthroughModel"), .children=list(childModel_XML))
+		}
+	
+	
+	geneTree_XML_list = c(geneTree_XML_list, list(popmodel_XML))	
+	
+	speciesTree_idref = paste0("@", tree_name)
+	birthRate_idref = paste0("@", birthRate_id)
+	deathRate_idref = paste0("@", deathRate_id)
+	
+	# StarBeast2 tree initializer
+	if ((popModel == "constant") || (popModel == "linear")  || (popModel == "analytic"))
+		{
+		if (random == TRUE)
+			{
+			starBeast2_initializer_XML = xmlNode(name="init", attrs=list(id="SBI", spec="starbeast2.StarBeastInitializer", birthRate=birthRate_idref, estimate="true", speciesTree=speciesTree_idref), .children=geneTree_XML_list)
+			}
+		if (random == FALSE)
+			{
+			# Use the Newick string
+			starBeast2_initializer_XML = xmlNode(name="init", attrs=list(id="SBI", spec="starbeast2.StarBeastInitializer",  birthRate=birthRate_idref, estimate="true", speciesTree=tree_name_idref, initial=trstr), .children=geneTree_XML_list)
+			}
+		} else {
+		starBeast2_initializer_XML = xmlNode(name="init", attrs=list(id="SBI", spec="starbeast2.StarBeastInitializer",  birthRate=birthRate_idref, estimate="false", speciesTree=tree_name_idref), .children=geneTree_XML_list)
+		} # END if ((popModel == "constant") || (popModel == "linear")  || (popModel == "analytic"))
+	
+	
+	# Min and max on birthRate - defaults
+	if (isblank_TF(treemodel_df$birthRate_min[1]))
+		{
+		birthRate_min = 0
+		} else {
+		birthRate_min = treemodel_df$birthRate_min[1]
+		}
+	if (isblank_TF(treemodel_df$birthRate_max[1]))
+		{
+		birthRate_max = 10
+		} else {
+		birthRate_max = treemodel_df$birthRate_max[1]
+		}
+
+	# stateNodes for the netDiversificationRate and ExtinctionFraction
+	birthRate_XML = xmlNode(name="parameter", as.numeric(treemodel_df$birthRate_starting_vals), attrs=list(id=birthRate_id, lower=birthRate_min, upper=birthRate_max, name="stateNode"))
+
+	# Prior on the birthRate and deathRate
+	birthRate_XML_priorLog = make_generic_XML_prior(dfline=treemodel_df, colname_prefix="birthRate", param_name=birthRate_id, xml=NULL)
+
+	# Operators on the birthRate
+	tmp_XML_comment = xmlCommentNode(" Operators on birthRate and deathRate of species tree ")
+	
+	operator_id = paste0("ScaleOperator_on_", birthRate_id)
+	birthRate_op1_XML = xmlNode(name="operator", attrs=list(id=operator_id, spec="ScaleOperator", parameter=birthRate_idref, scaleFactor="0.5", weight="3"))
+
+	# Min and max on deathRate - defaults
+	if (isblank_TF(treemodel_df$deathRate_min[1]))
+		{
+		deathRate_min = 0
+		} else {
+		deathRate_min = treemodel_df$deathRate_min[1]
+		}
+	if (isblank_TF(treemodel_df$deathRate_max[1]))
+		{
+		deathRate_max = 10
+		} else {
+		deathRate_max = treemodel_df$deathRate_max[1]
+		}
+
+	if (treeprior != "starBeast2_CalibratedYule")
+		{
+		# Max deathRate is 1 (relative extinction rate)
+		# (for StarBEAST2 analyses, this is relative extinction rate, between 0 and 1)
+		deathRate_max = as.numeric(deathRate_max)
+		if (deathRate_max > 1)
+			{
+			deathRate_max = 1
+			}
+
+		deathRate_XML = xmlNode(name="parameter", as.numeric(treemodel_df$deathRate_starting_vals), attrs=list(id=deathRate_id, lower=deathRate_min, upper=deathRate_max, name="stateNode"))
+		deathRate_XML_priorLog = make_generic_XML_prior(dfline=treemodel_df, colname_prefix="deathRate", param_name=deathRate_id, xml=NULL)
+		# Operators on the deathRate
+		operator_id = paste0("ScaleOperator_on_", deathRate_id)
+		deathRate_op1_XML = xmlNode(name="operator", attrs=list(id=operator_id, spec="ScaleOperator", parameter=deathRate_idref, scaleFactor="0.5", weight="1"))
+		operator_id = paste0("UniformOperator_on_", deathRate_id)
+		deathRate_op2_XML = xmlNode(name="operator", attrs=list(id=operator_id, spec="UniformOperator", parameter=deathRate_idref, weight="1"))
+
+		} else  {
+		deathRate_XML = NULL
+		deathRate_XML_priorLog  = NULL
+		deathRate_op1_XML = NULL
+		deathRate_op2_XML = NULL		
+		} # END if (treeprior != "starBeast2_CalibratedYule")
+	
+	
+	operators_XMLs = list(bl(), tmp_XML_comment, birthRate_op1_XML, deathRate_op1_XML, deathRate_op2_XML)
+	
+	
+	
+	if (treeprior == "starBeast2_BD")
+		{	
+		# Tree Model (tree prior) for species tree
+		tree_idref = paste0("@", tree_name)
+		treemodel_id = paste0("BirthDeathModel_", tree_name)
+	
+		tree_prior_XML = xmlNode(name="distribution", attrs=list(id=treemodel_id, spec="beast.evolution.speciation.BirthDeathGernhard08Model", birthDiffRate=birthRate_idref, relativeDeathRate=deathRate_idref, tree=tree_idref))
+		} # END if (treeprior == "starBeast2_BD")
+	
+	if (treeprior == "starBeast2_CalibratedYule")
+		{
+		# Tree Model (tree prior) for species tree
+		tree_idref = paste0("@", tree_name)
+		treemodel_id = paste0("CalibratedYuleModel_", tree_name)
+		
+		# Set up the calibrations, inside the Calibrated Yule setup
+		XML_children = make_cladePrior_XMLs(nodes_df, xml=NULL, list_of_empty_taxa=xml$list_of_empty_taxa, CalibratedYule_txt="CalibratedYule")
+		
+		# Write out to XML
+		tree_prior_XML = xmlNode(name="distribution", attrs=list(id=treemodel_id, spec="beast.evolution.speciation.CalibratedYuleModel", birthRate=birthRate_idref, tree=tree_idref, type="full"), .children=XML_children)
+		} # END if (treeprior == "starBeast2_CalibratedYule")	
+	
+	
+	#######################################################
+	# Logs on the species tree
+	#######################################################
+	#######################################################
+	# treeLog
+	#######################################################
+	TreeWithMetaDataLogger_id = paste0("TreeWithMetaDataLogger_", tree_name)
+	clockModel_name_idref = paste0("@", clockModel_name)
+	TreeWithMetaDataLogger_XML = xmlNode(name="log", attrs=list(id=TreeWithMetaDataLogger_id, tree=tree_name_idref, branchratemodel=clockModel_name_idref, substitutions="false", spec="beast.evolution.tree.TreeWithMetaDataLogger") )
+	TreeWithMetaDataLogger_XMLs = list(
+	xmlCommentNode(" Log the tree and branch rates "),
+	TreeWithMetaDataLogger_XML
+	)
+	
+	#######################################################
+	# subsLog -- tree of 
+	#######################################################
+	Subs_TreeWithMetaDataLogger_id = paste0("Subs_TreeWithMetaDataLogger_", tree_name)
+	Subs_TreeWithMetaDataLogger_XML = xmlNode(name="log", attrs=list(id=Subs_TreeWithMetaDataLogger_id, tree=tree_name_idref, substitutions="true", spec="beast.evolution.tree.TreeWithMetaDataLogger") )
+	Subs_TreeWithMetaDataLogger_XMLs = list(
+	xmlCommentNode(" Log the tree and branch rates "),
+	Subs_TreeWithMetaDataLogger_XML
+	)
+
+	
+	
+	#######################################################
+	# speciesTreeLogger
+	#######################################################
+	speciesTreeLoggerX_id = paste0("speciesTreeLoggerX_for_", tree_name)
+	fn = paste0("species_trees_for_", tree_name, ".trees.txt")
+	speciesTree_default_idref = paste0("@", speciesTree_default)
+	
+	popModel_idref = paste0("@", popModel_id)
+	child = xmlNode(name="log", attrs=list(id=speciesTreeLoggerX_id, spec="starbeast2.SpeciesTreeLogger", populationmodel=popModel_idref, speciesTree=speciesTree_default_idref))
+	
+	speciesTreeLogger_XML = xmlNode(name="logger", attrs=list(id="speciesTreeLogger", fileName=fn, logEvery=logEvery, mode="tree"), .children=list(child))
+	speciesTreeLogger_XMLs = list(bl(), xmlCommentNode(" starBeast2 logger for the speciesTree object "), speciesTreeLogger_XML)
+	
+	
+
+	#######################################################
+	# Logs on the gene trees
+	#######################################################
+	geneTree_treeHeights_XMLs_list = list()
+	geneTree_treeLogs_XMLs = list()
+	for (i in 1:length(geneTreeNames))
+		{
+		id = paste0("TreeHeight_of_", geneTreeNames[i])
+		geneTreeName_idref = paste0("@", geneTreeNames[i])
+		tmpXML = xmlNode(name="log", attrs=list(id=id, spec="beast.evolution.tree.TreeHeightLogger", tree=geneTreeName_idref))
+		geneTree_treeHeights_XMLs_list = c(geneTree_treeHeights_XMLs_list, list(tmpXML))
+		
+		# Tree log
+		id = paste0("TreeWithMetaDataLogger_for_", geneTreeNames[i])
+		child = xmlNode(name="log", attrs=list(id=id, spec="beast.evolution.tree.TreeWithMetaDataLogger", tree=geneTreeName_idref))
+		id = paste0("treeLog_for_", geneTreeNames[i])
+		fn = paste0("treeLog_for_", geneTreeNames[i], ".trees.txt")
+		tmpXML = xmlNode(name="logger", attrs=list(id=id, fileName=fn, logEvery=logEvery, mode="tree"), .children=list(child))
+		geneTree_treeLogs_XMLs = c(geneTree_treeLogs_XMLs, list(tmpXML))
+		}
+	
+	
+	
+	geneTree_treeHeights_XMLs_list = c(list(bl(), xmlCommentNode(" Loggers for genetree heights ")), geneTree_treeHeights_XMLs_list)
+	geneTree_treeLogs_XMLs = c(list(bl(), xmlCommentNode(" Loggers for genetrees ")), geneTree_treeLogs_XMLs)
+	
+	
+	if (is.null(xml))
+		{
+		res = NULL
+		res$init = starBeast2_initializer_XML
+		res$state = cl(res$state, speciesTree_statenode_XML, birthRate_XML, deathRate_XML)
+		res$operators = cl(res$operators, operators_XMLs)
+		res$priors = cl(res$priors, tree_prior_XML, birthRate_XML_priorLog$priors, deathRate_XML_priorLog$priors)
+		res$tracelog = cl(res$tracelog, birthRate_XML_priorLog$tracelog, deathRate_XML_priorLog$tracelog, geneTree_treeHeights_XMLs_list)
+		res$screenlog = cl(res$screenlog, birthRate_XML_priorLog$tracelog, deathRate_XML_priorLog$tracelog)
+		res$treelog_XMLs = TreeWithMetaDataLogger_XMLs
+		res$subslog_XMLs = Subs_TreeWithMetaDataLogger_XMLs
+		res$speciesTreeLogger_XMLs = speciesTreeLogger_XMLs
+		res$geneTree_treeLogs_XMLs = geneTree_treeLogs_XMLs
+		tracelog
+		return(res)
+		} else {
+		xml$init = cl(xml$init, starBeast2_initializer_XML)
+		xml$state = cl(xml$state, speciesTree_statenode_XML, birthRate_XML, deathRate_XML)
+		xml$operators = cl(xml$operators, operators_XMLs)
+		xml$priors = cl(xml$priors, tree_prior_XML, birthRate_XML_priorLog$priors, deathRate_XML_priorLog$priors)
+		xml$tracelog = cl(xml$tracelog, birthRate_XML_priorLog$tracelog, deathRate_XML_priorLog$tracelog, geneTree_treeHeights_XMLs_list)
+		xml$screenlog = cl(xml$screenlog, birthRate_XML_priorLog$tracelog, deathRate_XML_priorLog$tracelog)
+		xml$treelog = cl(xml$treelog, TreeWithMetaDataLogger_XMLs)
+		xml$subslog = cl(xml$subslog, Subs_TreeWithMetaDataLogger_XMLs)
+		xml$speciesTreeLogger_XMLs = speciesTreeLogger_XMLs
+		xml$geneTree_treeLogs_XMLs = geneTree_treeLogs_XMLs
+		return(xml)
+		}
+	
+	return(stop("make_BD_model_for_starBeast2() ERROR: Shouldn't get here!"))
+	} # END make_BD_model_for_starBeast2 <- function(treemodel_df, tree_name="shared_tree", xml=NULL)
+
+
+
+#######################################################
+# ONLY FOR NON-STARBEAST2 ANALYSES
+#######################################################
+
+make_BDSKY_model <- function(treemodel_df, tree_name="shared_tree", clockModel_name="shared_clock", clock_type="ucld", alignment_name_w_taxa, taxonset_w_taxa="list_of_OTUs", tipDates_id="tipDates", OTUs=NULL, xml=NULL, printall="short", relscale_fraction=0.05, XML_mod_for_cont_chars=FALSE, trstr=NULL, xlsfn=NULL)
+	{
+	defaults='
+	treemodel_df = readWorksheetFromFile(file=xlsfn, sheet="treemodel", startRow=15, startCol=1, header=TRUE)
 	tree_name = "shared_tree"
 	alignment_name_w_taxa="seqs_morph_morph2_unordered"
 	tipDates_id="tipDates"
@@ -13,12 +983,41 @@ make_BDSKY_model <- function(strat_df, tree_name="shared_tree", clockModel_name=
 	xml = NULL
 	printall="short"
 	relscale_fraction=0.05
+	trstr=NULL
 	'
 	###############################################
 	# starting Tree: Can be user-specified, or randomly determined
 	###############################################
-	startingTree_option = strat_df$starting_tree[isblank_TF(strat_df$starting_tree)==FALSE]
-	treeModel_option = strat_df$treeModel[isblank_TF(strat_df$treeModel)==FALSE]
+	# Setup / error fixes
+	if (is.null(treemodel_df$use))
+		{
+		treemodel_df$use = rep("yes", times=nrow(treemodel_df))
+		}
+	treemodel_df$use[isblank_TF(treemodel_df$use) == TRUE] = "yes"
+	treemodel_df$use = tolower(treemodel_df$use)
+	treemodel_df = treemodel_df[treemodel_df$use == "yes"]
+	
+	# file_type: Newick or NEXUS
+	if (is.null(treemodel_df$file_type))
+		{
+		treemodel_df$file_type = rep("newick", times=nrow(treemodel_df))
+		}
+	treemodel_df$file_type[isblank_TF(treemodel_df$file_type) == TRUE] = "newick"
+	treemodel_df$file_type = tolower(treemodel_df$file_type)
+	file_type = treemodel_df$file_type[1]
+	
+	if ((file_type %in% c("newick", "nexus")) == FALSE)
+		{
+		txt = paste0("STOP ERROR in make_starting_tree_for_starBeast2(): The starting tree type must be 'newick' or 'nexus', in treemodel_df$file_type.  Blank means 'newick'. However, you have: '", file_type, "'. Fix this in the Excel settings file, and re-run.")
+		
+		cat("\n\n")
+		cat(txt)
+		cat("\n\n")
+		stop(txt)
+		}
+	
+	startingTree_option = treemodel_df$starting_tree[1]
+	treeModel_option = treemodel_df$treeModel[1]
 	
 	if (length(startingTree_option) != 1)
 		{
@@ -36,15 +1035,15 @@ make_BDSKY_model <- function(strat_df, tree_name="shared_tree", clockModel_name=
 	
 	
 	# Error check
-	treeModel_options = c("BDSKY", "SABDSKY")
+	treeModel_options = c("BD", "BDSKY", "SABDSKY")
 	if ( (treeModel_option %in% treeModel_options) == FALSE)
 		{
-		error_msg = "STOP ERROR in make_BDSKY_model(): treeModel_option, from strat_df$treeModel,  must be one of the allowed options"
+		error_msg = "STOP ERROR in make_BDSKY_model(): treeModel_option, from treemodel_df$treeModel, must be one of the options allowed for a non-starBeast2 analysis."
 		
 		cat("\n\n")
 		cat("error_msg")
 		
-		cat("\n\nAllowed options for strat_df$treeModel:\n\n")
+		cat("\n\nAllowed options for treemodel_df$treeModel:\n\n")
 		print(treeModel_options)
 		cat("\n\n")
 		
@@ -57,7 +1056,7 @@ make_BDSKY_model <- function(strat_df, tree_name="shared_tree", clockModel_name=
 	# SABD and continuous traits.
 	if ((XML_mod_for_cont_chars == TRUE) && (treeModel_option == "SABDSKY"))
 		{
-		txt = "STOP ERROR in make_BDSKY_model(): You are attempting to include continuous \ncharacters in an SABDSKY analysis. I cannot figure out how to make this work, it may\nrequire manual edits of the XML, or perhaps a change to the BEAST source code. -- Nick Matzke, 2015-04-02"
+		txt = "STOP ERROR in make_BDSKY_model(): You are attempting to include continuous \ncharacters in an SABDSKY analysis. I cannot figure out how to make this work, it may\nrequire manual edits of the XML, or perhaps a change to the BEAST2 source code. -- Nick Matzke, 2015-04-02"
 		cat("\n\n")
 		cat(txt)
 		cat("\n\n")
@@ -89,6 +1088,33 @@ make_BDSKY_model <- function(strat_df, tree_name="shared_tree", clockModel_name=
 	# idref for taxa list (and taxonset list for SABDSKY)
 	alignment_name_w_taxaref = paste0("@", alignment_name_w_taxa)
 	taxonset_w_taxaref = paste0("@", taxonset_w_taxa)
+	
+	
+	
+
+	if ((startingTree_option == "construct_starting_tree") && (is.null(xlsfn)) )
+		{
+		txt = "ERROR in make_BDSKY_model(): the 'startingTree_option' was 'construct_starting_tree', but xlsfn=NULL. Supply xlsfn (Excel filename (fn)) in order for make_BDSKY_model to use the 'construct_starting_tree' option. (Note: The 'startingTree_option' setting is derived from the column 'starting_tree' in treemodel_df, from the Excel worksheet 'treemodel' in the BEASTmasteR settings spreadsheet. The options are 'random', 'upgma', a newick filename, or 'construct_starting_tree'."
+		
+		cat("\n\n")
+		cat(txt)
+		cat("\n\n")
+		stop(txt)  
+		}
+
+	# We have an xlsfn, so...Construct the starting tree
+	if (startingTree_option == "construct_starting_tree")
+		{
+		# Set the output filename
+		outfn = "constructed_starting_tree.newick"
+		
+		# Change the option, so that this filename is now the starting tree
+		startingTree_option = outfn
+		
+		# Construct the starting tree, write to outfn
+		construct_starting_tree(xlsfn=xlsfn, min_brlen=0.0001, outfn=outfn)
+		} # END if (startingTree_option == "construct_starting_tree")
+	
 	
 	if ((startingTree_option == "random") || (startingTree_option == "upgma"))
 		{
@@ -173,21 +1199,42 @@ make_BDSKY_model <- function(strat_df, tree_name="shared_tree", clockModel_name=
 		
 		} else {
 		# Use a user-specified starting tree
-		if (isblank_TF(strat_df$tree_dir[1]))
+		if (isblank_TF(treemodel_df$tree_dir[1]) == TRUE)
 			{
 			trfn = startingTree_option
 			} else {
 			# Directory not blank, paste to filename
-			trfn = slashslash(paste0(addslash(strat_df$tree_dir[1]), startingTree_option))
-			} # END if (isblank_TF(strat_df$tree_dir[1]))
+			trfn = slashslash(paste0(addslash(treemodel_df$tree_dir[1]), startingTree_option))
+			} # END if (isblank_TF(treemodel_df$tree_dir[1]))
 		
 		if (printall != "none")
 			{
 			cat("\n\nmake_BDSKY_model() is running 'ape::read.tree()' on:\n'", getwd(), "\n", trfn, "'...\n\n", sep="")
 			} # END if (printall != "none")
 		
-		# Read the Newick file
-		tr = read.tree(trfn)
+		
+		#######################################################
+		# Take the tree from a prior string, if specified
+		# If not, take from a filename
+		#######################################################
+		if (is.null(trstr) == FALSE)
+			{
+			# Read the Newick string
+			tr = read.tree(file="", text=trstr)
+			} else {
+			# Read the Newick or NEXUS file
+			# (trfn comes from startingTree_option)
+			# (which comes from startingTree_option = treemodel_df$starting_tree[1])
+			#tr = read.tree(file=trfn)
+			if (file_type == "newick")
+				{
+				tr = read.tree(file=trfn)
+				} 
+			if (file_type == "nexus")
+				{
+				tr = read.nexus(file=trfn)
+				}
+			} # END if (is.null(trstr) == FALSE)
 		
 		# Error check: Make sure there is just one (1) tree!
 		if (class(tr) != "phylo")
@@ -199,7 +1246,7 @@ make_BDSKY_model <- function(strat_df, tree_name="shared_tree", clockModel_name=
 			cat("Printing 'tr':\n")
 			print(tr)
 			cat("Printing 'tr' string:\n")
-			print(write.tree(tr, file=""))
+			print(write_tree_noSci(tr, file=""))
 			cat("\n\n")
 			stop(txt)
 			} # END if (length(tr) != 1)
@@ -244,7 +1291,7 @@ make_BDSKY_model <- function(strat_df, tree_name="shared_tree", clockModel_name=
 			} # END if (is.null(OTUs) != TRUE)
 		
 		# Write the tree string, for inclusion in the Newick file
-		trstr = write.tree(tr, file="")
+		trstr = write_tree_noSci(tr, file="")
 		
 		if (treeModel_option == "BDSKY")
 			{
@@ -335,7 +1382,7 @@ make_BDSKY_model <- function(strat_df, tree_name="shared_tree", clockModel_name=
 	# originTime: the time_bp at which the sampling process starts
 	# (a nuisance parameter)
 	###############################################
-	originTime = strat_df$originTime[isblank_TF(strat_df$originTime)==FALSE]
+	originTime = treemodel_df$originTime[isblank_TF(treemodel_df$originTime)==FALSE]
 	originTime_id = "originTime"
 	originTime_idref = "@originTime"
 	originTime_XML = xmlNode(name="parameter", originTime, attrs=list(id=originTime_id, lower="0.0", upper="4600", name="origin") )
@@ -343,13 +1390,13 @@ make_BDSKY_model <- function(strat_df, tree_name="shared_tree", clockModel_name=
 	###############################################
 	# birthRates, from oldest to youngest
 	###############################################
-	birthRates = strat_df$birthRate_starting_vals[isblank_TF(strat_df$birthRate_times_tops)==FALSE]
-	birthRateChangeTimes_tops = strat_df$birthRate_times_tops[isblank_TF(strat_df$birthRate_times_tops)==FALSE]
+	birthRates = treemodel_df$birthRate_starting_vals[isblank_TF(treemodel_df$birthRate_times_tops)==FALSE]
+	birthRateChangeTimes_tops = treemodel_df$birthRate_times_tops[isblank_TF(treemodel_df$birthRate_times_tops)==FALSE]
 	
 	# Check lengths
 	if (length(birthRates) != length(birthRateChangeTimes_tops))
 		{
-		txt = paste0("\n\nERROR in make_BDSKY_model():\nLength of strat_df$birthRate_starting_vals = ", length(birthRates), "\nLength of strat_df$birthRate_times_tops = ", length(birthRateChangeTimes_tops), "\nThese must be equal in the Excel spreadsheet.\n\n")
+		txt = paste0("\n\nERROR in make_BDSKY_model():\nLength of treemodel_df$birthRate_starting_vals = ", length(birthRates), "\nLength of treemodel_df$birthRate_times_tops = ", length(birthRateChangeTimes_tops), "\nThese must be equal in the Excel spreadsheet.\n\n")
 		cat(txt)
 		stop(txt)
 		}
@@ -363,9 +1410,24 @@ make_BDSKY_model <- function(strat_df, tree_name="shared_tree", clockModel_name=
 	rates_txt
 	
 	# Make the birthRate parameters
+		
+	# Min and max on birth rate - defaults
+	if (isblank_TF(treemodel_df$birthRate_min[1]))
+		{
+		birthRate_min = NULL
+		} else {
+		birthRate_min = treemodel_df$birthRate_min[1]
+		}
+	if (isblank_TF(treemodel_df$birthRate_max[1]))
+		{
+		birthRate_max = NULL
+		} else {
+		birthRate_max = treemodel_df$birthRate_max[1]
+		}
+	
 	birthRate_params_id = "birthRate"
 	birthRate_params_idref = "@birthRate"
-	birthRate_params_XML = xmlNode(name="parameter", attrs=list(id=birthRate_params_id, name="birthRate", lower="0.0", value=rates_txt))
+	birthRate_params_XML = xmlNode(name="parameter", attrs=list(id=birthRate_params_id, name="birthRate", lower=birthRate_min, upper=birthRate_max, value=rates_txt))
 	birthRateChangeTimes_tops_id = "birthRateChangeTimes_tops"
 	birthRateChangeTimes_tops_idref = paste0("@", birthRateChangeTimes_tops_id)
 	birthRateChangeTimes_tops_XML = xmlNode(name="parameter", attrs=list(id=birthRateChangeTimes_tops_id, name="birthRateChangeTimes", value=ages_txt))
@@ -373,13 +1435,13 @@ make_BDSKY_model <- function(strat_df, tree_name="shared_tree", clockModel_name=
 	#######################################################
 	# Extract the priors on one or more birthRates
 	#######################################################
-	#strat_df = readWorksheetFromFile(file=xlsfn, sheet="treemodel", startRow=15, startCol=1, header=TRUE)
+	#treemodel_df = readWorksheetFromFile(file=xlsfn, sheet="treemodel", startRow=15, startCol=1, header=TRUE)
 	
 	birthRate_defn_XMLs = NULL
 	birthRate_prior_XMLs = NULL
 	birthRate_log_XMLs = NULL
 	
-	dflines = strat_df[isblank_TF(strat_df$birthRate_times_tops)==FALSE, ]
+	dflines = treemodel_df[isblank_TF(treemodel_df$birthRate_times_tops)==FALSE, ]
 	num_birthRates = nrow(dflines)
 	num_birthRates
 	for (i in 1:num_birthRates)
@@ -574,13 +1636,13 @@ make_BDSKY_model <- function(strat_df, tree_name="shared_tree", clockModel_name=
 	###############################################
 	# deathRates, from oldest to youngest
 	###############################################
-	deathRates = strat_df$deathRate_starting_vals[isblank_TF(strat_df$deathRate_times_tops)==FALSE]
-	deathRateChangeTimes_tops = strat_df$deathRate_times_tops[isblank_TF(strat_df$deathRate_times_tops)==FALSE]
+	deathRates = treemodel_df$deathRate_starting_vals[isblank_TF(treemodel_df$deathRate_times_tops)==FALSE]
+	deathRateChangeTimes_tops = treemodel_df$deathRate_times_tops[isblank_TF(treemodel_df$deathRate_times_tops)==FALSE]
 	
 	# Check lengths
 	if (length(deathRates) != length(deathRateChangeTimes_tops))
 		{
-		txt = paste0("\n\nERROR in make_BDSKY_model():\nLength of strat_df$deathRate_starting_vals = ", length(deathRates), "\nLength of strat_df$deathRate_times_tops = ", length(deathRateChangeTimes_tops), "\nThese must be equal in the Excel spreadsheet.\n\n")
+		txt = paste0("\n\nERROR in make_BDSKY_model():\nLength of treemodel_df$deathRate_starting_vals = ", length(deathRates), "\nLength of treemodel_df$deathRate_times_tops = ", length(deathRateChangeTimes_tops), "\nThese must be equal in the Excel spreadsheet.\n\n")
 		cat(txt)
 		stop(txt)
 		}
@@ -594,9 +1656,23 @@ make_BDSKY_model <- function(strat_df, tree_name="shared_tree", clockModel_name=
 	rates_txt
 	
 	# Make the deathRate parameters
+	# Min and max on death rate - defaults
+	if (isblank_TF(treemodel_df$deathRate_min[1]))
+		{
+		deathRate_min = NULL
+		} else {
+		deathRate_min = treemodel_df$deathRate_min[1]
+		}
+	if (isblank_TF(treemodel_df$deathRate_max[1]))
+		{
+		deathRate_max = NULL
+		} else {
+		deathRate_max = treemodel_df$deathRate_max[1]
+		}
+
 	deathRate_params_id = "deathRate"
 	deathRate_params_idref = "@deathRate"
-	deathRate_params_XML = xmlNode(name="parameter", attrs=list(id=deathRate_params_id, name="deathRate", lower="0.0", value=rates_txt))
+	deathRate_params_XML = xmlNode(name="parameter", attrs=list(id=deathRate_params_id, name="deathRate", lower=deathRate_min, upper=deathRate_max, value=rates_txt))
 	deathRateChangeTimes_tops_id = "deathRateChangeTimes_tops"
 	deathRateChangeTimes_tops_idref = paste0("@", deathRateChangeTimes_tops_id)
 	deathRateChangeTimes_tops_XML = xmlNode(name="parameter", attrs=list(id=deathRateChangeTimes_tops_id, name="deathRateChangeTimes", value=ages_txt))
@@ -606,13 +1682,13 @@ make_BDSKY_model <- function(strat_df, tree_name="shared_tree", clockModel_name=
 	#######################################################
 	# Extract the priors on one or more deathRates
 	#######################################################
-	#strat_df = readWorksheetFromFile(file=xlsfn, sheet="treemodel", startRow=15, startCol=1, header=TRUE)
+	#treemodel_df = readWorksheetFromFile(file=xlsfn, sheet="treemodel", startRow=15, startCol=1, header=TRUE)
 	
 	deathRate_defn_XMLs = NULL
 	deathRate_prior_XMLs = NULL
 	deathRate_log_XMLs = NULL
 	
-	dflines = strat_df[isblank_TF(strat_df$deathRate_times_tops)==FALSE, ]
+	dflines = treemodel_df[isblank_TF(treemodel_df$deathRate_times_tops)==FALSE, ]
 	num_deathRates = nrow(dflines)
 	num_deathRates
 	for (i in 1:num_deathRates)
@@ -876,13 +1952,13 @@ make_BDSKY_model <- function(strat_df, tree_name="shared_tree", clockModel_name=
 	# https://groups.google.com/d/msg/beast-users/UyAS0sYDkKk/PB0ktWnssn0J
 	# (reverseTimeArrays is, I guess, about whether time itself is backwards or forwards)
 	###############################################
-	samplingRates = strat_df$samplingRate_starting_vals[isblank_TF(strat_df$samplingRate_times_tops)==FALSE]
-	samplingRateTimes_tops = strat_df$samplingRate_times_tops[isblank_TF(strat_df$samplingRate_times_tops)==FALSE]
+	samplingRates = treemodel_df$samplingRate_starting_vals[isblank_TF(treemodel_df$samplingRate_times_tops)==FALSE]
+	samplingRateTimes_tops = treemodel_df$samplingRate_times_tops[isblank_TF(treemodel_df$samplingRate_times_tops)==FALSE]
 	
 	# Check lengths
 	if (length(samplingRates) != length(samplingRateTimes_tops))
 		{
-		txt = paste0("\n\nERROR in make_BDSKY_model():\nLength of strat_df$samplingRate_starting_vals = ", length(samplingRates), "\nLength of strat_df$samplingRate_times_tops = ", length(samplingRateTimes_tops), "\nThese must be equal in the Excel spreadsheet.\n\n")
+		txt = paste0("\n\nERROR in make_BDSKY_model():\nLength of treemodel_df$samplingRate_starting_vals = ", length(samplingRates), "\nLength of treemodel_df$samplingRate_times_tops = ", length(samplingRateTimes_tops), "\nThese must be equal in the Excel spreadsheet.\n\n")
 		cat(txt)
 		stop(txt)
 		}
@@ -918,9 +1994,23 @@ make_BDSKY_model <- function(strat_df, tree_name="shared_tree", clockModel_name=
 	rates_txt
 	
 	# Make the samplingRate parameters
+	# Min and max on sampling rate - defaults
+	if (isblank_TF(treemodel_df$samplingRate_min[1]))
+		{
+		samplingRate_min = NULL
+		} else {
+		samplingRate_min = treemodel_df$samplingRate_min[1]
+		}
+	if (isblank_TF(treemodel_df$samplingRate_max[1]))
+		{
+		samplingRate_max = NULL
+		} else {
+		samplingRate_max = treemodel_df$samplingRate_max[1]
+		}
+	
 	samplingRate_params_id = "samplingRate"
 	samplingRate_params_idref = "@samplingRate"
-	samplingRate_params_XML = xmlNode(name="parameter", attrs=list(id=samplingRate_params_id, name="samplingRate", lower="0.0", value=rates_txt))
+	samplingRate_params_XML = xmlNode(name="parameter", attrs=list(id=samplingRate_params_id, name="samplingRate", lower=samplingRate_min, upper=samplingRate_max, value=rates_txt))
 	samplingRateTimes_tops_id = "samplingRateChangeTimes_tops"
 	samplingRateTimes_tops_idref = paste0("@", samplingRateTimes_tops_id)
 	samplingRateTimes_tops_XML = xmlNode(name="parameter", attrs=list(id=samplingRateTimes_tops_id, name="samplingRateChangeTimes", value=ages_txt))
@@ -930,13 +2020,13 @@ make_BDSKY_model <- function(strat_df, tree_name="shared_tree", clockModel_name=
 	#######################################################
 	# Extract the priors on one or more samplingRates
 	#######################################################
-	#strat_df = readWorksheetFromFile(file=xlsfn, sheet="treemodel", startRow=15, startCol=1, header=TRUE)
+	#treemodel_df = readWorksheetFromFile(file=xlsfn, sheet="treemodel", startRow=15, startCol=1, header=TRUE)
 	
 	samplingRate_defn_XMLs = NULL
 	samplingRate_prior_XMLs = NULL
 	samplingRate_log_XMLs = NULL
 	
-	dflines = strat_df[isblank_TF(strat_df$samplingRate_times_tops)==FALSE, ]
+	dflines = treemodel_df[isblank_TF(treemodel_df$samplingRate_times_tops)==FALSE, ]
 	num_samplingRates = nrow(dflines)
 	num_samplingRates
 	for (i in 1:num_samplingRates)
@@ -1149,13 +2239,13 @@ make_BDSKY_model <- function(strat_df, tree_name="shared_tree", clockModel_name=
 	###############################################
 	# rhoSamplingProbs, from oldest to youngest
 	###############################################
-	rhoSamplingProbs = strat_df$rho[isblank_TF(strat_df$rho)==FALSE]
-	rhoSamplingTimes = strat_df$rhoSamplingTimes[isblank_TF(strat_df$rhoSamplingTimes)==FALSE]
+	rhoSamplingProbs = treemodel_df$rho[isblank_TF(treemodel_df$rho)==FALSE]
+	rhoSamplingTimes = treemodel_df$rhoSamplingTimes[isblank_TF(treemodel_df$rhoSamplingTimes)==FALSE]
 	
 	# Check lengths
 	if (length(rhoSamplingProbs) != length(rhoSamplingTimes))
 		{
-		txt = paste0("\n\nERROR in make_BDSKY_model():\nLength of strat_df$rho = ", length(rhoSamplingProbs), "\nLength of strat_df$rhoSamplingTimes = ", length(rhoSamplingTimes), "\nThese must be equal in the Excel spreadsheet.\n\n")
+		txt = paste0("\n\nERROR in make_BDSKY_model():\nLength of treemodel_df$rho = ", length(rhoSamplingProbs), "\nLength of treemodel_df$rhoSamplingTimes = ", length(rhoSamplingTimes), "\nThese must be equal in the Excel spreadsheet.\n\n")
 		cat(txt)
 		stop(txt)
 		}
@@ -1305,7 +2395,7 @@ make_BDSKY_model <- function(strat_df, tree_name="shared_tree", clockModel_name=
 	birthRate_operator_XML = xmlNode(name="operator", attrs=list(id=birthRate_operator_id, parameter=birthRate_params_idref, scaleFactor="0.75", weight="10.0", spec="ScaleOperator") )
 
 	# If any of these are "estimated", put in the operator
-	birthRate_function = strat_df$birthRate_function[isblank_TF(strat_df$birthRate_function)==FALSE]
+	birthRate_function = treemodel_df$birthRate_function[isblank_TF(treemodel_df$birthRate_function)==FALSE]
 	TF = grepl(pattern="estimated", x=birthRate_function)
 	if (any(TF) == FALSE)
 		{
@@ -1319,7 +2409,7 @@ make_BDSKY_model <- function(strat_df, tree_name="shared_tree", clockModel_name=
 	deathRate_operator_XML = xmlNode(name="operator", attrs=list(id=deathRate_operator_id, parameter=deathRate_params_idref, scaleFactor="0.75", weight="10.0", spec="ScaleOperator") )
 
 	# If any of these are "estimated", put in the operator
-	deathRate_function = strat_df$deathRate_function[isblank_TF(strat_df$deathRate_function)==FALSE]
+	deathRate_function = treemodel_df$deathRate_function[isblank_TF(treemodel_df$deathRate_function)==FALSE]
 	TF = grepl(pattern="estimated", x=deathRate_function)
 	if (any(TF) == FALSE)
 		{
@@ -1333,7 +2423,7 @@ make_BDSKY_model <- function(strat_df, tree_name="shared_tree", clockModel_name=
 	samplingRate_operator_XML = xmlNode(name="operator", attrs=list(id=samplingRate_operator_id, parameter=samplingRate_params_idref, scaleFactor="0.75", weight="10.0", spec="ScaleOperator") )
 
 	# If any of these are "estimated", put in the operator
-	samplingRate_function = strat_df$samplingRate_function[isblank_TF(strat_df$samplingRate_function)==FALSE]
+	samplingRate_function = treemodel_df$samplingRate_function[isblank_TF(treemodel_df$samplingRate_function)==FALSE]
 	TF = grepl(pattern="estimated", x=samplingRate_function)
 	if (any(TF) == FALSE)
 		{
@@ -1347,7 +2437,7 @@ make_BDSKY_model <- function(strat_df, tree_name="shared_tree", clockModel_name=
 	rhoSamplingRate_operator_XML = xmlNode(name="operator", attrs=list(id=rhoSamplingRate_operator_id, parameter=rhoSamplingRate_params_idref, scaleFactor="0.75", weight="10.0", spec="ScaleOperator") )
 
 	# If any of these are "estimated", put in the operator
-	rhoSamplingRate_function = strat_df$rho_function[isblank_TF(strat_df$rho_function)==FALSE]
+	rhoSamplingRate_function = treemodel_df$rho_function[isblank_TF(treemodel_df$rho_function)==FALSE]
 	TF = ((rhoSamplingRate_function == "estimated") || (rhoSamplingRate_function == "estimated_base"))
 	if (any(TF) == FALSE)
 		{
@@ -1413,8 +2503,11 @@ make_BDSKY_model <- function(strat_df, tree_name="shared_tree", clockModel_name=
 			narrowExchange_XML,
 			wideExchange_XML,
 			bl(),
-			xmlCommentNode(" Not sure what this does: NJM 2014-12-01 "),
-			WilsonBalding_XML
+			xmlCommentNode(" Wilson-Balding Operator: for sampled ancestor trees, can change "),
+			xmlCommentNode(" the number of branches in the tree: "),
+			xmlCommentNode(" https://figshare.com/articles/_The_Wilson_Balding_operator_/1260483 "),
+			WilsonBalding_XML,
+			bl()
 			) # END tree_operators_XMLs
 		} # END if ( treeModel_option == "BDSKY" )
 	
@@ -1451,7 +2544,7 @@ make_BDSKY_model <- function(strat_df, tree_name="shared_tree", clockModel_name=
 	# 	SubtreeSlide_id = paste0("SubtreeSlide_", tree_name)
 	# 	SubtreeSlide_XML = xmlNode(name="operator", attrs=list(id=SubtreeSlide_id, tree=tree_name_idref, weight="15.0", spec="SubtreeSlide") )
 		
-		clock_rate_idref = paste0("@", clock_type, "Mean_of_", clockModel_name)
+		clock_rate_idref = paste0("@", clock_type, "_Mean_of_", clockModel_name)
 		updownTree_id = paste0("updownTree_", tree_name)
 		updownTree_XML = xmlNode(name="operator", attrs=list(id=updownTree_id, up=clock_rate_idref, down=tree_name_idref, scaleFactor="0.95", weight="20.0", spec="UpDownOperator") )
 
@@ -1741,14 +2834,517 @@ make_BDSKY_model <- function(strat_df, tree_name="shared_tree", clockModel_name=
 	
 	
 	
+make_taxon_superset <- function(taxonsets_df, speciesTree_taxonset_listname="taxonsuperset")
+	{
+	# Filter taxonsets_df to the "use" column
+	taxonsets_df = readWorksheetFromFile(xlsfn, sheet="taxonsets", startRow=15)
+	taxonsets_df$use[isblank_TF(taxonsets_df$use)] = "yes"
+	keepTF = (taxonsets_df$use != "no")
+	taxonsets_df = taxonsets_df[keepTF, ]
+	
+	list_of_taxonset_children = list(
+	bl(), 
+	xmlCommentNode(" Taxon list for the Species Tree "))
+	
+	# There may be many specimen names for each speciesName!!
+	list_of_taxonset_children = list()
+	uniq_speciesNames = unique(taxonsets_df$speciesName)
+	for (i in 1:length(uniq_speciesNames))
+		{
+		rows_TF = taxonsets_df$speciesName == uniq_speciesNames[i]
+		specimenStrings = taxonsets_df$specimenString[rows_TF]
+		specimen_children = list()
+		for (j in 1:length(specimenStrings))
+			{
+			specimenString = specimenStrings[j]
+			xml_child = xmlNode(name="taxon", attrs=list(id=specimenString, spec="Taxon") )
+			specimen_children = c(specimen_children, list(xml_child))
+			}
+		xml_specimens_with_a_species = xmlNode(name="taxon", attrs=list(id=uniq_speciesNames[i], spec="TaxonSet"), .children=specimen_children)
+		list_of_taxonset_children = c(list_of_taxonset_children, list(xml_specimens_with_a_species))
+		} # END for (i in 1:length(uniq_speciesNames))
+	taxonset_XML = xmlNode(name="taxonset", attrs=list(id=speciesTree_taxonset_listname, spec="TaxonSet"), .children=list_of_taxonset_children)
+	return(taxonset_XML)
+	}
+	
+
+make_speciesTree_statenode <- function(tree_name="shared_tree", taxonset_XML, starting_tree_string="")
+	{
+	if (isblank_TF(starting_tree_string) == TRUE)
+		{
+		# Default: tree will be random
+		speciesTree_statenode_XML = xmlNode(name="tree", attrs=list(id=tree_name, name="stateNode"), .children=list(taxonset_XML))
+		} else {
+		# Use a user-specified starting tree Newick string
+		speciesTree_statenode_XML = xmlNode(name="tree", attrs=list(id=tree_name, name="stateNode", initial="NULL", IsLabelledNewick="true", adjustTipHeights="false", estimate="true", spec="beast.util.TreeParser", threshold="0.001", newick=starting_tree_string), .children=list(taxonset_XML))
+		}
+	return(speciesTree_statenode_XML)
+	}
+
+
+make_speciesTree_statenode2 <- function(tree_name="shared_tree", taxonset_XML)
+	{
+	speciesTree_statenode_XML = xmlNode(name="stateNode", attrs=list(id=tree_name, spec="starbeast2.SpeciesTree"), .children=list(taxonset_XML))
+
+	return(speciesTree_statenode_XML)
+	}
 	
 	
 	
+make_speciesTree_starting <- function(tree_name="shared_tree", taxonset_XML, starting_tree_string="")
+	{
+	if (isblank_TF(starting_tree_string) == TRUE)
+		{
+		# Default: tree will be random
+		speciesTree_statenode_XML = xmlNode(name="tree", attrs=list(id=tree_name, name="tree"), .children=list(taxonset_XML))
+		} else {
+		# Use a user-specified starting tree Newick string
+		speciesTree_statenode_XML = xmlNode(name="tree", attrs=list(id=tree_name, name="tree", initial="NULL", IsLabelledNewick="true", adjustTipHeights="false", estimate="true", spec="beast.util.TreeParser", threshold="0.001", newick=starting_tree_string), .children=list(taxonset_XML))
+		}
+	return(speciesTree_statenode_XML)
+	}
+	
+	
+
+
+
+
+treeClock_operators <- function(tree_name, clock_name, clock_type)
+	{
+	# Starter
+	operator_id_suffix = paste0("operator_for_TREE_", tree_name, "_CLOCK_", clock_name)
+	clockName_id = clock_name
+	genetree_id = tree_name
+	clockName_idref = paste0("@", clockName_id)
+	genetree_idref = paste0("@", genetree_id)
+	
+	clockRate_id = paste0(clock_type, "_Mean_of_", clockName_id)
+	clockRate_idref = paste0("@", clockRate_id)
+	
+	# Clock operators
+	clockRateScaler_id = paste0("clockRateScaler_", operator_id_suffix)
+	clockRateScaler_XML = xmlNode(name="operator", attrs=list(id=clockRateScaler_id, spec="ScaleOperator", parameter=clockRate_idref, scaleFactor="0.5", weight="3.0"))
+	
+	clockUpDownOperator_id = paste0("clockUpDownOperator_", operator_id_suffix)
+	up_XML = xmlNode(name="up", attrs=list(idref=clockRate_id))
+	down_XML = xmlNode(name="down", attrs=list(idref=genetree_id))
+	updown_XML_list = list(up_XML, down_XML)
+	clockUpDownOperator_XML = xmlNode(name="operator", attrs=list(id=clockUpDownOperator_id, spec="UpDownOperator", scaleFactor="0.95", weight="3.0"), .children=updown_XML_list)	
+	
+	# Tree operators
+	treeScaler_id = paste0("treeScaler_", operator_id_suffix)
+	treeScaler_XML = xmlNode(name="operator", attrs=list(id=treeScaler_id, tree=genetree_idref, scaleFactor="0.95", weight="3.0", spec="ScaleOperator") )
+
+	treeRootScaler_id = paste0("treeRootScaler_", operator_id_suffix)
+	treeRootScaler_XML = xmlNode(name="operator", attrs=list(id=treeRootScaler_id, tree=genetree_idref, scaleFactor="0.7", weight="3.0", spec="ScaleOperator", rootOnly="true") )
+
+	UniformOperator_id = paste0("UniformOperator_", operator_id_suffix)
+	UniformOperator_XML = xmlNode(name="operator", attrs=list(id=UniformOperator_id, tree=genetree_idref, weight="15.0", spec="Uniform") )
+
+	SubtreeSlide_id = paste0("SubtreeSlide_", operator_id_suffix)
+	SubtreeSlide_XML = xmlNode(name="operator", attrs=list(id=SubtreeSlide_id, tree=genetree_idref, weight="15.0", spec="SubtreeSlide", size="0.002") )
+
+	narrowExchange_id = paste0("narrowExchange_", operator_id_suffix)
+	narrowExchange_XML = xmlNode(name="operator", attrs=list(id=narrowExchange_id, tree=genetree_idref, weight="15.0", spec="Exchange", isNarrow="true") )
+
+	wideExchange_id = paste0("wideExchange_", operator_id_suffix)
+	wideExchange_XML = xmlNode(name="operator", attrs=list(id=wideExchange_id, tree=genetree_idref, isNarrow="false", weight="15.0", spec="Exchange") )
+
+	WilsonBalding_id = paste0("WilsonBalding_", operator_id_suffix)
+	WilsonBalding_XML = xmlNode(name="operator", attrs=list(id=WilsonBalding_id, tree=genetree_idref, weight="15.0", spec="WilsonBalding") )
+
+	# Make the list of tree operators
+	treeClock_operators_XMLs = list(bl(),
+		xmlCommentNode(paste0(" Operators on the geneTree clock/tree model parameters for: ", operator_id_suffix, " ")),
+		xmlCommentNode(" (commented out unless specified as estimated in Excel settings file) "),
+		bl(),
+		xmlCommentNode(" Operators on the clock model "),
+		clockRateScaler_XML, 
+		clockUpDownOperator_XML,
+		xmlCommentNode(" Operators on the tree/phylogeny (topology and node dates; tip dates could be added) "),
+		treeScaler_XML,
+		treeRootScaler_XML,
+		UniformOperator_XML,
+		SubtreeSlide_XML,
+		narrowExchange_XML,
+		wideExchange_XML,
+		bl(),
+		xmlCommentNode(" Wilson-Balding Operator: for sampled ancestor trees, can change "),
+		xmlCommentNode(" the number of branches in the tree: "),
+		xmlCommentNode(" https://figshare.com/articles/_The_Wilson_Balding_operator_/1260483 "),
+		WilsonBalding_XML,
+		bl()
+		) # END treeClock_operators_XMLs
+		
+	return(treeClock_operators_XMLs)
+	} # END treeclock_operators <- function(tree_name, clock_name)
+	
+
+	
+
+genetrees_operators <- function(seqs_df, taxonsets_df, treemodel_df, tree_name="shared_tree", speciesTree_taxonset_listname="taxonsuperset", speciesTree_default="speciesTree", xml=NULL, birthRate_id="netDiversificationRate")
+	{
+	defaults='
+	speciesTree_taxonset_listname="taxonsuperset"
+	taxonsets_df = readWorksheetFromFile(xlsfn, sheet="taxonsets", startRow=15)
+	seqs_df = readWorksheetFromFile(xlsfn, sheet="data", startRow=15)
+	birthRate_id="netDiversificationRate"
+	'
+	
+	tree_name_idref = paste0("@", tree_name)
+	
+	# Check for BEASTmasteR-programmed population models
+	if (is.null(treemodel_df$popModel))
+		{
+		treemodel_df$popModel = "constant"
+		} # END if (is.null(treemodel_df$popModel))
+	if (isblank_TF(treemodel_df$popModel))
+		{
+		treemodel_df$popModel = "constant"
+		} # END if (is.null(treemodel_df$popModel))
+	popModel = treemodel_df$popModel
+
+	if (popModel == "constant")
+		{
+		popModel_prefix = "constantPopModel"
+		}
+	if (popModel == "analytic")
+		{
+		popModel_prefix = "constantPopIOModel"
+		}
+	if ((treemodel_df$popModel == "linear"))
+		{
+		popModel_prefix = "lwcrPopModel"
+		}
+	
+	popModel_id = paste0(popModel_prefix, "_for_", speciesTree_default)
+	popModel_idref = paste0("@", popModel_id)
+	popSizes_id = paste0(popModel_prefix, "_popSizes.Species")
+	popSizes_idref = paste0("@", popSizes_id)
+	popSizesMean_id = paste0(popModel_prefix, "_popSizesMean.Species")
+	popSizesShape_id = paste0(popModel_prefix, "_popSizesShape.Species")
+	popSizes_idref = paste0("@", popModel_prefix, "_popSizes.Species")
+	popSizesMean_idref = paste0("@", popModel_prefix, "_popSizesMean.Species")
+	popSizesShape_idref = paste0("@", popModel_prefix, "_popSizesShape.Species")
+	popModelBridge_id = "popModelBridge.Species"
+			
+	tip_popSizes_id = paste0("tip_", popModel_prefix, "_popSizes.Species")
+	tip_popSizes_idref = paste0("@", popSizes_id)
+	top_popSizes_id = paste0("top_", popModel_prefix, "_popSizes.Species")
+	top_popSizes_idref = paste0("@", popSizes_id)
+	lwcrPopScale_id = paste0(popModel_prefix, "_popScale.Species")
+	lwcrPopScale_idref = paste0("@", lwcrPopScale_id)
+	
+	
+	# Make the stateNodes and operators for the genetree / species tree
+	
+	# Get the gene tree names
+	gene_tree_names = unique(seqs_df$geneTreeName)
+	rownums = match(x=gene_tree_names, table=seqs_df$geneTreeName)
+	
+	tree_XMLs = list()
+	genetree_idref_XMLs = list()
+	geneTree_idref_XMLs = list()
+	for (i in 1:length(gene_tree_names))
+		{
+		gene_tree_name = gene_tree_names[i]
+		alignment_source_id = seqs_df$datasetName[rownums[i]]
+		
+		child = xmlNode(name="alignment", attrs=list(idref=alignment_source_id))
+		taxonset_id = paste0("taxonset_", gene_tree_name)
+		taxonset_XML = xmlNode(name="taxonset", attrs=list(id=taxonset_id, spec="TaxonSet"), .children=list(child))
+		
+		tree_XML = xmlNode(name="tree", attrs=list(id=gene_tree_name, name="stateNode"), .children=list(taxonset_XML))
+		tree_XMLs = c(tree_XMLs, list(tree_XML))
+		
+		# Operators
+		genetree_idref_XML = xmlNode(name="genetree", attrs=list(idref=gene_tree_name))
+		genetree_idref_XMLs = c(genetree_idref_XMLs, list(genetree_idref_XML))
+
+		# Some like "genetree", some like "geneTree"
+		geneTree_idref_XML = xmlNode(name="geneTree", attrs=list(idref=gene_tree_name))
+		geneTree_idref_XMLs = c(geneTree_idref_XMLs, list(geneTree_idref_XML))
+		}
+	tree_XMLs
 	
 	
 	
+	#######################################################
+	# Operators for the gene trees
+	#######################################################
+	operator_name = paste0("Reheight_operator_for_", tree_name)
+	taxonset_idref = paste0("@", speciesTree_taxonset_listname)
+	tree_idref = paste0("@", tree_name)
+	weight = 8 * length(gene_tree_names)	# Rough weight, Nick's guess
+	NodeReheight_operator_XML = xmlNode(name="operator", attrs=list(id=operator_name, spec="NodeReheight", taxonset=taxonset_idref, tree=tree_idref, weight=weight), .children=genetree_idref_XMLs)
+
+	operator_name = paste0("coordinatedUniform_operator_for_", tree_name)
+	species_tree_name_idref = paste0("@", tree_name)
+	speciesTree_idref = paste0("@speciesTree")
+	weight = 2 * length(gene_tree_names)	# Rough weight, Nick's guess
 	
+	if ((popModel == "constant") || (popModel == "linear")  || (popModel == "analytic"))
+		{
+		coordinatedUniform_operator_XML = xmlNode(name="operator", attrs=list(id=operator_name, spec="starbeast2.CoordinatedUniform", speciesTree=tree_name_idref, weight=weight), .children=geneTree_idref_XMLs)
+		} else {
+		coordinatedUniform_operator_XML = xmlNode(name="operator", attrs=list(id=operator_name, spec="starbeast2.CoordinatedUniform", speciesTree=speciesTree_idref, tree=species_tree_name_idref, weight=weight), .children=geneTree_idref_XMLs)
+		}
+
+
+	operator_name = paste0("coordinatedExponential_operator_for_", tree_name)
+	species_tree_name_idref = paste0("@", tree_name)
+	speciesTree_idref = paste0("@speciesTree")
+	weight = 2 * length(gene_tree_names)	# Rough weight, Nick's guess
+	if ((popModel == "constant") || (popModel == "linear")  || (popModel == "analytic"))
+		{
+		coordinatedExponential_operator_XML = xmlNode(name="operator", attrs=list(id=operator_name, spec="starbeast2.CoordinatedExponential", speciesTree=tree_name_idref, weight=weight), .children=geneTree_idref_XMLs)
+		} else {
+		coordinatedExponential_operator_XML = xmlNode(name="operator", attrs=list(id=operator_name, spec="starbeast2.CoordinatedExponential", speciesTree=speciesTree_idref, tree=species_tree_name_idref, weight=weight), .children=geneTree_idref_XMLs)
+		}
+
+
+	if ((popModel == "constant") || (popModel == "linear")  || (popModel == "analytic"))
+		{	
+		operator_name = paste0("TreeScaler_operator_for_", tree_name)
+		species_tree_name_idref = paste0("@", tree_name)
+		weight = 0.5 * length(gene_tree_names)	# Rough weight, Nick's guess
+		TreeScaler_operator_XML = xmlNode(name="operator", attrs=list(id=operator_name, spec="ScaleOperator", scaleFactor="0.95", tree=tree_name_idref, weight=weight))
+
+		operator_name = paste0("TreeRootScaler_operator_for_", tree_name)
+		species_tree_name_idref = paste0("@", tree_name)
+		weight = 0.5 * length(gene_tree_names)	# Rough weight, Nick's guess
+		TreeRootScaler_operator_XML = xmlNode(name="operator", attrs=list(id=operator_name, spec="ScaleOperator", rootOnly="true", scaleFactor="0.7", tree=tree_name_idref, weight=weight))
 	
+		operator_name = paste0("UniformOperator_operator_for_", tree_name)
+		species_tree_name_idref = paste0("@", tree_name)
+		weight = 2 * length(gene_tree_names)	# Rough weight, Nick's guess
+		UniformOperator_operator_XML = xmlNode(name="operator", attrs=list(id=operator_name, spec="Uniform", tree=tree_name_idref, weight=weight))
 	
+		operator_name = paste0("SubtreeSlide_operator_for_", tree_name)
+		species_tree_name_idref = paste0("@", tree_name)
+		weight = 2 * length(gene_tree_names)	# Rough weight, Nick's guess
+		SubtreeSlide_operator_XML = xmlNode(name="operator", attrs=list(id=operator_name, spec="SubtreeSlide", size="0.002", tree=tree_name_idref, weight=weight))
+
+		operator_name = paste0("Narrow_operator_for_", tree_name)
+		species_tree_name_idref = paste0("@", tree_name)
+		weight = 2 * length(gene_tree_names)	# Rough weight, Nick's guess
+		Narrow_operator_XML = xmlNode(name="operator", attrs=list(id=operator_name, spec="Exchange", isNarrow="true", tree=tree_name_idref, weight=weight))
+		
+		operator_name = paste0("Wide_operator_for_", tree_name)
+		species_tree_name_idref = paste0("@", tree_name)
+		weight = 2 * length(gene_tree_names)	# Rough weight, Nick's guess
+		Wide_operator_XML = xmlNode(name="operator", attrs=list(id=operator_name, spec="Exchange", isNarrow="false", tree=tree_name_idref, weight=weight))
+
+		operator_name = paste0("WilsonBalding_operator_for_", tree_name)
+		species_tree_name_idref = paste0("@", tree_name)
+		weight = 2 * length(gene_tree_names)	# Rough weight, Nick's guess
+		WilsonBalding_operator_XML = xmlNode(name="operator", attrs=list(id=operator_name, spec="WilsonBalding", tree=tree_name_idref, weight=weight))
+		} else {
+		# Old method
+		operator_name = paste0("TreeScaler_operator_for_", tree_name)
+		species_tree_name_idref = paste0("@", tree_name)
+		weight = 0.5 * length(gene_tree_names)	# Rough weight, Nick's guess
+		TreeScaler_operator_XML = xmlNode(name="operator", attrs=list(id=operator_name, spec="ScaleOperator", scaleFactor="0.95", tree=species_tree_name_idref, weight=weight))
+
+		operator_name = paste0("TreeRootScaler_operator_for_", tree_name)
+		species_tree_name_idref = paste0("@", tree_name)
+		weight = 0.5 * length(gene_tree_names)	# Rough weight, Nick's guess
+		TreeRootScaler_operator_XML = xmlNode(name="operator", attrs=list(id=operator_name, spec="ScaleOperator", rootOnly="true", scaleFactor="0.7", tree=species_tree_name_idref, weight=weight))
+	
+		operator_name = paste0("UniformOperator_operator_for_", tree_name)
+		species_tree_name_idref = paste0("@", tree_name)
+		weight = 2 * length(gene_tree_names)	# Rough weight, Nick's guess
+		UniformOperator_operator_XML = xmlNode(name="operator", attrs=list(id=operator_name, spec="Uniform", tree=species_tree_name_idref, weight=weight))
+	
+		operator_name = paste0("SubtreeSlide_operator_for_", tree_name)
+		species_tree_name_idref = paste0("@", tree_name)
+		weight = 2 * length(gene_tree_names)	# Rough weight, Nick's guess
+		SubtreeSlide_operator_XML = xmlNode(name="operator", attrs=list(id=operator_name, spec="SubtreeSlide", size="0.002", tree=species_tree_name_idref, weight=weight))
+
+		operator_name = paste0("Narrow_operator_for_", tree_name)
+		species_tree_name_idref = paste0("@", tree_name)
+		weight = 2 * length(gene_tree_names)	# Rough weight, Nick's guess
+		Narrow_operator_XML = xmlNode(name="operator", attrs=list(id=operator_name, spec="Exchange", isNarrow="true", tree=species_tree_name_idref, weight=weight))
+		
+		operator_name = paste0("Wide_operator_for_", tree_name)
+		species_tree_name_idref = paste0("@", tree_name)
+		weight = 2 * length(gene_tree_names)	# Rough weight, Nick's guess
+		Wide_operator_XML = xmlNode(name="operator", attrs=list(id=operator_name, spec="Exchange", isNarrow="false", tree=species_tree_name_idref, weight=weight))
+
+		operator_name = paste0("WilsonBalding_operator_for_", tree_name)
+		species_tree_name_idref = paste0("@", tree_name)
+		weight = 2 * length(gene_tree_names)	# Rough weight, Nick's guess
+		WilsonBalding_operator_XML = xmlNode(name="operator", attrs=list(id=operator_name, spec="WilsonBalding", tree=species_tree_name_idref, weight=weight))
+		}
+
+
+	# UpDown for all clockrates, and gene trees
+	updown_XMLs_list = list()
+	clock_rownums = match(x=clockModel_names, table=seqs_df$clockModel_name)
+	for (i in 1:length(clockModel_names))
+		{
+		clock_type = seqs_df$clockmodel_type[clock_rownums[i]]
+		
+		if (grepl(pattern="SpeciesTree", x=clock_type) == TRUE)
+			{
+			# Collect the geneTrees within this SpeciesTree clock model
+
+			# SPECIESTREE RELAXED CLOCK STARBEAST2 ANALYSIS
+			
+			TFs = seqs_df$clockModel_name == clockModel_names[i]
+			
+			for (j in 1:sum(TFs))
+				{
+				tree_name = seqs_df$geneTreeName[TFs][j]
+				geneTree_clockModel_rate_id = paste0(seqs_df$clockmodel_type[clock_rownums[i]], "_Mean_of_clockRate_for_geneTree_", tree_name)
+				geneTree_clockModel_rate_idref = paste0("@", geneTree_clockModel_rate_id)
+			
+				clock_rate_id = paste0(seqs_df$clockmodel_type[clock_rownums[i]], "_", "Mean_of_clockRate_", clockModel_names[i])
+
+				up_XML = xmlNode(name="up", attrs=list(idref=clock_rate_id))
+				updown_XMLs_list = c(updown_XMLs_list, list(up_XML))
+				} # END for (j in 1:sum(TFs))
+			} else {
+			
+			# REGULAR STARBEAST2 ANALYSIS
+			clock_rate_id = paste0(seqs_df$clockmodel_type[clock_rownums[i]], "_Mean_of_", clockModel_names[i])
+
+			up_XML = xmlNode(name="up", attrs=list(idref=clock_rate_id))
+			updown_XMLs_list = c(updown_XMLs_list, list(up_XML))
+			} # END if (grepl(pattern="SpeciesTree", x=clock_type) == TRUE)
+		} # END for (i in 1:length(clockModel_names))
+	
+	# Add netDiversificationRate
+	up_XML = xmlNode(name="up", attrs=list(idref=birthRate_id))
+	updown_XMLs_list = c(updown_XMLs_list, list(up_XML))
+	
+	# Down moves
+	down_XML = xmlNode(name="down", attrs=list(idref=tree_name))
+	updown_XMLs_list = c(updown_XMLs_list, list(down_XML))
+
+	for (i in 1:length(gene_tree_names))
+		{
+		down_XML = xmlNode(name="down", attrs=list(idref=gene_tree_names[i]))
+		updown_XMLs_list = c(updown_XMLs_list, list(down_XML))
+		}
+	
+	if ((treemodel_df$popModel == "constant"))
+		{
+		down_XML = xmlNode(name="down", attrs=list(idref=popSizes_id))
+		updown_XMLs_list = c(updown_XMLs_list, list(down_XML))
+
+		down_XML = xmlNode(name="down", attrs=list(idref=popSizesMean_id))
+		updown_XMLs_list = c(updown_XMLs_list, list(down_XML))
+		}
+
+	if ((treemodel_df$popModel == "linear"))
+		{
+		down_XML = xmlNode(name="down", attrs=list(idref=tip_popSizes_id))
+		updown_XMLs_list = c(updown_XMLs_list, list(down_XML))
+
+		down_XML = xmlNode(name="down", attrs=list(idref=top_popSizes_id))
+		updown_XMLs_list = c(updown_XMLs_list, list(down_XML))
+
+		down_XML = xmlNode(name="down", attrs=list(idref=lwcrPopScale_id))
+		updown_XMLs_list = c(updown_XMLs_list, list(down_XML))
+		}
+
+	
+	weight = 1 * length(gene_tree_names)
+	updown_all_species_XML = xmlNode(name="operator", attrs=list(id="updown.all.Species", spec="UpDownOperator", scaleFactor="0.75", weight=weight), .children=updown_XMLs_list)
+		
+	
+
+	
+	# Scalers for clock rates and gene trees
+	# Do it for every unique combination of gene tree and clock rate
+	if (grepl(pattern="SpeciesTree", x=clock_type) == TRUE)
+		{
+		clockModel_names = paste0("clockRate_for_geneTree_", seqs_df$geneTreeName)
+		genetree_clockrates_fused = paste0(seqs_df$geneTreeName, "_", clockModel_names)
+		} else {
+		genetree_clockrates_fused = paste0(seqs_df$geneTreeName, "_", seqs_df$clockModel_name)
+		clockModel_names = seqs_df$clockModel_name
+		} # END if (grepl(pattern="SpeciesTree", x=clock_type) == TRUE)
+	
+	genetree_clockrates_fused_unique = unique(genetree_clockrates_fused)
+	rownums = match(x=genetree_clockrates_fused_unique, table=genetree_clockrates_fused)
+	treeClock_operators_XMLs = list()
+	previous_clock_type = NA
+	for (r in rownums)
+		{
+		if (grepl(pattern="SpeciesTree", x=clock_type) == TRUE)
+			{
+			tree_name = seqs_df$geneTreeName[r]
+			clock_name = paste0("clockRate_for_geneTree_", tree_name)
+			} else {
+			clock_name = seqs_df$clockModel_name[r]
+			tree_name = seqs_df$geneTreeName[r]
+			} # END if (grepl(pattern="SpeciesTree", x=clock_type) == TRUE)
+		clock_type = seqs_df$clockmodel_type[r]
+		
+		# Store the previous clock_type, use if this one is NA
+		if (isblank_TF(clock_type) == FALSE)
+			{
+			previous_clock_type = clock_type
+			} else {
+			clock_type = previous_clock_type
+			}
+		# Error check
+		if (isblank_TF(clock_type) == TRUE)
+			{
+			txt = paste0("STOP ERROR in genetrees_operators(). For clock_name '", clock_name, "', tree_name '", tree_name, "', the clock_type variable came out as blank/NA. Please check the 'clockmodel_type' column in the 'data' worksheet of the Excel settings file.")
+			cat("\n\n")
+			cat(txt)
+			cat("\n\n")
+			stop(txt)
+			}
+		
+		treeClock_operators_XML = treeClock_operators(tree_name=tree_name, clock_name=clock_name, clock_type=clock_type)
+		treeClock_operators_XMLs = c(treeClock_operators_XMLs, treeClock_operators_XML)
+		}
+	
+	treeClock_operators_XMLs[1:17]
+	treeClock_operators_XMLs[(length(treeClock_operators_XMLs)-17+1):length(treeClock_operators_XMLs)]
+	length(treeClock_operators_XMLs)
+	
+	length(treeClock_operators_XMLs)/17
+
+
+
+	# Put the tree stuff in the stateNodes
+
+	genetree_operators_XMLs = c(list(NodeReheight_operator_XML),
+	list(coordinatedUniform_operator_XML),
+	list(coordinatedExponential_operator_XML),
+	list(TreeScaler_operator_XML),
+	list(TreeRootScaler_operator_XML),
+	list(UniformOperator_operator_XML),
+	list(SubtreeSlide_operator_XML),
+	list(Narrow_operator_XML),
+	list(Wide_operator_XML),
+	list(WilsonBalding_operator_XML),
+	list(updown_all_species_XML),
+	treeClock_operators_XMLs)
+
+	if (is.null(xml))
+		{
+		res = NULL
+		res$tree_XMLs = tree_XMLs
+		res$genetree_operators_XMLs = genetree_operators_XMLs
+
+		extract='
+		tree_XMLs = res$tree_XMLs
+		genetree_operators_XMLs = res$genetree_operators_XMLs
+		'
+		return(res)
+		} else {
+		xml$state = c(xml$state, tree_XMLs)
+		xml$operators = c(xml$operators, genetree_operators_XMLs)
+		return(xml)
+		} # END if (is.null(xml))
+	} # END genetrees_operators <- function(seqs_df, taxonsets_df, tree_name="shared_tree", speciesTree_taxonset_listname="taxonsuperset", speciesTree_default="speciesTree", xml=NULL)
+
+
 	
 	

@@ -1,3 +1,12 @@
+# Extract the string (strings?) matching the regexp
+extract_regexp <- function(tmpstr, tmpre_string)
+	{
+	matches = gregexpr(tmpre_string, tmpstr)[[1]]
+	matches_end = matches-1+attr(matches,"match.length")
+	x = mapply(substr, tmpstr, matches, matches_end)
+	return(x)
+	}
+
 
 
 headtail <- function(fn, startline=1, endline=3, outputtxt="| more", outfn=NULL, printall=FALSE)
@@ -829,7 +838,7 @@ read.beast_original <- function (file, digits = NULL, printflag=FALSE)
 # read_beast_prt() produces these columns in the prt table:
 # names(beast_nodestats_dtf) = c("internal_nodenums_from1", "internal_nodenums", "rate_range_MIN", "rate_range_MAX", "height_95%_HPD_MIN", "height_95%_HPD_MAX", "height_median", "rate", "height", "rate_median", "height_range_MIN", "height_range_MAX", "rate_95%_HPD_MIN", "rate_95%_HPD_MAX", "posterior", "height_HPD_width", "height_range", "rate_HPD_width", "height_CV", "rate_CV")
 
-read_beast_prt <- function (file, digits = NULL, get_tipnames=TRUE, printflag=FALSE, include_rates=FALSE) 
+read_beast_prt <- function (file, digits = 9, get_tipnames=TRUE, printflag=FALSE, include_rates=FALSE) 
 	{
 	setup='
 	file=confn
@@ -838,14 +847,23 @@ read_beast_prt <- function (file, digits = NULL, get_tipnames=TRUE, printflag=FA
 	'
 
 	defaults='
+	library(BioGeoBEARS)
+	sourceall("/drives/GDrive/__github/BEASTmasteR/R/")
+	
+	# MrBayes doggies (no rates!)
 	wd = "/drives/SkyDrive/NIMBioS_projects/2015-03-18_Tumamoc/doggies/mb1/"
 	setwd(wd)
 	nexfn = "treeLog.mcc"
+	
+	# Matzke & Irmis, Muller & Reisz 2006 early eureptiles
+	wd="/drives/GDrive/__GDrive_projects/2014-11-21_Randy_Irmis_autapomorphies/_03_BEAST_IrmisDates/2016-01-12_Mk_unif_stripFalse"
+	setwd(wd)
+	nexfn = "treeLog2.mcc"
 	file=nexfn
-	digits=2
+	digits=9
 	get_tipnames=TRUE
 	printflag=FALSE
-	include_rates=FALSE
+	include_rates=TRUE
 	'
 	
 	# Scan the files in
@@ -862,7 +880,19 @@ read_beast_prt <- function (file, digits = NULL, get_tipnames=TRUE, printflag=FA
         
     # Nodes without posterior values are tip nodes (always 100%!)
     interior <- which(!is.na(tab$posterior))
-
+	
+	# The OTHER nodes are external (tip nodes)
+	external <- which(is.na(tab$posterior))
+	
+	# The lowest height (0) is the root node
+	# NO!! Height=0 is the top node, i.e. the present
+	# Height=age
+	#root_node <-  which(tab$height == 0)
+	
+	# Remove the root from the external nodes
+	#external = external[external != root_node]
+	
+	
     # Right is the lines containing ]
     # -- basically the tree lines
     RIGHT <- grep("\\]", X)    
@@ -912,7 +942,7 @@ read_beast_prt <- function (file, digits = NULL, get_tipnames=TRUE, printflag=FA
     # Line # for beginning of TRANSLATE block
     i2 <- grep("TRANSLATE", X, ignore.case = TRUE)
     
-    # No TRANSLATE block
+    # If a TRANSLATE BLOCK IS FOUND (in i2), use the first one
     if (length(i2) != 0)
     	{    
 		# Last line with TRANSLATE items
@@ -938,8 +968,7 @@ read_beast_prt <- function (file, digits = NULL, get_tipnames=TRUE, printflag=FA
 		start <- i1+1
 		end <- endblock[endblock > i1][1] - 1
 		tree <- X[start:end]
-
-		}
+		} # END if (length(i2) != 0)
     
 
      
@@ -965,19 +994,56 @@ read_beast_prt <- function (file, digits = NULL, get_tipnames=TRUE, printflag=FA
     brl <- paste("", brl, sep = ":")
     brl <- c(brl, ";")
     
-    # Make an empty vector, 1 cell for each stat
+    # Add totally unique 10-character code to brl text
+    # (for gsub ability later)
+    # (don't do the last brl, it's a ;)
+    codenums = sprintf("%010.0f", 1:(length(brl)-1))
+    codetxt = paste0("remove", codenums, "remove", collapse=NULL)
+    numchars_to_remove = nchar(codetxt[1])
+    brl[1:(length(brl)-1)] = paste0(codetxt, brl[1:(length(brl)-1)], collapse=NULL)
+    brl
+    
+    # tree with codetxt
+    tree_w_codetxt = tree
+    match_colon_locations = gregexpr(":", text=tree_w_codetxt)[[1]]
+    startpos=1
+    
+    insert_text_before_colon <- function(colonposition, textval, original_txt)
+    	{
+    	original_txt_part1 = substr(x=original_txt, start=1, stop=colonposition-1)
+    	original_txt_part2 = substr(x=original_txt, start=colonposition+1, stop=nchar(original_txt))
+    	newtxt = paste0(original_txt_part1, textval, ":", original_txt_part2)
+    	return(newtxt)
+    	}
+    
+    newtxt = tree_w_codetxt
+    # You HAVE to insert things backwards for the match position numbers to keep working
+    for (pos in length(match_colon_locations):1)
+    	{
+    	(newtxt = insert_text_before_colon(colonposition=match_colon_locations[pos], textval=codetxt[pos], original_txt=newtxt))
+    	}
+    tree_w_codetxt = newtxt
+    tree_w_codetxt
+    # Make an empty list, 1 item for each stat
+    # nodestats: for internal nodes
     nodestats <- vector(mode = "list", length = dim(tab)[2])
-
+	tipstats <- vector(mode = "list", length = dim(tab)[2])
+	
 	# Go through each nodestat
     for (i in seq(along = nodestats))
     #for (i in 1:1)
     	{
-        newtree <- tree
+        newtree <- tree_w_codetxt
         
         # Paste together the nodestat & branchlength
         val <- tab[, i]
         ggg <- paste(val, brl, sep = "")
         ggg[length(ggg)] <- paste(tail(val, 1), ";", sep = "")
+        
+        # Edit the ":" text in the newtree to be e.g.
+        # :remove0000000001remove
+        
+        
         
         # Go through the interior nodes, and replace
         # the branchlength with the node statistic in question
@@ -985,7 +1051,30 @@ read_beast_prt <- function (file, digits = NULL, get_tipnames=TRUE, printflag=FA
         	{
         	newtree <- gsub(brl[j], ggg[j], newtree)
         	}
+        # External nodes
+        for (j in external)
+        	{
+        	# Add a delimiter for the labels below the tipnames
+        	newtree <- gsub(brl[j], paste0("|", ggg[j]), newtree)
+        	}
+        # Root node (actually already in the tipnodes
+        #for (j in root_node)
+        #	{
+        #	newtree <- gsub(brl[j], ggg[j], newtree)
+        #	}
+        # I think you DON'T have to remove
+        # numchars_to_remove, since you've
+        # already gsubbed it out!
+        
+        # Now remove that codetext
+        for (removei in 1:length(codetxt))
+        	{
+        	newtree = gsub(pattern=codetxt[removei], replacement="", x=newtree)
+        	}
+        newtree
         dt <- read.tree(text = newtree)
+        dt
+        
         
         # Then get these as node labels
         z <- dt$node.label
@@ -993,19 +1082,28 @@ read_beast_prt <- function (file, digits = NULL, get_tipnames=TRUE, printflag=FA
         z <- as.numeric(z)
         z[z == 9999] <- NA
         
+        # Also get the tiplabels
+        tipvals = as.numeric(matrix(data=unlist(strsplit(dt$tip.label, split="\\|")), ncol=2, byrow=TRUE)[,2])
+        tipvals
+        
         # Tabulate the nodestats
         nodestats[[i]] <- z
         names(nodestats)[i] <- colnames(tab)[i]
+
+        tipstats[[i]] <- tipvals
+        names(tipstats)[i] <- colnames(tab)[i]
     	}
     
+    tipstats
     
     # Read the input file as plain NEXUS
     tr <- read.nexus(file)
     
-    # Add the stats to the standard tree object
+    # Add the stats (a bunch of sub-objects) to the standard 
+    # tree object (4 sub-objects)
     tr <- c(tr[1:length(tr)], nodestats[1:length(nodestats)])
     class(tr) <- ("phylo")
-
+	
     # Add the origin attribute
     attr(tr, "origin") <- file
     tr
@@ -1017,6 +1115,8 @@ read_beast_prt <- function (file, digits = NULL, get_tipnames=TRUE, printflag=FA
     tr_table = prt(tr, printflag=FALSE, relabel_nodes = FALSE, time_bp_digits=7, get_tipnames=get_tipnames)
     
     # make the internal node numbers
+    tipnums = 1:length(tr$tip.label)
+    tipnums_from1 = rep(NA, times=length(tr$tip.label))
     internal_nodenums = seq(from=length(tr$tip.label)+1, to=length(tr$tip.label)+tr$Nnode, by=1)
 	internal_nodenums_from1 = seq(from=1, to=tr$Nnode, by=1)
 
@@ -1029,12 +1129,23 @@ read_beast_prt <- function (file, digits = NULL, get_tipnames=TRUE, printflag=FA
     height_CV = (height_HPD_width/(1.96*2)) / tr$height
     rate_CV = (rate_HPD_width/(1.96*2)) / tr$rate
     
+     # Make a table of tip stats from the BEAST stats
+    tipstats$height_HPD_width = tipstats$"height_95%_HPD_MAX" - tipstats$"height_95%_HPD_MIN"
+    tipstats$height_range = tipstats$"height_range_MAX" - tipstats$"height_range_MIN"
+    tipstats$rate_HPD_width = tipstats$"rate_95%_HPD_MAX" - tipstats$"rate_95%_HPD_MIN"
+    
+    # Calculate the tip stats CVs of height and rate
+    tipstats$height_CV = (tipstats$height_HPD_width/(1.96*2)) / tipstats$height
+    tipstats$rate_CV = (tipstats$rate_HPD_width/(1.96*2)) / tipstats$rate
+   
+    
     if (include_rates == FALSE)
     	{
 		beast_nodestats_table_temp = cbind(internal_nodenums_from1, internal_nodenums, tr$"height_95%_HPD_MIN", tr$"height_95%_HPD_MAX", tr$height_median, tr$height, tr$height_range_MIN, tr$height_range_MAX, tr$posterior, height_HPD_width, height_range, height_CV)
 
-		# Add tip rows as NAs
-		tiprows = matrix(data=NA, nrow=length(tr$tip.label), ncol=ncol(beast_nodestats_table_temp))
+		# Add tip rows as NAs -- NO! GET THE DATA IN THERE!!
+		#tiprows = matrix(data=NA, nrow=length(tr$tip.label), ncol=ncol(beast_nodestats_table_temp))
+		tiprows = cbind(tipnums_from1, tipnums, tipstats$"height_95%_HPD_MIN", tipstats$"height_95%_HPD_MAX", tipstats$height_median, tipstats$height, tipstats$height_range_MIN, tipstats$height_range_MAX, tipstats$posterior, tipstats$height_HPD_width, tipstats$height_range, tipstats$height_CV)
 	
 		beast_nodestats_table = rbind(tiprows, beast_nodestats_table_temp)
 		beast_nodestats_dtf = adf2(beast_nodestats_table)
@@ -1042,9 +1153,11 @@ read_beast_prt <- function (file, digits = NULL, get_tipnames=TRUE, printflag=FA
 		} else {
 		beast_nodestats_table_temp = cbind(internal_nodenums_from1, internal_nodenums, tr$rate_range_MIN, tr$rate_range_MAX, tr$"height_95%_HPD_MIN", tr$"height_95%_HPD_MAX", tr$height_median, tr$rate, tr$height, tr$rate_median, tr$height_range_MIN, tr$height_range_MAX, tr$"rate_95%_HPD_MIN", tr$"rate_95%_HPD_MAX", tr$posterior, height_HPD_width, height_range, rate_HPD_width, height_CV, rate_CV)
 
-		# Add tip rows as NAs
-		tiprows = matrix(data=NA, nrow=length(tr$tip.label), ncol=ncol(beast_nodestats_table_temp))
-	
+		# Add tip rows as NAs -- NO! GET THE DATA IN THERE!!
+		# 2016-06-02_bug: the RATES WILL NOT be NA!
+		#tiprows = matrix(data=NA, nrow=length(tr$tip.label), ncol=ncol(beast_nodestats_table_temp))
+		tiprows = cbind(tipnums_from1, tipnums, tipstats$rate_range_MIN, tipstats$rate_range_MAX, tipstats$"height_95%_HPD_MIN", tipstats$"height_95%_HPD_MAX", tipstats$height_median, tipstats$rate, tipstats$height, tipstats$rate_median, tipstats$height_range_MIN, tipstats$height_range_MAX, tipstats$"rate_95%_HPD_MIN", tipstats$"rate_95%_HPD_MAX", tipstats$posterior, tipstats$height_HPD_width, tipstats$height_range, tipstats$rate_HPD_width, tipstats$height_CV, tipstats$rate_CV)
+		
 		beast_nodestats_table = rbind(tiprows, beast_nodestats_table_temp)
 		beast_nodestats_dtf = adf2(beast_nodestats_table)
 		names(beast_nodestats_dtf) = c("internal_nodenums_from1", "internal_nodenums", "rate_range_MIN", "rate_range_MAX", "height_95%_HPD_MIN", "height_95%_HPD_MAX", "height_median", "rate", "height", "rate_median", "height_range_MIN", "height_range_MAX", "rate_95%_HPD_MIN", "rate_95%_HPD_MAX", "posterior", "height_HPD_width", "height_range", "rate_HPD_width", "height_CV", "rate_CV")
@@ -1054,10 +1167,35 @@ read_beast_prt <- function (file, digits = NULL, get_tipnames=TRUE, printflag=FA
 	# head(beast_nodestats_dtf)
 	# tail(beast_nodestats_dtf)
     
+    # NAs in these tips represent tips with 0 variation in height. Convert NA to 0:
+    TF = is.na(beast_nodestats_dtf$"height_95%_HPD_MIN"[tipnums])
+    beast_nodestats_dtf$"height_95%_HPD_MIN"[tipnums][TF] = 0
+
+    TF = is.na(beast_nodestats_dtf$"height_95%_HPD_MAX"[tipnums])
+    beast_nodestats_dtf$"height_95%_HPD_MAX"[tipnums][TF] = 0
+
+    TF = is.na(beast_nodestats_dtf$height_median[tipnums])
+    beast_nodestats_dtf$height_median[tipnums][TF] = 0
+
+    TF = is.na(beast_nodestats_dtf$height_range_MIN[tipnums])
+    beast_nodestats_dtf$height_range_MIN[tipnums][TF] = 0
     
+    TF = is.na(beast_nodestats_dtf$height_range_MAX[tipnums])
+    beast_nodestats_dtf$height_range_MAX[tipnums][TF] = 0
+    
+    TF = is.na(beast_nodestats_dtf$height_HPD_width[tipnums])
+    beast_nodestats_dtf$height_HPD_width[tipnums][TF] = 0
+    
+    TF = is.na(beast_nodestats_dtf$height_range[tipnums])
+    beast_nodestats_dtf$height_range[tipnums][TF] = 0
+    
+    TF = is.na(beast_nodestats_dtf$height_CV[tipnums])
+    beast_nodestats_dtf$height_CV[tipnums][TF] = 0
+    beast_nodestats_dtf
+    
+    # Assemble the final table
     prt_beast_nodestats = cbind(tr_table, beast_nodestats_dtf)
     
-	
 	# Return a list with the tree and the megatable
 	beastcon = NULL
 	beastcon$tr = tr
@@ -1571,4 +1709,80 @@ extractBEASTstats2 <- function (fn, regexp = "(tree)( )(STATE)(_)(\\d+)")
     #tip <- which(is.na(ttab$posterior))
     return(tab)
 	}
+
+
+
+#######################################################
+# From phyloch (released with GPL >2)
+# MUCH faster than read.nexus.data or read_nexus_data2
+# (but, way less flexible)
+#######################################################
+
+read_nex_phyloch <- function(fn){
+	
+	x <- scan(fn, what = "c", quiet = TRUE)
+		
+	## eliminate comments
+	## ------------------
+	left <- grep("\\[", x)
+	right <- grep("\\]", x)
+	if ( length(left) > 0 ){
+	  m <- cbind(left, right)
+	  x <- x[-unlist(apply(m, 1, function(x) x[1]:x[2]))]
+	}
+	
+	x <- x[x != ""]
+	
+  ## getting number of taxa
+  ## ----------------------
+	ntax <- x[grep("ntax", x, ignore.case = TRUE)]
+	ntax <- gsub("[[:alpha:]]|[[:punct:]]", "", ntax )
+	nb <- ntax <- as.numeric(unique(ntax))
+		
+	## getting number of characters	
+  ## ----------------------------
+	ncha <- x[grep("nchar", x, ignore.case = TRUE)]
+	ncha <- gsub("[[:alpha:]]|[[:punct:]]", "", ncha )
+	ncha <- as.numeric(unique(ncha))
+	
+	## get beginning and end of matrix
+  ## -------------------------------
+	start <- grep("^\t?matrix$", x, ignore.case = TRUE)
+	end <- grep(";", x)
+	end <- min(end[end > start])
+	M <- x[(start + 1):(end - 1)]
+	
+	# assemble DNAbin object:
+	# -----------------------
+	nblock <- ceiling(ncha / nchar(M[2]))
+	id <- seq(1, 2 * ntax, by = 2)
+	nam <- M[id]
+	fuse <- function(s, M, nblock, ntax){
+	  paste(M[seq(s, length.out = nblock, by = ntax * 2)], collapse = "")
+	}
+	seq <- lapply(id + 1, fuse, M = M, nblock = nblock, ntax = ntax)
+	obj <- list(nb = ntax, seq = seq, nam = nam, com = NA)
+	class(obj) <- "alignment"
+	as.DNAbin(obj)
+} # END read.nex
+
+
+#######################################################
+# Much FASTER read of a large NEXUS DNA file
+#######################################################
+read_nex_phyloch_to_list <- function(fn)
+	{
+	obj = read_nex_phyloch(fn)
+	charmat = as.character(obj)
+	
+	charlist = list()
+	for (i in 1:nrow(charmat))
+		{
+		charlist[[i]] = charmat[i,]
+		}
+	names(charlist) = row.names(charmat)
+	return(charlist)
+	}
+
+
 

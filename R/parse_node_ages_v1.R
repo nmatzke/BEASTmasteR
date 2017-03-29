@@ -10,9 +10,24 @@ make_taxa_groups <- function(taxa_df, OTUs=NULL, xml=NULL)
 	'
 	
 	names_of_groups = names(taxa_df)
-	# User should manually create an "all_OTUs" group first
+	# User should manually create an "total_group_LCA" group first
 	#names_of_groups = names_of_groups[names_of_groups != "all_taxa"]
-
+	
+	#######################################################
+	# Error check
+	#######################################################
+	if (length(names_of_groups) != length(unique(names_of_groups)))
+		{
+		stoptxt = "ERROR in make_taxa_groups(): In worksheet 'taxa', you have duplicate clade names. Printing them below."
+		cat("\n\n")
+		cat(stoptxt)
+		cat("\n\n")
+		print(table(names_of_groups))
+		cat("\n\n")
+		stop(stoptxt)
+		}
+	
+	
 	if (length(names_of_groups) < 1)
 		{
 		if (is.null(xml))
@@ -22,7 +37,8 @@ make_taxa_groups <- function(taxa_df, OTUs=NULL, xml=NULL)
 			return(xml)
 			} # END if (is.null(xml))
 		} # END if (length(names_of_groups) < 1)
-
+	
+	
 	# Check names
 	keepTF = rep(TRUE, times=length(names_of_groups))
 	for (i in 1:length(names_of_groups))
@@ -48,10 +64,29 @@ make_taxa_groups <- function(taxa_df, OTUs=NULL, xml=NULL)
 			return(xml)
 			} # END if (is.null(xml))
 		} # END if (length(names_of_groups) < 1)
+
+	
+	# ERROR CHECK
+	if (names_of_groups[1] != "total_group_LCA")
+		{
+		stoptxt = paste0("STOP ERROR in make_taxa_groups(). The first taxon group listed in worksheet 'taxa' *must* be named 'total_group_LCA'. In addition, 'total_group_LCA' *must* be listed in worksheet 'nodes', with its entry for column 'use' set to 'yes'.  Your input Excel file fails at one or both of these.")
+		
+		cat("\n\n")
+		cat(stoptxt)
+		cat("\n\n")
+		
+		stop(stoptxt)
+		} # END if (names_of_groups[1] != "total_group_LCA")
+
+	# Keep a count of how many clade constraints each 
+	# OTU in total_group_LCA has
+	OTUnames_to_count_constraints = taxa_df[,"total_group_LCA"]
+	count_constraints = rep(0, length(OTUnames_to_count_constraints))
 	
 	# Keep a list of the taxa which end up EMPTY -- we will CUT 
 	# these from the priors list (or else it causes an error)
 	list_of_empty_taxa = NULL
+	
 	
 	# Otherwise, go through and make these taxa
 	taxon_XMLs = list(bl(), xmlCommentNode(" Taxon groupings (clades or other groups of interest) "))
@@ -97,6 +132,10 @@ make_taxa_groups <- function(taxa_df, OTUs=NULL, xml=NULL)
 				} # END if (length(items_being_removed) > 0)
 			# Subset the OTUs
 			items2 = items2[TF]
+			
+			# Count their occurrences in clades
+			indexes_in_constraints_count = match(x=items2, table=OTUnames_to_count_constraints)
+			count_constraints[indexes_in_constraints_count] = count_constraints[indexes_in_constraints_count] + 1
 			} # END if (is.null(OTUs) == FALSE)
 		
 		
@@ -106,23 +145,37 @@ make_taxa_groups <- function(taxa_df, OTUs=NULL, xml=NULL)
 		taxon_XMLs = c(taxon_XMLs, taxon_XML)
 		} # END for (i in 1:length(names_of_groups))
 	
+	count_constraints_df = cbind(OTUnames_to_count_constraints, count_constraints)
+	count_constraints_df = as.data.frame(count_constraints_df, stringsAsFactors=FALSE)
+	count_constraints_df = dfnums_to_numeric(count_constraints_df)
+	row.names(count_constraints_df) = 1:nrow(count_constraints_df)
+	names(count_constraints_df) = c("OTUs", "count_constraints")
+	
 	# Return results
 	if (is.null(xml))
 		{
 		res = NULL
 		res$taxon_XMLs = taxon_XMLs
 		res$list_of_empty_taxa = list_of_empty_taxa
+		res$count_constraints_df = count_constraints_df
 		
 		extract='
 		taxon_XMLs = res$taxon_XMLs
 		list_of_empty_taxa = res$list_of_empty_taxa
+		count_constraints_df = res$count_constraints_df
 		'
 		
 		return(res)
 		} else {
 		xml$taxa = c(xml$taxa, taxon_XMLs)
 		xml$list_of_empty_taxa = list_of_empty_taxa
+		xml$count_constraints_df = count_constraints_df
+		
+		extract='
+		taxa = xml$taxa
 		list_of_empty_taxa = xml$list_of_empty_taxa
+		count_constraints_df = xml$count_constraints_df
+		'
 		return(xml)
 		} # END if (is.null(xml))
 
@@ -130,7 +183,7 @@ make_taxa_groups <- function(taxa_df, OTUs=NULL, xml=NULL)
 	stop("ERROR in make_taxa_groups(): shouldn't get here")
 	} # END make_taxa_groups <- function(taxa_df, OTUs=NULL, xml=NULL)
 
-make_cladePrior_XMLs <- function(nodes_df, tree_name="shared_tree", xml=NULL, list_of_empty_taxa=NULL)
+make_cladePrior_XMLs <- function(nodes_df, tree_name="shared_tree", xml=NULL, list_of_empty_taxa=NULL, CalibratedYule_txt="")
 	{
 	defaults='
 	tree_name="shared_tree"
@@ -140,7 +193,8 @@ make_cladePrior_XMLs <- function(nodes_df, tree_name="shared_tree", xml=NULL, li
 	
 	# Subset nodes_df
 	nodes_df = nodes_df[nodes_df$use != "no",]
-	
+
+
 	# Remove taxa groups that are empty (have no species in them)
 	if (!is.null(list_of_empty_taxa))
 		{
@@ -149,12 +203,25 @@ make_cladePrior_XMLs <- function(nodes_df, tree_name="shared_tree", xml=NULL, li
 		nodes_df = nodes_df[TF==FALSE,]
 		} # END if (is.null(list_of_empty_taxa))
 	
+	# ERROR CHECK
+	if (length(nodes_df$Taxon) != length(unique(nodes_df$Taxon)))
+		{
+		stoptxt = "ERROR in make_taxa_groups(): In worksheet 'nodes', you have duplicate clade names. Printing them below."
+		cat("\n\n")
+		cat(stoptxt)
+		cat("\n\n")
+		print(table(nodes_df$Taxon))
+		cat("\n\n")
+		stop(stoptxt)
+		}
+
+	
 	# Make the clade priors
 	priordists_XML = list()
 	for (i in 1:nrow(nodes_df))
 		{
 		nodeline = nodes_df[i,]
-		priordist_XML_list = nodeline_to_cladePrior(nodeline, tree_name=tree_name)
+		priordist_XML_list = nodeline_to_cladePrior(nodeline, tree_name=tree_name, CalibratedYule_txt=CalibratedYule_txt)
 		priordists_XML = c(priordists_XML, priordist_XML_list)
 		priordists_XML
 		}
@@ -266,9 +333,16 @@ make_cladePrior_logs <- function(nodes_df, xml=NULL, tree_name="shared_tree", tr
 		} # END if (is.null(xml) == FALSE)
 	} # END make_cladePrior_logs <- function(nodes_df, xml=NULL, tree_name="shared_tree", trace_or_screen="both")
 
+
+
+
+
+
+
+
 # Take a line from the "nodes" worksheet, and
 # make an XML prior
-nodeline_to_cladePrior <- function(nodeline, tree_name="shared_tree")
+nodeline_to_cladePrior <- function(nodeline, tree_name="shared_tree", CalibratedYule_txt="")
 	{
 	param2_XML = NULL
 	
@@ -324,8 +398,8 @@ nodeline_to_cladePrior <- function(nodeline, tree_name="shared_tree")
 			stop(errortxt1)
 			} # END if (sum(TF2) > 0)
 		distrib = nodeline$distribution
-		param1 = nodeline$param1
-		param2 = nodeline$param2
+		param1 = as.numeric(nodeline$param1)
+		param2 = as.numeric(nodeline$param2)
 		meanInRealSpace = nodeline$meanInRealSpace
 		offset = nodeline$offset
 		node_or_stem = nodeline$node_or_stem
@@ -395,6 +469,9 @@ nodeline_to_cladePrior <- function(nodeline, tree_name="shared_tree")
 				cat(errortxt)
 				stop(errortxt)
 				} # END if (offset > 0)
+
+			normMeanval = param1
+			normSDval = 0.01 * normMeanval
 			} # END if (tolower(distrib) == "normal")
 		if (tolower(distrib) == "lognormal")
 			{
@@ -439,44 +516,59 @@ nodeline_to_cladePrior <- function(nodeline, tree_name="shared_tree")
 			
 		
 		# xmlNodes for the parameters
+		if (isblank_TF(CalibratedYule_txt) == FALSE)
+			{
+			param_name_txt = paste0("param_", CalibratedYule_txt)
+			} else {
+			param_name_txt = "param"
+			}
+		
+		
 		if ((distrib == "Uniform") && (nodeline$convert_to_normal != "yes"))
 			{
-			node_id = paste(taxon_name, "param", distrib, sep="_")
+			node_id = paste(taxon_name, param_name_txt, distrib, sep="_")
 			param1_XML = xmlNode(name=distrib, attrs=list(id=node_id, name="distr", lower=param1, upper=param2))
 			param2_XML = NULL
 			}
 		if ((distrib == "Normal") && (nodeline$convert_to_normal != "yes"))
 			{
-			node_id = paste(taxon_name, "param", distrib, param1_txt, sep="_")
+			node_id = paste(taxon_name, param_name_txt, distrib, param1_txt, sep="_")
 			param1_XML = xmlNode(name="parameter", param1, attrs=list(id=node_id, name="mean", estimate="false"))
-			node_id = paste(taxon_name, "param", distrib, param2_txt, sep="_")
+			node_id = paste(taxon_name, param_name_txt, distrib, param2_txt, sep="_")
 			param2_XML = xmlNode(name="parameter", param2, attrs=list(id=node_id, name="sigma", estimate="false"))
 			}
 		if ((distrib == "LogNormal") && (nodeline$convert_to_normal != "yes"))
 			{
-			node_id = paste(taxon_name, "param", distrib, param1_txt, sep="_")
+			node_id = paste(taxon_name, param_name_txt, distrib, param1_txt, sep="_")
 			param1_XML = xmlNode(name="parameter", param1, attrs=list(id=node_id, name="M", estimate="false"))
-			node_id = paste(taxon_name, "param", distrib, param2_txt, sep="_")
+			node_id = paste(taxon_name, param_name_txt, distrib, param2_txt, sep="_")
 			param2_XML = xmlNode(name="parameter", param2, attrs=list(id=node_id, name="S", estimate="false"))
 			}
 		if ((distrib == "Exponential") && (nodeline$convert_to_normal != "yes"))
 			{
-			node_id = paste(taxon_name, "param", distrib, param1_txt, sep="_")
+			node_id = paste(taxon_name, param_name_txt, distrib, param1_txt, sep="_")
 			param1_XML = xmlNode(name="parameter", param1, attrs=list(id=node_id, name="mean", estimate="false"))
 			}
 		# If we are converting to normal
 		if (nodeline$convert_to_normal == "yes")
 			{
 			distrib = "Normal"
-			node_id = paste("ConvertedForStartTree", taxon_name, "param", distrib, param1_txt, sep="_")
+			node_id = paste("ConvertedForStartTree", taxon_name, param_name_txt, distrib, param1_txt, sep="_")
 			param1_XML = xmlNode(name="parameter", normMeanval, attrs=list(id=node_id, name="mean", estimate="false"))
-			node_id = paste("ConvertedForStartTree", taxon_name, "param", distrib, param2_txt, sep="_")
+			node_id = paste("ConvertedForStartTree", taxon_name, param_name_txt, distrib, param2_txt, sep="_")
 			param2_XML = xmlNode(name="parameter", normSDval, attrs=list(id=node_id, name="sigma", estimate="false"))
 			}
 
-
+		# Modify the prior name, if it's going into the Calibrated Yule specification
+		if (isblank_TF(CalibratedYule_txt) == FALSE)
+			{
+			priortxt = paste0("prior_", CalibratedYule_txt)
+			} else {
+			priortxt = "prior"
+			}
+		node_id = paste(taxon_name, priortxt, distrib, sep="_")
+		
 		# xmlNode for the distribution
-		node_id = paste(taxon_name, "prior", distrib, sep="_")
 		if (!is.null(param2_XML))
 			{
 			children = list(param1_XML, param2_XML)
@@ -511,6 +603,12 @@ nodeline_to_cladePrior <- function(nodeline, tree_name="shared_tree")
 		} else {
 		prior_id = paste(taxon_name, "prior", sep="_")
 		}
+	
+	if (CalibratedYule_txt != "")
+		{
+		prior_id = paste0(prior_id, "_for_CalibratedYule")
+		}
+	
 	mono_txt = "false"
 	if (nodeline$mono == "yes")
 		{
@@ -521,6 +619,22 @@ nodeline_to_cladePrior <- function(nodeline, tree_name="shared_tree")
 		{
 		useStem_txt = "true"
 		}
+	
+	# XML for Calibrated Yule calibrations
+	if (isblank_TF(CalibratedYule_txt) == FALSE)
+		{
+		# Distribution on the date, monophyly NOT required
+
+		txt = paste(" Distribution on the date (no prior) of taxon: ", taxon_name, " (CalibrationPoint doesn't specify monophyly vs.not) ", sep="")
+		XML_comment = xmlCommentNode(txt)
+
+		priordist_XML = xmlNode(name="calibrations", attrs=list(id=prior_id, spec="beast.evolution.speciation.CalibrationPoint", parentOf=useStem_txt), .children=c(list(taxonset_node), list(distrib_XML)))
+		priordist_XML_list = list(bl(), XML_comment, priordist_XML)		
+		
+		# Exit early
+		return(priordist_XML_list)
+		}
+	
 	
 	# Date and monophyly constrained
 	if ((is.null(distrib_XML) == FALSE) && (nodeline$mono == "yes") ) 

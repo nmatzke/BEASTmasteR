@@ -553,6 +553,7 @@ plot_Delta1_diversification_shifts <- function(trfn, timeperiods=c(1,2), lambda2
 	dev.off()
 	cmdstr = paste0("open ", pdffn)
 	system(cmdstr)
-
+	
+	return(res)
 	} # END plot_Delta1_diversification_shifts <- function(trfn, timeperiods, lambda2, pdffn, width=7, height=12)
 
