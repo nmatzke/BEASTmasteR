@@ -225,7 +225,7 @@ data_section_name = unname(mapply(FUN=gsub, pattern="datatype_", x=data_section_
 			data_txt = paste0("@", dataset_name)
 			morph_basefreqs_XML = xmlNode(name="frequencies", attrs=list(id=morph_basefreqs_id, data=data_txt, spec="Frequencies", estimate="true") )
 			xml1 = xmlCommentNode(" Using empirical base frequencies for this morphological character dataset ")
-			xml2 = xmlCommentNode(" (but estimate=`true` in `frequencies` means use empirical mean freqs from data) ")
+			xml2 = xmlCommentNode(" (note: estimate=`true` in `frequencies` means use empirical mean freqs from data) ")
 			morph_basefreqs_XMLs = cl(xml1, xml2, morph_basefreqs_XML)
 			freq_params_XMLs = cl(bl(), xmlCommentNode(" Parameters for the base frequencies (if they are free parameters; if not free, no parameters) "), xmlCommentNode(" (no base frequency free parameters here) "), bl())
 			}
@@ -236,7 +236,7 @@ data_section_name = unname(mapply(FUN=gsub, pattern="datatype_", x=data_section_
 			morph_basefreqs_id = paste0(data_section_name[i], "_basefreqs")
 			freq_params_id = paste0(morph_basefreqs_id, "_params")
 			freq_params_idref = paste0("@", freq_params_id)
-			freq_params_XML = xmlNode(name="parameter", freqs_txt, attrs=list(dimension=numstates, lower="0.0", upper="1.0", name="stateNode", estimate="true"))
+			freq_params_XML = xmlNode(name="parameter", freqs_txt, attrs=list(id=freq_params_id, dimension=numstates, lower="0.0", upper="1.0", name="stateNode", estimate="true"))
 			freq_params_XMLs = cl(bl(), xmlCommentNode(" Parameters for the base frequencies (if they are free parameters; if not free, no parameters) "), freq_params_XML)
 			# Logs on the base frequencies for morphological characters
 			freq_params_log_XML = xmlNode(name="log", attrs=list(idref=freq_params_id))
@@ -245,14 +245,14 @@ data_section_name = unname(mapply(FUN=gsub, pattern="datatype_", x=data_section_
 			morph_basefreqs_idref = paste0("@", morph_basefreqs_id)
 			morph_basefreqs_XML = xmlNode(name="frequencies", attrs=list(id=morph_basefreqs_id, frequencies=freq_params_idref, spec="Frequencies", estimate="false") )
 			xml1 = xmlCommentNode(" Estimating base frequencies for this morphological character as free parameters dataset ")
-			xml2 = xmlCommentNode(" (but estimate=`false` in `frequencies` means don't use empirical mean freqs from data) ")
+			xml2 = xmlCommentNode(" (note: estimate=`false` in `frequencies` means don't use empirical mean freqs from data) ")
 			morph_basefreqs_XMLs = cl(xml1, xml2, morph_basefreqs_XML)
 			
 			# Make the operator for the frequencies
 			freq_params_idref_XML = xmlNode(name="parameter", attrs=list(idref=freq_params_id))
 			freq_params_operators_id = paste0("DeltaExchangeOperator_on_", freq_params_id)
 			freq_params_operators_XML = xmlNode(name="operator", attrs=list(id=freq_params_operators_id, delta=0.1, spec="DeltaExchangeOperator", weight="10"), .children=list(freq_params_idref_XML))
-			freq_params_operators_XMLs = c(freq_params_operators_XMLs, freq_params_operators_XML)
+			freq_params_operators_XMLs = cl(freq_params_operators_XMLs, freq_params_operators_XML)
 			}
 		
 		

@@ -171,7 +171,7 @@ level_tree_tips <- function(tr, method="mean", printflag=TRUE, fossils_older_tha
 
 
 
-impose_min_brlen <- function(phy, min_brlen=0.01, leave_BL0_terminals=TRUE)
+impose_min_brlen_OLD <- function(phy, min_brlen=0.01, leave_BL0_terminals=TRUE)
 	{
 	num_internal_nodes = phy$Nnode
 	numtips = length(phy$tip.label)
@@ -314,6 +314,176 @@ impose_min_brlen <- function(phy, min_brlen=0.01, leave_BL0_terminals=TRUE)
 	cat("\n")
 	return(phy3)
 	} # END impose_min_brlen <- function(phy, min_brlen=0.1)
+
+
+
+
+
+
+
+# Avoid negative branchlengths
+
+impose_min_brlen <- function(phy, min_brlen=0.01, leave_BL0_terminals=TRUE, direct_ancestor_brlen=1e-07)
+	{
+	defaults='
+	min_brlen = 1e-6
+	leave_BL0_terminals=TRUE
+	direct_ancestor_brlen=1e-07
+	'
+	
+	num_internal_nodes = phy$Nnode
+	numtips = length(phy$tip.label)
+	rootnodenum = numtips+1
+	# likelihoods are computed at all nodes
+	# make a list to store the 
+	numnodes = numtips + num_internal_nodes
+	
+	# Reorder the edge matrix into pruningwise order
+	# This is CRUCIAL!!
+	phy2 <- reorder(phy, "pruningwise")
+	phy2_orig = phy2
+	
+	observed_min_orig = min(phy2_orig$edge.length)
+	TF = phy2_orig$edge.length < min_brlen
+	num_branches_below_min = sum(TF)
+	if (observed_min_orig >= min_brlen)
+		{
+		txt = paste0("No branches found =< min_brlen (", min_brlen, "). Returning original tree, pruningwise reordered.")
+		cat("\n")
+		cat(txt)
+		cat("\n")
+		return(phy2)
+		} else {
+		
+		txt = paste0(num_branches_below_min, " branches found < min_brlen (", min_brlen, "). Running downpass to edit branchlengths by pushing nodes down so that minimum branchlength=", min_brlen, ". Adjusting i:Leftnode,j:Rightnode,anc:Ancnode;...")
+		cat("\n")
+		cat(txt)
+		cat("\n\n")
+		} 
+		
+		# END if (observed_min_orig > min_brlen)
+
+
+
+	# DEFINE DOWNPASS THROUGH THE BRANCHES	
+	tipnums <- 1:numtips
+	i = 1
+	edges_to_visit = seq(from=1, by=2, length.out=num_internal_nodes)
+
+	#######################################################
+	#######################################################
+	# THIS IS A DOWNPASS FROM THE TIPS TO THE ROOT
+	#######################################################
+	#######################################################
+	direct_ancestor_count = 0
+	for (i in edges_to_visit)
+		{
+		# First edge visited is i
+		#print(i)
+		
+		# Its sister is j 
+		j <- i + 1
+		#print(j)
+
+		# Get the node numbers at the tips of these two edges		
+		left_desc_nodenum <- phy2$edge[i, 2]
+		right_desc_nodenum <- phy2$edge[j, 2]
+		
+		# And for the ancestor edge (i or j shouldn't matter, should produce the same result!!!)
+		ancnode <- phy2$edge[i, 1]
+		anc_edge_TF = phy2$edge[,2] == ancnode
+		anc_edgenum = (1:nrow(phy2$edge))[anc_edge_TF]
+		if (length(anc_edgenum) == 0)
+			{
+			anc_edgenum = NA
+			}
+
+		# Get the edge length (left, right, anc)
+		Llength = phy2$edge.length[i]
+		Rlength = phy2$edge.length[j]
+		Alength = phy2$edge.length[anc_edgenum]
+		
+		txt = paste("ancnode:", ancnode, " left:", left_desc_nodenum, " right:", right_desc_nodenum, sep="")
+		#print(txt)
+		
+		# If 0-length terminal branches are allowed (e.g. a 
+		# sampled-ancestor tree), and
+		# If a node is a terminal node,
+		# and if it is of length 0 and the other branch > 0,
+		# then don't change this branch length
+		edit_brlength = TRUE
+
+		if (leave_BL0_terminals == TRUE)
+			{
+			if (i <= numtips)
+				{
+				TF1  = (Llength >= 0) && (Llength <= direct_ancestor_brlen)
+				TF2  = (Rlength >= 0) && (Rlength <= direct_ancestor_brlen)
+				#cat(i, Llength, Rlength, sep="\t")
+				#cat("\n")
+				if ( TF1 && (Rlength > 0) )
+					{
+					edit_brlength = FALSE
+					direct_ancestor_count = direct_ancestor_count + 1
+					}
+				} # END if (i <= numtips)
+			if (j <= numtips)
+				{
+				if ( TF2 && (Llength > 0) )
+					{
+					edit_brlength = FALSE
+					direct_ancestor_count = direct_ancestor_count + 1
+					}
+				} # END if (i <= numtips)
+			} # END if (leave_BL0_terminals == TRUE)
+		
+		
+		# If either the left or right branch is < min_brlen, change both
+		if (edit_brlength == TRUE) {
+		if ( (Llength < min_brlen) || (Rlength < min_brlen) )
+			{
+			cat(i, ":", left_desc_nodenum, ",", j, ":", right_desc_nodenum, ",anc:", ancnode, "; ", sep="")
+			
+			amount_to_add_L = min_brlen - Llength
+			amount_to_add_R = min_brlen - Rlength
+			amount_to_add = max(c(amount_to_add_L, amount_to_add_R))
+			
+			# Change both branchlengths by the same amount
+			phy2$edge.length[i] = phy2$edge.length[i] + amount_to_add
+			phy2$edge.length[j] = phy2$edge.length[j] + amount_to_add
+			
+			# Subtract that amount from the branch below
+			# (may result in negative, which will be fixed further in the downpass)
+			if (is.na(anc_edgenum) == FALSE)
+				{
+				phy2$edge.length[anc_edgenum] = phy2$edge.length[anc_edgenum] - amount_to_add
+				}
+			}
+			} # END if (edit_brlength == TRUE)
+		
+		} # end downpass
+	#######################################################
+	# END DOWNPASS FROM THE TIPS TO THE ROOT
+	#######################################################
+	rootnode = ancnode
+	phy3 = phy2
+
+	cat("\n")
+	cat("\n")
+	num_branches_below_min2 = num_branches_below_min - direct_ancestor_count
+	
+	txt = paste0("Originally, ", num_branches_below_min2, " (non-ancestor) branches were found < min_brlen (", min_brlen, "). Running downpass to edit branchlengths by pushing nodes down so that minimum branchlength=", min_brlen, ". Adjusting i:Leftnode,j:Rightnode,anc:Ancnode;...")
+	cat("\n")
+	cat(txt)
+		
+	observed_min_brlen_new = min(phy3$edge.length)
+	cat("\n\n")
+	cat("New observed_min_brlen_new=", observed_min_brlen_new, sep="")
+	cat("\n")
+	return(phy3)
+	} # END impose_min_brlen <- function(phy, min_brlen=0.1)
+
+
 
 
 

@@ -1956,7 +1956,7 @@ get_edge_times_before_present <- function(t)
 #'   @cite Matzke_2012_IBS
 #' @examples
 #' test=1
-extend_tips_to_ultrametricize <- function(obj, age_of_root=0, tips_end_at_this_date=NA)
+extend_tips_to_ultrametricize_OLD <- function(obj, age_of_root=0, tips_end_at_this_date=NA)
 	{
 	#print("node ages of tips:")
 	tip_ages = age_of_root + get_node_ages_of_tips(obj)
@@ -1973,6 +1973,62 @@ extend_tips_to_ultrametricize <- function(obj, age_of_root=0, tips_end_at_this_d
 	indices_of_branches_under_tips = get_indices_of_branches_under_tips(obj)
 
 	obj$edge.length[indices_of_branches_under_tips] = obj$edge.length[indices_of_branches_under_tips] + nums_to_add_to_tip_to_ultrametricize
+	
+	return(obj)
+	}
+
+
+
+
+#######################################################
+# extend_tips_to_ultrametricize
+#######################################################
+#' Take a tree, extend all tips (including fossils) up to 0.0 my before present
+#' 
+#' Makes tree precisely ultrametric by extending the terminal branches up to the highest tip (which is treated as 0 my before present).
+#'
+#' This function ADDS the time_before_present to everything, including fossils.  You have been warned.
+#' 
+#' @param obj An \code{\link[ape]{ape}} \code{\link[ape]{phylo}} object.
+#' @param age_of_root The length of the branch below the root. Default 0.
+#' @param tips_end_at_this_date The tips can be set to something other than 0, if desired.  (This could produce negative branclengths, however.)
+#' @return \code{obj} The corrected phylogeny
+#' @export
+#' @seealso \code{\link[ape]{read.tree}}, \code{\link{prt}}, \code{\link{average_tr_tips}}
+#' @note Go BEARS!
+#' @author Nicholas J. Matzke \email{matzke@@berkeley.edu} 
+#' @references
+#' \url{http://phylo.wikidot.com/matzke-2013-international-biogeography-society-poster}
+#' @bibliography /Dropbox/_njm/__packages/BioGeoBEARS_setup/BioGeoBEARS_refs.bib
+#'   @cite Matzke_2012_IBS
+#' @examples
+#' test=1
+extend_tips_to_ultrametricize <- function(obj, age_of_root=0, tips_end_at_this_date=NA, fossils_older_than=NULL)
+	{
+	#print("node ages of tips:")
+	tip_ages = age_of_root + get_node_ages_of_tips(obj)
+	#print(tip_ages)
+	
+	# Change ONLY things YOUNGER than fossils
+	if (is.null(fossils_older_than) == FALSE)
+		{
+		tips_must_be_higher_than_this = age_of_root + max(tip_ages) - fossils_older_than
+		change_TF = tip_ages > tips_must_be_higher_than_this
+		} else {
+		change_TF = rep(TRUE, length(tip_ages))
+		}
+	
+	
+	if (is.na(tips_end_at_this_date))
+		{
+		tips_end_at_this_date = max(tip_ages)
+		}
+	
+	nums_to_add_to_tip_to_ultrametricize = tips_end_at_this_date - tip_ages[change_TF]
+	
+	indices_of_branches_under_tips = get_indices_of_branches_under_tips(obj)
+
+	obj$edge.length[indices_of_branches_under_tips][change_TF] = obj$edge.length[indices_of_branches_under_tips][change_TF] + nums_to_add_to_tip_to_ultrametricize
 	
 	return(obj)
 	}
