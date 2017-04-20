@@ -796,7 +796,7 @@ dnalist_conversion_output_preCompleteness_fn = "dnalist_conversion_dnalist_conve
 	#######################################################
 	# Prune based on completeness, and get final completeness statistics
 	#######################################################
-	data_XML = prune_seqs_based_on_completeness(data_XML=data_XML_preCompleteness, min_numseqs=0, min_fraction_to_keep_sequence=0.5)
+	data_XML = prune_seqs_based_on_completeness(data_XML=data_XML_preCompleteness, min_numseqs=0, min_fraction_to_keep_sequence=min_fraction_to_keep_sequence)
 	data_XMLs$data_XML = data_XML
 
 	completeness_df = completeness_stats_from_data_XML(data_XMLs$data_XML)
