@@ -174,7 +174,7 @@ save_data_stats <- function(data_XMLs, datastats_dir=NULL)
 # Parse the "run" worksheet, and convert "xml" to the full XML file
 #######################################################
 
-parse_run <- function(run_df, xml, outfn="run_df", burnin_fraction=0.5, dataset_source="", printall="short", BEAST2_version="2.4.3")
+parse_run <- function(run_df, xml, outfn="run_df", burnin_fraction=0.5, dataset_source="", printall="short", BEAST2_version="2.5.2")
 	{
 	defaults='
 	outfn=NULL
@@ -350,11 +350,23 @@ parse_run <- function(run_df, xml, outfn="run_df", burnin_fraction=0.5, dataset_
 	# "N" as the output
 	# xml$tracelog = cl(ESS_log1, ESS_log2, ESS_log3, xml$tracelog)
 
-	ESS_log1 = xmlNode(name="log", attrs=list(id="ESS.po", spec="util.ESS", arg="@prior"))
-	ESS_log2 = xmlNode(name="log", attrs=list(id="ESS.pr", spec="util.ESS", arg="@likelihood"))
-	ESS_log3 = xmlNode(name="log", attrs=list(id="ESS.l", spec="util.ESS", arg="@posterior"))
-	xml$screenlog = cl(ESS_log1, ESS_log2, ESS_log3, xml$screenlog)
-	
+	ESS_log1 = xmlNode(name="log", attrs=list(id="ESS.pr", spec="util.ESS", arg="@prior"))
+	ESS_log2 = xmlNode(name="log", attrs=list(id="ESS.l", spec="util.ESS", arg="@likelihood"))
+	ESS_log3 = xmlNode(name="log", attrs=list(id="ESS.po", spec="util.ESS", arg="@posterior"))
+	#xml$screenlog = cl(ESS_log1, ESS_log2, ESS_log3, xml$screenlog)
+
+	# NJM 2019-06-20_
+	# In Beast2.5.2, having more than one ESS causes an error:
+# 	java.lang.ArrayIndexOutOfBoundsException: -1
+# 	at java.util.ArrayList.elementData(ArrayList.java:422)
+# 	at java.util.ArrayList.get(ArrayList.java:435)
+# 	at beast.core.Logger.initAndValidate(Unknown Source)
+# 	at beast.util.XMLParser.initBEASTObjects(Unknown Source)
+# 	at beast.util.XMLParser.parse(Unknown Source)
+# 	at beast.util.XMLParser.parseFile(Unknown Source)
+# 	at beast.app.BeastMCMC.parseArgs(Unknown Source)
+# 	at beast.app.beastapp.BeastMain.main(Unknown Source)
+	xml$screenlog = cl(ESS_log3, xml$screenlog)
 	
 	# Assemble the state
 	storeEvery_statelog = sprintf("%0.0f", as.numeric(settings$state_store))
@@ -521,6 +533,57 @@ parse_run <- function(run_df, xml, outfn="run_df", burnin_fraction=0.5, dataset_
 			}
 		
 
+#######################################################
+# Adding -Dbeast.load.jars=true as instructed by Remco:
+# https://groups.google.com/forum/#!topic/beast-users/qLpEqJCF6dg
+# 
+# Remco Bouckaert	
+# 6/14/18
+# Hi Andre,
+# 
+# BEAST v2.5.0 does not automatically load packages any more, unless 
+# started via BeastLauncher. With java 8, you can make it load packages 
+# using the -Dbeast.load.jars=true directive, like so:
+# 
+# ./jre1.8.0_161/bin/java -Dbeast.load.jars=true -jar ./lib/beast.jar demo.xml 
+# Cheers,
+# Remco
+# 
+# - hide quoted text -
+# On 14/06/2018, at 11:04 AM, Andrés Parada <andre...@gmail.com> wrote:
+# 
+# - hide quoted text -
+# Dear all, 
+# 
+# 
+# I am trying to use a specific java (the one provided with the download) 
+# for an analysis running on a cluster but I found that even in a Desktop 
+# machines the combination of launching beast through java -jar + 
+# starbeast2 doesn't seem to work.
+# I must add, a simple analysis with one gene runs with either /bin/beast, 
+# java -jar  or ./jre1.8.0_161/bin/java   -jar . Any of the three options run.
+# 
+# For this analysis, I started to step up everything in a Desktop machine.
+# I added the starbeast2  package with
+# 
+# ./bin/packagemanager -add starbeast2  
+# 
+# I tried to add it with
+# 
+# ./jre1.8.0_161/bin/java  -cp  ./lib/beast.jar beast.util.AddOnManager
+# 
+# But I got this error
+# 
+# Error: Could not find or load main class beast.util.AddOnManager
+# 
+# 
+# When I try to run the xmleither giving the path of the java jre 
+# or just the java already installed on the machine I get this error
+# 
+#  ./jre1.8.0_161/bin/java   -jar ./lib/beast.jar demo.xml 
+#######################################################
+
+
 		
 		if (printall != "none")
 			{
@@ -533,14 +596,14 @@ parse_run <- function(run_df, xml, outfn="run_df", burnin_fraction=0.5, dataset_
 		cat(run_cmd1)
 		cat("\n\n")
 		cat("(2) Run Beast2.\n")
-		run_cmd2 = paste0(">>> java -Xms512m -Xmx512m -jar /Applications/BEAST_", BEAST2_version, "/lib/beast.jar -java -seed 754321 -overwrite ", outfn)
+		run_cmd2 = paste0(">>> java -Xms512m -Xmx512m -Dbeast.load.jars=true -jar /Applications/BEAST_", BEAST2_version, "/lib/beast.jar -java -seed 754321 -overwrite ", outfn)
 		cat(run_cmd2)
 		cat("\n\n")
 		cat("-java means you don't need Beagle, but makes it slower.\n-Xms512m and -Xmx512 control how much RAM is used; double etc., if you need more.\n-seed is the starting seed so you can replicate the analysis.\n-overwrite means you will overwrite the output file. Rename it if you don't want to do this!\n\n")
 
 		cat("(3) This runs the help for Beast. See also google and the Beast2 website and beast-users google group!\n")
 
-		run_cmd3 = paste0(">>> java -Xms512m -Xmx512m -jar /Applications/BEAST_", BEAST2_version, "/lib/beast.jar -help")
+		run_cmd3 = paste0(">>> java -Xms512m -Xmx512m -Dbeast.load.jars=true -jar /Applications/BEAST_", BEAST2_version, "/lib/beast.jar -help")
 		cat(run_cmd3)
 		cat("\n\n")
 
@@ -548,12 +611,12 @@ parse_run <- function(run_df, xml, outfn="run_df", burnin_fraction=0.5, dataset_
 		
 		mcc_fn = paste0(get_fn_prefix(settings$treelog_fn), ".mcc")
 		mcc_fn
-		run_cmd4 = paste0(">>> java -Xms512m -Xmx512m -jar /Applications/BEAST_", BEAST2_version, "/treeannotator.jar -heights median -burnin ", burnin, " -limit 0 ", settings$treelog_fn, " ", mcc_fn)
+		run_cmd4 = paste0(">>> java -Xms512m -Xmx512m -Dbeast.load.jars=true -jar /Applications/BEAST_", BEAST2_version, "/treeannotator.jar -heights median -burnin ", burnin, " -limit 0 ", settings$treelog_fn, " ", mcc_fn)
 		cat(run_cmd4)
 		cat("\n\n")
 		
 		cat("(5) This runs the help for TreeAnnotator. See also google and the Beast2 website and beast-users google group!\n")
-		run_cmd5 = paste0(">>> java -Xms512m -Xmx512m -jar /Applications/BEAST_", BEAST2_version, "/lib/treeannotator.jar -help")
+		run_cmd5 = paste0(">>> java -Xms512m -Xmx512m -Dbeast.load.jars=true -jar /Applications/BEAST_", BEAST2_version, "/lib/treeannotator.jar -help")
 		cat(run_cmd5)
 		cat("\n\n")
 		
