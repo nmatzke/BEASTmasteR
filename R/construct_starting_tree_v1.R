@@ -708,7 +708,21 @@ construct_starting_tree <- function(OTUs_df=NULL, taxa_df=NULL, nodes_df=NULL, x
 	
 	# Remove blanks!
 	keepTF = isblank_TF(names(taxa_df)) == FALSE
-	taxa_df = taxa_df[,keepTF]
+	
+	# Don't change, if sum(keepTF == 1)
+	if (sum(keepTF) > 1)
+		{
+		taxa_df = taxa_df[,keepTF]
+		}
+	
+	# Bug fix for keepTF=1
+	if (sum(keepTF) == 1)
+		{
+		taxa_vector = taxa_df[,keepTF]
+		taxa_df2 = as.data.frame(matrix(taxa_vector, ncol=1), stringsAsFactors=FALSE)
+		names(taxa_df2) = names(taxa_df)[keepTF]
+		taxa_df = taxa_df2
+		}
 	names_of_groups = names(taxa_df)
 	
 	

@@ -2489,8 +2489,39 @@ drop_tips_NA <- function(tmptr, copied_tiplabel_to_drop="NA")
 	} # END drop_tips_NA <- function(tmptr, copied_tiplabel_to_drop="NA")
 
 
+# Calculate the inputs for manual_boxplot, then run manual_boxplot
+calc_manual_boxplot <- function(tmpx, tmpy, width=1, lwd=1, col="gray", border="black", extreme_width=0.1, logt=TRUE, box_quantiles=FALSE, whisker95=FALSE, middle50=FALSE)
+	{
+	y0025 = quantile(x=tmpy, probs=0.025)
+	lower25 = quantile(x=tmpy, probs=0.25)
+	y_med = quantile(x=tmpy, probs=0.5)
+	upper75 = quantile(x=tmpy, probs=0.75)
+	y0975 = quantile(x=tmpy, probs=0.975)
+	ymin = min(tmpy)
+	ymax = max(tmpy)
 
-
+	x = mean(tmpx)
+	y = mean(tmpy)
+	
+	# Should whiskers be the 95% CIs?
+	if (whisker95==TRUE)
+		{
+		ymin = y0025
+		ymax = y0975
+		}
+	# Should box borders be the 25%, 75% quantiles?
+	if (box_quantiles==TRUE)
+		{
+		y0025 = lower25
+		y0975 = upper75
+		}
+	# Should middle line be the 50% quantile (median)?
+	if (middle50==TRUE)
+		{
+		y = y_med
+		}
+	manual_boxplot(x=x, y=y, y_med=y_med, y0025=y0025, y0975=y0975, ymin=ymin, ymax=ymax, width=width, lwd=lwd, col=col, border=border, extreme_width=extreme_width, logt=logt)
+	}
 
 
 
