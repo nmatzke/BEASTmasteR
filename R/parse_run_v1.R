@@ -607,22 +607,23 @@ parse_run <- function(run_df, xml, outfn="run_df", burnin_fraction=0.5, dataset_
 		cat(run_cmd3)
 		cat("\n\n")
 
-		cat("(4) This runs TreeAnnotator, which goes through your post-burnin tree samples and calculates an MCC (Maximum Clade Credibility) tree. Note that this is not the same thing as e.g. a majority-rule 'consensus' tree. See: http://en.wikipedia.org/wiki/Maximum_clade_credibility_tree\n")
+		cat("(4) This runs the TreeAnnotator binary, located in the /bin directory of your BEAST_2.5.2 installation (I have put the Mac default location here, you may have to change this).  TreeAnnotator goes through your post-burnin tree samples and calculates an MCC (Maximum Clade Credibility) tree. Note that this is not the same thing as e.g. a majority-rule 'consensus' tree. See: http://en.wikipedia.org/wiki/Maximum_clade_credibility_tree\n")
 		
 		mcc_fn = paste0(get_fn_prefix(settings$treelog_fn), ".mcc")
 		mcc_fn
-		run_cmd4 = paste0(">>> java -Xms512m -Xmx512m -Dbeast.load.jars=true -jar /Applications/BEAST_", BEAST2_version, "/treeannotator.jar -heights median -burnin ", burnin, " -limit 0 ", settings$treelog_fn, " ", mcc_fn)
+		#run_cmd4 = paste0(">>> java -Xms512m -Xmx512m -Dbeast.load.jars=true -jar /Applications/BEAST_", BEAST2_version, "/treeannotator.jar -heights median -burnin ", burnin, " -limit 0 ", settings$treelog_fn, " ", mcc_fn)
+		run_cmd4 = paste0(">>> /Applications/BEAST_", BEAST2_version, "/bin/treeannotator -heights median -burnin ", burnin, " -limit 0 ", settings$treelog_fn, " ", mcc_fn)
 		cat(run_cmd4)
 		cat("\n\n")
 		
 		cat("(5) This runs the help for TreeAnnotator. See also google and the Beast2 website and beast-users google group!\n")
-		run_cmd5 = paste0(">>> java -Xms512m -Xmx512m -Dbeast.load.jars=true -jar /Applications/BEAST_", BEAST2_version, "/lib/treeannotator.jar -help")
+		run_cmd5 = paste0(">>> /Applications/BEAST_", BEAST2_version, "/bin/treeannotator -help")
 		cat(run_cmd5)
 		cat("\n\n")
 		
 		cat("(6) This opens the MCC tree in FigTree. You should also inspect the trace log files with Tracer.app!!\n")
 		mcc_fn_wDir = slashslash(paste0(addslash(getwd()), mcc_fn))
-		run_cmd6 = paste0(">>> open -n /Applications/beast/FigTree_v1.4.0.app --args ", mcc_fn)
+		run_cmd6 = paste0(">>> open -n /Applications/FigTree_v1.4.4.app --args ", mcc_fn)
 		cat(run_cmd6)
 		cat("\n==================================================\n")
 
