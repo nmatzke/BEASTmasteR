@@ -166,7 +166,8 @@ convert_data_XML_to_dnalists <- function(data_XML, remove_taxon=TRUE, string_to_
 				} # END if (name_seqs_by_taxonname == TRUE)
 		
 			alignment_names = c(alignment_names, unique_nameval)
-			cmdstr = paste0("dna_dfs_list$", unique_nameval, " = dnavals")
+			cmdstr = paste0('dna_dfs_list$"', unique_nameval, '" = dnavals')
+			cat("\n#4 convert_data_XML_to_dnalists() is running cmdstr='", cmdstr, "'...", sep="")
 			eval(parse(text=cmdstr))
 			
 			tmp_alignment_length = length(dnavals[[1]])
@@ -307,6 +308,7 @@ charseqs_list_to_partition_txt <- function(dna_dfs_list, returnval="text")
 					seqname_to_add = names(tmp_alignment_charseqs)[seqnum_to_take_from]
 					# Add the new sequence
 					cmdstr = paste0("super_seqs_list$", seqname_to_add, " = tmp_alignment_charseqs[[seqnum_to_take_from]]")
+					cat("\n#5 charseqs_list_to_partition() is running cmdstr='", cmdstr, "'...", sep="")
 					eval(parse(text=cmdstr))
 					} # END for (k in 1:length(nums_of_seqnames_that_are_new))
 				} # END if (length(nums_of_seqnames_that_are_new) > 0)
@@ -495,7 +497,8 @@ write_DNAdf_to_files <- function(dna_taxa_list, dna_dfs_list, datatypes, prefix=
 	out_seqs_charslist = list()
 	for (i in 1:length(OTUs_all))
 		{
-		cmdstr = paste0("out_seqs_charslist$", OTUs_all[i], " = list()")
+		cmdstr = paste0('out_seqs_charslist$"', OTUs_all[i], '" = list()')
+		cat("\n#1 write_DNAdf_to_files() is running cmdstr='", cmdstr, "'...", sep="")
 		eval(parse(text=cmdstr))
 		#out_seqs_charslist[[i]] = list()
 		}
@@ -886,6 +889,7 @@ z_Excel_OTUs_yesNo_fns
 	
 		# Add a column of 0s
 		cmdstr = paste0("taxa_wData_df$", dataset_name, " = rep(0, nrow(taxa_wData_df))")
+		cat("\n#2 which_taxa_have_data() is running cmdstr='", cmdstr, "'...", sep="")
 		eval(parse(text=cmdstr))
 
 		# Fill it in
@@ -894,6 +898,7 @@ z_Excel_OTUs_yesNo_fns
 		vals = matrices_stats[[i]]$completeness_df$PctData[notNAs]
 	
 		cmdstr = paste0("taxa_wData_df$", dataset_name, "[indices_to_OTUs_raw] = vals")
+		cat("\n#3 which_taxa_have_data() is running cmdstr='", cmdstr, "'...", sep="")
 		eval(parse(text=cmdstr))
 		}
 	taxa_wData_df = dfnums_to_numeric(taxa_wData_df)

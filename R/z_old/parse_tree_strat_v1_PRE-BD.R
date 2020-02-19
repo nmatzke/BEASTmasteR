@@ -843,7 +843,7 @@ make_BD_model_for_starBeast2 <- function(treemodel_df, seqs_df, taxonset_XML, tr
 	
 	
 	
-	if ((treeprior == "starBeast2_BD") || (treeprior == "BD"))
+	if (treeprior == "starBeast2_BD")
 		{	
 		# Tree Model (tree prior) for species tree
 		tree_idref = paste0("@", tree_name)
@@ -1115,12 +1115,11 @@ make_BDSKY_model <- function(treemodel_df, tree_name="shared_tree", clockModel_n
 		construct_starting_tree(xlsfn=xlsfn, min_brlen=0.0001, outfn=outfn)
 		} # END if (startingTree_option == "construct_starting_tree")
 	
-	#print("HERE!0")	
-	#print(startingTree_option)
+	
 	if ((startingTree_option == "random") || (startingTree_option == "upgma"))
 		{
 		# Generate a starting tree
-		if (startingTree_option == "upgma")
+		if (startingTree_option == "random")
 			{
 			# UPGMA starting tree (commented out)
 			tipDates_idref = paste0("@", tipDates_id)
@@ -1142,10 +1141,6 @@ make_BDSKY_model <- function(treemodel_df, tree_name="shared_tree", clockModel_n
 			# Starting Tree
 			tipDates_idref = paste0("@", tipDates_id)
 			
-			if (treeModel_option == "BD")
-				{
-				startingTree_XML = xmlNode(name=treetag, attrs=list(id=tree_name_init, initial=tree_name_idref_for_init, estimate="true", spec="beast.evolution.tree.RandomTree", taxa=alignment_name_w_taxaref), .children=list(popModel_XML) )
-				} # END if (treeModel_options == "BDSKY")
 			if (treeModel_option == "BDSKY")
 				{
 				startingTree_XML = xmlNode(name=treetag, attrs=list(id=tree_name_init, initial=tree_name_idref_for_init, estimate="true", spec="beast.evolution.tree.RandomTree", taxa=alignment_name_w_taxaref, trait=tipDates_idref), .children=list(popModel_XML) )
@@ -1159,15 +1154,11 @@ make_BDSKY_model <- function(treemodel_df, tree_name="shared_tree", clockModel_n
 			startingTree_XMLs = c(UPGMA_startingTree_XMLs, list(bl(), txt0_XML, xmlCommentNode(" Starting tree is constructed using random coalescence "), startingTree_XML))
 			} # END if (startingTree_option == "random")
 
-		if (startingTree_option == "random")
+		if (startingTree_option == "upgma")
 			{
 			# Random Starting Tree (commented out)
 			tipDates_idref = paste0("@", tipDates_id)
 			
-			if (treeModel_option == "BD")
-				{
-				random_startingTree_XML = xmlNode(name=treetag, attrs=list(id=tree_name_init, initial=tree_name_idref_for_init, estimate="true", spec="beast.evolution.tree.RandomTree", taxa=alignment_name_w_taxaref), .children=list(popModel_XML) )
-				} # END if (treeModel_options == "BDSKY")
 			if (treeModel_option == "BDSKY")
 				{
 				random_startingTree_XML = xmlNode(name=treetag, attrs=list(id=tree_name_init, initial=tree_name_idref_for_init, estimate="true", spec="beast.evolution.tree.RandomTree", taxa=alignment_name_w_taxaref, trait=tipDates_idref), .children=list(popModel_XML) )
@@ -1221,7 +1212,7 @@ make_BDSKY_model <- function(treemodel_df, tree_name="shared_tree", clockModel_n
 			cat("\n\nmake_BDSKY_model() is running 'ape::read.tree()' on:\n'", getwd(), "\n", trfn, "'...\n\n", sep="")
 			} # END if (printall != "none")
 		
-		print("treeModel_option")
+		
 		#######################################################
 		# Take the tree from a prior string, if specified
 		# If not, take from a filename
@@ -1301,32 +1292,15 @@ make_BDSKY_model <- function(treemodel_df, tree_name="shared_tree", clockModel_n
 		
 		# Write the tree string, for inclusion in the Newick file
 		trstr = write_tree_noSci(tr, file="")
-		#print("HERE!1")
-
-		if (treeModel_option == "BD")
-			{
-			print(paste0("Using constructed starting tree, treeModel_option='BD'"))
-			startingTree_XML = xmlNode(name=treetag, attrs=list(id=tree_name_init, initial=tree_name_idref_for_init, IsLabelledNewick="true", adjustTipHeights="false", estimate="true", spec="beast.util.TreeParser", taxa=alignment_name_w_taxaref, threshold="0.001", newick=trstr) )	
-			print("startingTree_XML")
-			print(startingTree_XML)
-			} # END if (treeModel_option == "BD")
-
-
+		
 		if (treeModel_option == "BDSKY")
 			{
-			print(paste0("Using constructed starting tree, treeModel_option='BDSKY'"))
 			startingTree_XML = xmlNode(name=treetag, attrs=list(id=tree_name_init, initial=tree_name_idref_for_init, IsLabelledNewick="true", adjustTipHeights="false", estimate="true", spec="beast.util.TreeParser", taxa=alignment_name_w_taxaref, threshold="0.001", newick=trstr) )	
-			print("startingTree_XML")
-			print(startingTree_XML)
 			} # END if (treeModel_option == "BDSKY")
-
 			
 		if (treeModel_option == "SABDSKY")
 			{
-			print(paste0("Using constructed starting tree, treeModel_option='SABDSKY'"))
 			startingTree_XML = xmlNode(name=treetag, attrs=list(id=tree_name_init, initial=tree_name_idref_for_init, IsLabelledNewick="true", singlechild="true", estimate="true", threshold="0.001", spec="beast.util.ZeroBranchSATreeParser", taxa=alignment_name_w_taxaref, newick=trstr) )	
-			print("startingTree_XML")
-			print(startingTree_XML)
 			} # END if (treeModel_option == "SABDSKY")
 
 
@@ -1381,19 +1355,14 @@ make_BDSKY_model <- function(treemodel_df, tree_name="shared_tree", clockModel_n
 		txt0_XML = xmlCommentNode(" RRB (Remco) suggested: add initialiser ")
 		txt1_XML = xmlCommentNode(" Starting tree is user-specified Newick file from: ")
 		txt2_XML = xmlCommentNode(paste0(" ", trfn, " "))
-		print("XY")
 		startingTree_XMLs = c(random_startingTree_XMLs, UPGMA_startingTree_XMLs, list(bl(), txt0_XML, txt1_XML, txt2_XML, startingTree_XML))
-		print("YY")
 		startingTree_XMLs
 		} # END if ((startingTree_option == "random") || (startingTree_option == "upgma"))
-		#print("HERE!2")	
+	
 	#######################################################
 	# Copy the starting tree into the states (helps make 
 	# continuous characters not crash; see Remco's (RRB's) advice)
 	#######################################################
-	
-	print(startingTree_XMLs)
-	#stop()
 	
 	if (XML_mod_for_cont_chars == TRUE)
 		{
@@ -1414,20 +1383,9 @@ make_BDSKY_model <- function(treemodel_df, tree_name="shared_tree", clockModel_n
 	# (a nuisance parameter)
 	###############################################
 	originTime = treemodel_df$originTime[isblank_TF(treemodel_df$originTime)==FALSE]
-	
-	if (isblank_TF(originTime) == TRUE)
-		{
-		originTime = 1000
-		} # END if (isblank_TF(originTime) == TRUE)
-		
-	if ((treeModel_option == "BDSKY") || (treeModel_option == "BD"))
-		{
-		originTime_id = "originTime"
-		originTime_idref = "@originTime"
-		originTime_XML = xmlNode(name="parameter", originTime, attrs=list(id=originTime_id, lower="0.0", upper="4600", name="origin") )
-		} else {
-		originTime_XML = list(bl(), xmlCommentNode(" No originTime, as the treeModel is BD. "))
-		} # END if ((treeModel_option == "BDSKY") || (treeModel_option == "BD"))
+	originTime_id = "originTime"
+	originTime_idref = "@originTime"
+	originTime_XML = xmlNode(name="parameter", originTime, attrs=list(id=originTime_id, lower="0.0", upper="4600", name="origin") )
 		
 	###############################################
 	# birthRates, from oldest to youngest
@@ -1941,7 +1899,6 @@ make_BDSKY_model <- function(treemodel_df, tree_name="shared_tree", clockModel_n
 	deathRateChangeTimes_tops = c(0)
 	'
 	
-	
 	times = seq(0, originTime, (originTime / 50))
 	birthTime_tops_tmp = c(birthRateChangeTimes_tops, originTime)
 	deathTime_tops_tmp = c(deathRateChangeTimes_tops, originTime)
@@ -1969,24 +1926,6 @@ make_BDSKY_model <- function(treemodel_df, tree_name="shared_tree", clockModel_n
 	TF = birth_death_rates_table$OK == 1
 	birth_death_rates_table$OK = TF
 	birth_death_rates_table
-	
-	
-	# BD model uses a relative deathRate, not absolute
-	if (treeModel_option == "BD")
-		{
-		TF = deathRateChangeTimes_tops > 1
-		if (any(TF))
-			{
-			error_txt = paste0("\n\nSTOP ERROR in make_BDSKY_model(): In the Beast2 'BD' tree model (BirthDeathGernhard08Model), deathRate is relative to birthRate, and so must be between 0-1.\n\n")
-			cat(error_txt)
-			print(birth_death_rates_table)
-			stop(error_txt)
-			} else {
-			birth_death_rates_table$OK = TRUE
-			}
-		} # END if (treeModel_option == "BD")
-	
-	
 	
 	if (any(birth_death_rates_table$OK == FALSE))
 		{
@@ -2342,64 +2281,44 @@ make_BDSKY_model <- function(treemodel_df, tree_name="shared_tree", clockModel_n
 	####################################################
 	# Assemble into the BirthDeathSkylineModel node
 	####################################################
-	if (( treeModel_option == "BDSKY" ) || ( treeModel_option == "SABDSKY" ))
-		kids_XML = list(
-		bl(),
-		xmlCommentNode(" Starting parameters of the BirthDeathSkylineModel for the observed tree "), 
+	kids_XML = list(
+	bl(),
+	xmlCommentNode(" Starting parameters of the BirthDeathSkylineModel for the observed tree "), 
 	
-		bl(),
-		xmlCommentNode(" originTime: the start of the sampling+tree growth process "), 
-		xmlCommentNode(" (This is a nuisance parameter, but its starting value must be older than the start tree root or Beast2 will crash) "), 
-		originTime_XML,
+	bl(),
+	xmlCommentNode(" originTime: the start of the sampling+tree growth process "), 
+	xmlCommentNode(" (This is a nuisance parameter, but its starting value must be older than the start tree root or Beast2 will crash) "), 
+	originTime_XML,
 	
-		bl(),
-		xmlCommentNode(" birthRates (lambda: speciation or lineage splitting rates, oldest to youngest) "), 
-		birthRate_params_XML,
-		birthRateChangeTimes_tops_XML,
+	bl(),
+	xmlCommentNode(" birthRates (lambda: speciation or lineage splitting rates, oldest to youngest) "), 
+	birthRate_params_XML,
+	birthRateChangeTimes_tops_XML,
 	
-		bl(),
-		xmlCommentNode(" deathRates (mu: lineage extinction rates, oldest to youngest) "), 
-		deathRate_params_XML,
-		deathRateChangeTimes_tops_XML,
+	bl(),
+	xmlCommentNode(" deathRates (mu: lineage extinction rates, oldest to youngest) "), 
+	deathRate_params_XML,
+	deathRateChangeTimes_tops_XML,
 	
-		bl(),
-		xmlCommentNode(" samplingRates (psi: rate of sampling per lineage per my)                  "), 
-		xmlCommentNode(" sorted from youngest to oldest, but with zero at the end,                 "), 
-		xmlCommentNode(" as specified by Denise on the beast-users group:                          "), 
-		xmlCommentNode(" https://groups.google.com/d/msg/beast-users/UyAS0sYDkKk/PB0ktWnssn0J          "), 
-		xmlCommentNode(" The actual psi samplingRates, though, are in order from oldest to youngest "), 
-		samplingRate_params_XML,
-		samplingRateTimes_tops_XML,
+	bl(),
+	xmlCommentNode(" samplingRates (psi: rate of sampling per lineage per my)                  "), 
+	xmlCommentNode(" sorted from youngest to oldest, but with zero at the end,                 "), 
+	xmlCommentNode(" as specified by Denise on the beast-users group:                          "), 
+	xmlCommentNode(" https://groups.google.com/d/msg/beast-users/UyAS0sYDkKk/PB0ktWnssn0J          "), 
+	xmlCommentNode(" The actual psi samplingRates, though, are in order from oldest to youngest "), 
+	samplingRate_params_XML,
+	samplingRateTimes_tops_XML,
 	
-		bl(),
-		xmlCommentNode(" rho (probability of sampling each lineage extant at a particular timepoint, typically the present, 0 Ma) "), 
-		rhoSamplingRate_params_XML,
-		rhoSamplingTimes_XML,
+	bl(),
+	xmlCommentNode(" rho (probability of sampling each lineage extant at a particular timepoint, typically the present, 0 Ma) "), 
+	rhoSamplingRate_params_XML,
+	rhoSamplingTimes_XML,
 	
-		bl(),
-		xmlCommentNode(" Are time arrays reversed, for birth, death, psi, rho, and R. Regardless, the parameter values are listed from oldest to youngest time bin. "),
-		reverseTimeArrays_XML
-		) # END if (( treeModel_option == "BDSKY" ) || if ( treeModel_option == "SABDSKY" ))
-
-
-	# BirthDeath model
-	if (treeModel_option == "BD")
-		kids_XML = list(
-		bl(),
-		xmlCommentNode(" Starting parameters of the BirthDeathGernhard08Model for the observed tree "), 
-	
-		bl(),
-		xmlCommentNode(" birthRates (lambda-mu, net birth rate) "), 
-		birthRate_params_XML,
-		#birthRateChangeTimes_tops_XML,
-	
-		bl(),
-		xmlCommentNode(" deathRates (mu/lambda, relative death rate) "), 
-		deathRate_params_XML
-		#deathRate_params_XML,
-		#deathRateChangeTimes_tops_XML	
-		) # END if (treeModel_option == "BD")
-
+	bl(),
+	xmlCommentNode(" Are time arrays reversed, for birth, death, psi, rho, and R. Regardless, the parameter values are listed from oldest to youngest time bin. "),
+	reverseTimeArrays_XML
+	) # END kids_XML list
+	kids_XML
 
 
 	# If SABDSKY, add Removal Probability
@@ -2437,18 +2356,6 @@ make_BDSKY_model <- function(treemodel_df, tree_name="shared_tree", clockModel_n
 	###########################################
 	treeModel_id = tree_name
 	treeModel_idref = paste0("@", treeModel_id)
-
-
-	# BD
-	if ( treeModel_option == "BD" )
-		{
-		treeModel_XML = xmlNode(name="BirthDeathGernhard08Model", attrs=list(id=treeModel_idref, tree=treeModel_idref, contemp="false", spec="beast.evolution.speciation.BirthDeathGernhard08Model"), .children=kids_XML)
-	
-		treeModel_XMLs = list(bl(), xmlCommentNode(" Set up the BD tree model: BirthDeathSkylineModel "), xmlCommentNode(" (Other models, e.g. Yule (pure-birth), BD (birth-death), BDSS (BD, constant serial sampling) are special cases of BDSKY) "), xmlCommentNode(" (Except the Birth-Death-Skyline-Sampled-Ancestor model) "), treeModel_XML)
-		treeModel_XMLs
-		} # END if ( treeModel_option == "BD" )
-
-
 	
 	# BDSKY
 	if ( treeModel_option == "BDSKY" )
@@ -2540,11 +2447,8 @@ make_BDSKY_model <- function(treemodel_df, tree_name="shared_tree", clockModel_n
 	
 	
 	# originTime operators
-	if (( treeModel_option == "BDSKY" ) || ( treeModel_option == "SABDSKY" ))
-		{
-		originTime_operator_id = paste0("rateScaler_", originTime_id, "_", tree_name)
-		originTime_operator_XML = xmlNode(name="operator", attrs=list(id=originTime_operator_id, parameter=originTime_idref, scaleFactor="0.75", weight="1.0", spec="ScaleOperator") )
-		} # END if (( treeModel_option == "BDSKY" ) || ( treeModel_option == "SABDSKY" ))
+	originTime_operator_id = paste0("rateScaler_", originTime_id, "_", tree_name)
+	originTime_operator_XML = xmlNode(name="operator", attrs=list(id=originTime_operator_id, parameter=originTime_idref, scaleFactor="0.75", weight="1.0", spec="ScaleOperator") )
 	
 	
 	
@@ -2553,14 +2457,11 @@ make_BDSKY_model <- function(treemodel_df, tree_name="shared_tree", clockModel_n
 	# operators on the tree
 	#######################################################
 	tree_name_idref = paste0("@", tree_name)
-
-
-
 	
 	#######################################################
-	# operators on BirthDeath (BD) or BirthDeathSkylineModel (BDSKY) tree
+	# operators on BirthDeathSkylineModel (BDSKY) tree
 	#######################################################
-	if ((treeModel_option == "BD") || (treeModel_option == "BDSKY"))
+	if ( treeModel_option == "BDSKY" )
 		{
 		treeScaler_id = paste0("treeScaler_", tree_name)
 		treeScaler_XML = xmlNode(name="operator", attrs=list(id=treeScaler_id, tree=tree_name_idref, scaleFactor="0.5", weight="3.0", spec="ScaleOperator") )
@@ -2583,33 +2484,8 @@ make_BDSKY_model <- function(treemodel_df, tree_name="shared_tree", clockModel_n
 		WilsonBalding_id = paste0("WilsonBalding_", tree_name)
 		WilsonBalding_XML = xmlNode(name="operator", attrs=list(id=WilsonBalding_id, tree=tree_name_idref, weight="3.0", spec="WilsonBalding") )
 
-		if (treeModel_option == "BD")
-			{
-			# Make the list of tree operators
-			tree_operators_XMLs = list(
-				bl(),
-				xmlCommentNode(" Operators on the tree model parameters "),
-				xmlCommentNode(" (commented out unless specified as estimated in Excel settings file) "),
-				birthRate_operator_XML,
-				deathRate_operator_XML,
-				bl(),
-				xmlCommentNode(" Operators on the phylogeny (topology and node dates; tip dates could be added) "),
-				treeScaler_XML,
-				treeRootScaler_XML,
-				UniformOperator_XML,
-				SubtreeSlide_XML,
-				narrowExchange_XML,
-				wideExchange_XML,
-				bl(),
-				xmlCommentNode(" Wilson-Balding Operator: for sampled ancestor trees, can change "),
-				xmlCommentNode(" the number of branches in the tree: "),
-				xmlCommentNode(" https://figshare.com/articles/_The_Wilson_Balding_operator_/1260483 "),
-				WilsonBalding_XML,
-				bl()
-				) # END tree_operators_XMLs
-			} else {
-			# Make the list of tree operators
-			tree_operators_XMLs = list(
+		# Make the list of tree operators
+		tree_operators_XMLs = list(
 			bl(),
 			xmlCommentNode(" Operators on the tree model parameters "),
 			xmlCommentNode(" (commented out unless specified as estimated in Excel settings file) "),
@@ -2633,8 +2509,6 @@ make_BDSKY_model <- function(treemodel_df, tree_name="shared_tree", clockModel_n
 			WilsonBalding_XML,
 			bl()
 			) # END tree_operators_XMLs
-
-			}
 		} # END if ( treeModel_option == "BDSKY" )
 	
 
@@ -2722,43 +2596,24 @@ make_BDSKY_model <- function(treemodel_df, tree_name="shared_tree", clockModel_n
     epidemiology_comment2_XML = xmlCommentNode(txt2)
         
 	
-	if (( treeModel_option == "BDSKY" ) || ( treeModel_option == "SABDSKY" ))
-		{
-		state_of_treeModel_XMLs = list(
-		bl(),
-		xmlCommentNode(" State of the tree & tree model parameters during MCMC search "), 
-		xmlNode(name="stateNode", attrs=list(idref=tree_name) ),
-		xmlNode(name="stateNode", attrs=list(idref=originTime_id) ),
-		xmlNode(name="stateNode", attrs=list(idref=birthRate_params_id) ),
-		xmlNode(name="stateNode", attrs=list(idref=deathRate_params_id) ),
-		xmlNode(name="stateNode", attrs=list(idref=samplingRate_params_id) ),
-		xmlNode(name="stateNode", attrs=list(idref=birthRateChangeTimes_tops_id) ),
-		xmlNode(name="stateNode", attrs=list(idref=deathRateChangeTimes_tops_id) ),
-		xmlNode(name="stateNode", attrs=list(idref=samplingRateTimes_tops_id) ),
-		xmlNode(name="stateNode", attrs=list(idref=rhoSamplingRate_params_id) ),
-		xmlNode(name="stateNode", attrs=list(idref=rhoSamplingTimes_id) ),
-		xmlNode(name="stateNode", attrs=list(idref=reverseTimeArrays_id) ),
-		bl(),
-		epidemiology_comment1_XML,
-		epidemiology_comment2_XML
-		)
-		}
-
-
-	if ( treeModel_option == "BD" )
-		{
-		state_of_treeModel_XMLs = list(
-		bl(),
-		xmlCommentNode(" State of the tree & tree model parameters during MCMC search "), 
-		xmlNode(name="stateNode", attrs=list(idref=tree_name) ),
-		xmlNode(name="stateNode", attrs=list(idref=birthRate_params_id) ),
-		xmlNode(name="stateNode", attrs=list(idref=deathRate_params_id) ),
-		bl(),
-		epidemiology_comment1_XML,
-		epidemiology_comment2_XML
-		)
-		}
-
+	state_of_treeModel_XMLs = list(
+	bl(),
+	xmlCommentNode(" State of the tree & tree model parameters during MCMC search "), 
+	xmlNode(name="stateNode", attrs=list(idref=tree_name) ),
+	xmlNode(name="stateNode", attrs=list(idref=originTime_id) ),
+	xmlNode(name="stateNode", attrs=list(idref=birthRate_params_id) ),
+	xmlNode(name="stateNode", attrs=list(idref=deathRate_params_id) ),
+	xmlNode(name="stateNode", attrs=list(idref=samplingRate_params_id) ),
+	xmlNode(name="stateNode", attrs=list(idref=birthRateChangeTimes_tops_id) ),
+	xmlNode(name="stateNode", attrs=list(idref=deathRateChangeTimes_tops_id) ),
+	xmlNode(name="stateNode", attrs=list(idref=samplingRateTimes_tops_id) ),
+	xmlNode(name="stateNode", attrs=list(idref=rhoSamplingRate_params_id) ),
+	xmlNode(name="stateNode", attrs=list(idref=rhoSamplingTimes_id) ),
+	xmlNode(name="stateNode", attrs=list(idref=reverseTimeArrays_id) ),
+	bl(),
+	epidemiology_comment1_XML,
+	epidemiology_comment2_XML
+	)
 	# Add Remco's (RRB's) tree-copying procedure
 	state_of_treeModel_XMLs = c(state_of_treeModel_XMLs, tree_RRM_statenode_XMLs)
 	state_of_treeModel_XMLs
@@ -2767,16 +2622,12 @@ make_BDSKY_model <- function(treemodel_df, tree_name="shared_tree", clockModel_n
 	# XML for the parameters of the tree prior
 	#######################################################
 	# Prior on originTime
-	if (( treeModel_option == "BDSKY" ) || ( treeModel_option == "SABDSKY" ))
-		{
-		originTime_id
-		originTime_prior_id = paste0("prior_", originTime_id)
-		originTime_prior_Uniform_id = paste0("prior_", originTime_id, "_Uniform_distrib")
-		originTime_prior_Uniform_XML = xmlNode(name="Uniform", attrs=list(id=originTime_prior_Uniform_id, lower="0.0", upper="4600.0", name="distr") )
-		originTime_prior_XML = xmlNode(name="prior", attrs=list(id=originTime_prior_id, name="distribution", x=originTime_idref), .children=list(originTime_prior_Uniform_XML) )
-		}
+	originTime_id
+	originTime_prior_id = paste0("prior_", originTime_id)
+	originTime_prior_Uniform_id = paste0("prior_", originTime_id, "_Uniform_distrib")
+	originTime_prior_Uniform_XML = xmlNode(name="Uniform", attrs=list(id=originTime_prior_Uniform_id, lower="0.0", upper="4600.0", name="distr") )
+	originTime_prior_XML = xmlNode(name="prior", attrs=list(id=originTime_prior_id, name="distribution", x=originTime_idref), .children=list(originTime_prior_Uniform_XML) )
 	
-		
 	OLD_PRIORS='	
 	# Prior on birthRate
 	birthRate_prior_id = paste0("prior_", birthRate_params_id, "_", tree_name)
@@ -2821,154 +2672,91 @@ make_BDSKY_model <- function(treemodel_df, tree_name="shared_tree", clockModel_n
 	#######################################################
 	# XML for the tree prior
 	#######################################################
-	tree_prior_id = paste0(treeModel_option, "_prior_", tree_name)
+	tree_prior_id = paste0("BDSKY_prior_", tree_name)
 	tree_prior_idref = paste0("@", tree_prior_id)
 	tree_name_idref = paste0("@", tree_name)
 	
-	if (( treeModel_option == "BDSKY" ) || ( treeModel_option == "SABDSKY" ))
-		{
-		tree_prior_XML = xmlNode(name="distribution", attrs=list(
-		id=tree_prior_id,
-		spec="beast.evolution.speciation.BirthDeathSkylineModel",
-		tree=tree_name_idref,
-		origin=originTime_idref,
-		birthRate=birthRate_params_idref,
-		birthRateChangeTimes=birthRateChangeTimes_tops_idref,
-		deathRate=deathRate_params_idref,
-		deathRateChangeTimes=deathRateChangeTimes_tops_idref,
-		samplingRate=samplingRate_params_idref,
-		samplingRateChangeTimes=samplingRateTimes_tops_idref,
-		rho=rhoSamplingRate_params_idref,
-		rhoSamplingTimes=rhoSamplingTimes_idref,
-		reverseTimeArrays=reverseTimeArrays_idref
-		) )
-
-		tree_prior_XMLs = c(
-		list(
-		bl(),
-		xmlCommentNode(" Prior probability distributions of tree model parameters "),
-		bl(),
-		xmlCommentNode(" Uniform prior on the time of origin of the process (assumes my) "),
-		xmlCommentNode(" x means whatever parameter you are assessing via the distribution "),
-		originTime_prior_XML,
-		bl(),
-		xmlCommentNode(" Priors on birthRate(s) ")),
-		birthRate_prior_XMLs,
-		list( bl(),
-		xmlCommentNode(" Priors on deathRate(s) ")),
-		deathRate_prior_XMLs,
-		list( bl(),
-		xmlCommentNode(" Prior on samplingRate(s) ")),
-		samplingRate_prior_XMLs,
-		list(bl(),
-		xmlCommentNode(" Also: we are assuming for now that rho at time 0 is fixed "),
-		bl(),
-		xmlCommentNode(" Probability of MCMC sampled tree given treeModel parameters "),
-		tree_prior_XML)
-		)
-		tree_prior_XMLs
-
-
-		#######################################################
-		# Log the tree prior, parameter values, and parameter priors
-		#######################################################
-		tracelog_XMLs = list(
-		bl(), 
-		xmlCommentNode(" Log the probability of the tree given the treeModel parameters"), 
-		xmlNode(name="log", attrs=list(idref=tree_prior_id) ),
-		bl(), 
-		xmlCommentNode(" Log the prior probability of the treeModel parameters"), 
-		xmlNode(name="log", attrs=list(idref=originTime_id) ),
-		xmlNode(name="log", attrs=list(idref=birthRate_params_id) ),
-		xmlNode(name="log", attrs=list(idref=deathRate_params_id) ),
-		xmlNode(name="log", attrs=list(idref=samplingRate_params_id) ),
-		xmlNode(name="log", attrs=list(idref=rhoSamplingRate_params_id) )		
-		)
-		tracelog_XMLs
-		# Add the new rate parameters
-		tracelog_XMLs = c(tracelog_XMLs, birthRate_log_XMLs, deathRate_log_XMLs, samplingRate_log_XMLs)
-
-		#######################################################
-		# screenLog the tree prior, parameter values, and parameter priors
-		#######################################################
-		screenlog_XMLs = list(
-		bl(), 
-		xmlCommentNode(" Log the probability of the tree given the treeModel parameters"), 
-		xmlNode(name="log", attrs=list(idref=tree_prior_id) ),
-		bl(), 
-		xmlCommentNode(" Log the prior probability of the treeModel parameters"), 
-		xmlNode(name="log", attrs=list(idref=originTime_id) ),
-		xmlNode(name="log", attrs=list(idref=birthRate_params_id) ),
-		xmlNode(name="log", attrs=list(idref=deathRate_params_id) ),
-		xmlNode(name="log", attrs=list(idref=samplingRate_params_id) ),
-		xmlNode(name="log", attrs=list(idref=rhoSamplingRate_params_id) )
-		)
-		# Nah don't need this...
-		#screenlog_XMLs = c(screenlog_XMLs, birthRate_log_XMLs, deathRate_log_XMLs, samplingRate_log_XMLs)
-
-
-		}
-		
-	if ( treeModel_option == "BD" )
-		{
-		tree_prior_XML = xmlNode(name="distribution", attrs=list(
-		id=tree_prior_id,
-		spec="beast.evolution.speciation.BirthDeathGernhard08Model",
-		tree=tree_name_idref,
-		birthDiffRate=birthRate_params_idref,
-		relativeDeathRate=deathRate_params_idref
-		) )
-
-		tree_prior_XMLs = cl(
-		list(
-		bl(),
-		xmlCommentNode(" Prior probability distributions of tree model parameters "),
-		bl(),
-		bl(),
-		xmlCommentNode(" Priors on birthRate(s) ")),
-		birthRate_prior_XMLs,
-		list( bl(),
-		xmlCommentNode(" Priors on deathRate(s) ")),
-		deathRate_prior_XMLs,
-		xmlCommentNode(" Probability of MCMC sampled tree given treeModel parameters "),
-		tree_prior_XML
-		)
-		tree_prior_XMLs
-
-
-		#######################################################
-		# Log the tree prior, parameter values, and parameter priors
-		#######################################################
-		tracelog_XMLs = list(
-		bl(), 
-		xmlCommentNode(" Log the probability of the tree given the treeModel parameters"), 
-		xmlNode(name="log", attrs=list(idref=tree_prior_id) ),
-		bl(), 
-		xmlCommentNode(" Log the prior probability of the treeModel parameters"), 
-		xmlNode(name="log", attrs=list(idref=birthRate_params_id) ),
-		xmlNode(name="log", attrs=list(idref=deathRate_params_id) )
-		)
-		tracelog_XMLs
-		# Add the new rate parameters
-		tracelog_XMLs = cl(tracelog_XMLs, birthRate_log_XMLs, deathRate_log_XMLs)
-
-		#######################################################
-		# screenLog the tree prior, parameter values, and parameter priors
-		#######################################################
-		screenlog_XMLs = list(
-		bl(), 
-		xmlCommentNode(" Log the probability of the tree given the treeModel parameters"), 
-		xmlNode(name="log", attrs=list(idref=tree_prior_id) ),
-		bl(), 
-		xmlCommentNode(" Log the prior probability of the treeModel parameters"), 
-		xmlNode(name="log", attrs=list(idref=birthRate_params_id) ),
-		xmlNode(name="log", attrs=list(idref=deathRate_params_id) )
-		)
-		# Nah don't need this...
-		#screenlog_XMLs = c(screenlog_XMLs, birthRate_log_XMLs, deathRate_log_XMLs, samplingRate_log_XMLs)
-		}
-		
+	tree_prior_XML = xmlNode(name="distribution", attrs=list(
+	id=tree_prior_id,
+	spec="beast.evolution.speciation.BirthDeathSkylineModel",
+	tree=tree_name_idref,
+	origin=originTime_idref,
+	birthRate=birthRate_params_idref,
+	birthRateChangeTimes=birthRateChangeTimes_tops_idref,
+	deathRate=deathRate_params_idref,
+	deathRateChangeTimes=deathRateChangeTimes_tops_idref,
+	samplingRate=samplingRate_params_idref,
+	samplingRateChangeTimes=samplingRateTimes_tops_idref,
+	rho=rhoSamplingRate_params_idref,
+	rhoSamplingTimes=rhoSamplingTimes_idref,
+	reverseTimeArrays=reverseTimeArrays_idref
+	) )
 	
+	tree_prior_XMLs = c(
+	list(
+	bl(),
+	xmlCommentNode(" Prior probability distributions of tree model parameters "),
+	bl(),
+	xmlCommentNode(" Uniform prior on the time of origin of the process (assumes my) "),
+	xmlCommentNode(" x means whatever parameter you are assessing via the distribution "),
+	originTime_prior_XML,
+	bl(),
+	xmlCommentNode(" Priors on birthRate(s) ")),
+	birthRate_prior_XMLs,
+	list( bl(),
+	xmlCommentNode(" Priors on deathRate(s) ")),
+	deathRate_prior_XMLs,
+	list( bl(),
+	xmlCommentNode(" Prior on samplingRate(s) ")),
+	samplingRate_prior_XMLs,
+	list(bl(),
+	xmlCommentNode(" Also: we are assuming for now that rho at time 0 is fixed "),
+	bl(),
+	xmlCommentNode(" Probability of MCMC sampled tree given treeModel parameters "),
+	tree_prior_XML)
+	)
+	tree_prior_XMLs
+
+
+
+
+	#######################################################
+	# Log the tree prior, parameter values, and parameter priors
+	#######################################################
+	tracelog_XMLs = list(
+	bl(), 
+	xmlCommentNode(" Log the probability of the tree given the treeModel parameters"), 
+	xmlNode(name="log", attrs=list(idref=tree_prior_id) ),
+	bl(), 
+	xmlCommentNode(" Log the prior probability of the treeModel parameters"), 
+	xmlNode(name="log", attrs=list(idref=originTime_id) ),
+	xmlNode(name="log", attrs=list(idref=birthRate_params_id) ),
+	xmlNode(name="log", attrs=list(idref=deathRate_params_id) ),
+	xmlNode(name="log", attrs=list(idref=samplingRate_params_id) ),
+	xmlNode(name="log", attrs=list(idref=rhoSamplingRate_params_id) )		
+	)
+	tracelog_XMLs
+	# Add the new rate parameters
+	tracelog_XMLs = c(tracelog_XMLs, birthRate_log_XMLs, deathRate_log_XMLs, samplingRate_log_XMLs)
+
+	#######################################################
+	# screenLog the tree prior, parameter values, and parameter priors
+	#######################################################
+	screenlog_XMLs = list(
+	bl(), 
+	xmlCommentNode(" Log the probability of the tree given the treeModel parameters"), 
+	xmlNode(name="log", attrs=list(idref=tree_prior_id) ),
+	bl(), 
+	xmlCommentNode(" Log the prior probability of the treeModel parameters"), 
+	xmlNode(name="log", attrs=list(idref=originTime_id) ),
+	xmlNode(name="log", attrs=list(idref=birthRate_params_id) ),
+	xmlNode(name="log", attrs=list(idref=deathRate_params_id) ),
+	xmlNode(name="log", attrs=list(idref=samplingRate_params_id) ),
+	xmlNode(name="log", attrs=list(idref=rhoSamplingRate_params_id) )
+	)
+	# Nah don't need this...
+	#screenlog_XMLs = c(screenlog_XMLs, birthRate_log_XMLs, deathRate_log_XMLs, samplingRate_log_XMLs)
+
 	
 	#######################################################
 	# treeLog

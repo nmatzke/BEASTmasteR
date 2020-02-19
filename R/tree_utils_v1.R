@@ -1762,6 +1762,22 @@ read_nex_phyloch <- function(fn){
 	}
 	seq <- lapply(id + 1, fuse, M = M, nblock = nblock, ntax = ntax)
 	obj <- list(nb = ntax, seq = seq, nam = nam, com = NA)
+	
+	# Error check for sequence lengths
+	length_seqs = unlist(lapply(X=obj$seq, FUN=nchar))
+	avg_length_seqs = mean(length_seqs)
+	if (all(length_seqs == avg_length_seqs) == FALSE)
+		{
+		txt = paste0("STOP ERROR in read_nex_phyloch(): Not all of your sequences have the same number of characters!  Printing 'unlist(lapply(X=obj$seq, FUN=nchar))':")
+		
+		cat("\n\n")
+		cat(txt)
+		cat("\n\n")
+		print(length_seqs)
+		cat("\n\n")
+		stop(txt)
+		}
+	
 	class(obj) <- "alignment"
 	as.DNAbin(obj)
 } # END read.nex
@@ -1772,6 +1788,7 @@ read_nex_phyloch <- function(fn){
 #######################################################
 read_nex_phyloch_to_list <- function(fn)
 	{
+	cat("\nread_nex_phyloch_to_list() is running read_nex_phyloch('", fn, "')...\n", sep="")
 	obj = read_nex_phyloch(fn)
 	charmat = as.character(obj)
 	

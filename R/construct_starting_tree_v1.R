@@ -703,6 +703,21 @@ construct_starting_tree <- function(OTUs_df=NULL, taxa_df=NULL, nodes_df=NULL, x
 		} # END if (is.null(OTUs_df) && !is.null(xlsfn))
 
 
+	# NAs in tipdates?
+	if (any(isblank_TF(OTUs_df$tipdate)) == TRUE)
+		{
+		stoptxt = "STOP ERROR in construct_starting_tree(): There are blanks or NAs in OTUs_df$tipdate. Check your OTUs worksheet. Printing 'OTUs_df$tipdate'..."
+
+		cat("\n\n")
+		cat(stoptxt)
+		cat("\n\n")
+		print("OTUs_df$tipdate:")
+		print(OTUs_df$tipdate)
+		cat("\n\n")
+		stop(stoptxt)
+		}
+	
+
 	# Gather clade names, remove empty clades
 	names_of_groups = names(taxa_df)
 	
@@ -889,7 +904,7 @@ construct_starting_tree <- function(OTUs_df=NULL, taxa_df=NULL, nodes_df=NULL, x
 	names(list_of_clades) = names_of_groups
 
 	#######################################################
-	# Now, if any of the clades are identical each other,
+	# Now, if any of the clades are identical to each other,
 	# cut them also
 	#######################################################
 	clade_txts = NULL
@@ -913,10 +928,13 @@ construct_starting_tree <- function(OTUs_df=NULL, taxa_df=NULL, nodes_df=NULL, x
 	
 	# List of which subclades go in which
 	list_of_subclades_of_each_clade = list()
-	for (i in 1:length(names_of_groups))
+	if (length(names_of_groups) > 0)
 		{
-		cmdtxt = paste0("list_of_subclades_of_each_clade$", names_of_groups[i], " = '", names_of_groups[i], "'")
-		eval(parse(text=cmdtxt))
+		for (i in 1:length(names_of_groups))
+			{
+			cmdtxt = paste0("list_of_subclades_of_each_clade$", names_of_groups[i], " = '", names_of_groups[i], "'")
+			eval(parse(text=cmdtxt))
+			}
 		}
 
 	# For each clade, check that it doesn't contradict larger clades
@@ -988,11 +1006,14 @@ construct_starting_tree <- function(OTUs_df=NULL, taxa_df=NULL, nodes_df=NULL, x
 
 	# Make subtrees, from smallest to biggest
 	list_of_subtrees = list()
-	for (j in 1:length(list_of_clades_collapsed))
+	if (length(list_of_clades_collapsed) > 0)
 		{
-		tmpOTUs = list_of_clades_collapsed[[j]]
-		tmptr = rtree(n=length(tmpOTUs), rooted=TRUE, tip.label=tmpOTUs, br=runif, min=min_brlen, max=min_brlen)
-		list_of_subtrees[[j]] = tmptr
+		for (j in 1:length(list_of_clades_collapsed))
+			{
+			tmpOTUs = list_of_clades_collapsed[[j]]
+			tmptr = rtree(n=length(tmpOTUs), rooted=TRUE, tip.label=tmpOTUs, br=runif, min=min_brlen, max=min_brlen)
+			list_of_subtrees[[j]] = tmptr
+			}
 		}
 	list_of_subtrees
 
@@ -1011,74 +1032,79 @@ construct_starting_tree <- function(OTUs_df=NULL, taxa_df=NULL, nodes_df=NULL, x
 
 	desired_node_ages = NULL
 	names_of_groups_w_node_ages = NULL
-	for (i in 1:length(names_of_groups))
+	if (length(names_of_groups) > 0)
 		{
-		# Match OTUs to tree tiplabel order,
-		# get the dates of all of the included tips
-		OTUs_in_subtree_TF = OTUs %in% list_of_clades[[i]]
-		subtree_OTUs = OTUs[OTUs_in_subtree_TF]
-		subtree_tipdates = OTUs_df$tipdate[OTUs_in_subtree_TF]
-		if (length(subtree_tipdates) == 0)
+		for (i in 1:length(names_of_groups))
 			{
-			subtree_tipdates = 0
-			}
-		oldest_tip_age = max(subtree_tipdates)
+			# Match OTUs to tree tiplabel order,
+			# get the dates of all of the included tips
+			OTUs_in_subtree_TF = OTUs %in% list_of_clades[[i]]
+			subtree_OTUs = OTUs[OTUs_in_subtree_TF]
+			subtree_tipdates = OTUs_df$tipdate[OTUs_in_subtree_TF]
+			if (length(subtree_tipdates) == 0)
+				{
+				subtree_tipdates = 0
+				}
+			oldest_tip_age = max(subtree_tipdates)
 		
-		# If a desired age has been specified...
-		if (nodes_df$make_age_prior[i] == "yes")
-			{
-			names_of_groups_w_node_ages = c(names_of_groups_w_node_ages, desired_node_ages[i])
+			# If a desired age has been specified...
+			if (nodes_df$make_age_prior[i] == "yes")
+				{
+				names_of_groups_w_node_ages = c(names_of_groups_w_node_ages, desired_node_ages[i])
 			
-			if (tolower(nodes_df$distribution[i]) == "normal")
-				{
-				desired_node_age = nodes_df$param1[i] + nodes_df$offset[i]
-				}
-			if (tolower(nodes_df$distribution[i]) == "uniform")
-				{
-				desired_node_age = (nodes_df$param1[i] + nodes_df$param2[i])/2 + nodes_df$offset[i]
-				}
-			if (tolower(nodes_df$distribution[i]) == "lognormal")
-				{
-				if (nodes_df$meanInRealSpace[i] == "yes")
+				if (tolower(nodes_df$distribution[i]) == "normal")
 					{
 					desired_node_age = nodes_df$param1[i] + nodes_df$offset[i]
 					}
-				if (nodes_df$meanInRealSpace[i] == "no")
+				if (tolower(nodes_df$distribution[i]) == "uniform")
 					{
-					meanval = exp(nodes_df$param1[i])
-					desired_node_age = meanval + nodes_df$offset[i]
+					desired_node_age = (nodes_df$param1[i] + nodes_df$param2[i])/2 + nodes_df$offset[i]
 					}
-				}
-			if (tolower(nodes_df$distribution[i]) == "exponential")
-				{
-				if (nodes_df$meanInRealSpace[i] == "yes")
+				if (tolower(nodes_df$distribution[i]) == "lognormal")
 					{
-					desired_node_age = nodes_df$param1[i] + nodes_df$offset[i]
+					if (nodes_df$meanInRealSpace[i] == "yes")
+						{
+						desired_node_age = nodes_df$param1[i] + nodes_df$offset[i]
+						}
+					if (nodes_df$meanInRealSpace[i] == "no")
+						{
+						meanval = exp(nodes_df$param1[i])
+						desired_node_age = meanval + nodes_df$offset[i]
+						}
 					}
-				if (nodes_df$meanInRealSpace[i] == "no")
+				if (tolower(nodes_df$distribution[i]) == "exponential")
 					{
-					meanval = 1/(nodes_df$param1[i])
-					desired_node_age = meanval + nodes_df$offset[i]
+					if (nodes_df$meanInRealSpace[i] == "yes")
+						{
+						desired_node_age = nodes_df$param1[i] + nodes_df$offset[i]
+						}
+					if (nodes_df$meanInRealSpace[i] == "no")
+						{
+						meanval = 1/(nodes_df$param1[i])
+						desired_node_age = meanval + nodes_df$offset[i]
+						}
 					}
-				}
 		
 	
-			# If the desired node age is less than oldest_tip_age, re-set to tip age + 1%
-			if (desired_node_age <= oldest_tip_age)
+				# If the desired node age is less than oldest_tip_age, re-set to tip age + 1%
+				if (desired_node_age <= oldest_tip_age)
+					{
+					desired_node_age = oldest_tip_age * 1.01
+					}
+				} # END if (nodes_df$make_age_prior[i] == "yes")
+		
+			# If no desired age specified, just make it a little older than the tips
+			if (nodes_df$make_age_prior[i] != "yes")
 				{
 				desired_node_age = oldest_tip_age * 1.01
-				}
-			} # END if (nodes_df$make_age_prior[i] == "yes")
+				} # END if (nodes_df$make_age_prior[i] == "yes")
 		
-		# If no desired age specified, just make it a little older than the tips
-		if (nodes_df$make_age_prior[i] != "yes")
-			{
-			desired_node_age = oldest_tip_age * 1.01
-			} # END if (nodes_df$make_age_prior[i] == "yes")
-		
-		# Save the desired node age
-		desired_node_ages = c(desired_node_ages, desired_node_age)
-		} # END for (i in 1:length(names_of_groups))
+			# Save the desired node age
+			desired_node_ages = c(desired_node_ages, desired_node_age)
+			} # END for (i in 1:length(names_of_groups))
+		} else {
+		# nada
+		}
 
 
 	# Apply names to desired_node_ages
@@ -1101,80 +1127,84 @@ construct_starting_tree <- function(OTUs_df=NULL, taxa_df=NULL, nodes_df=NULL, x
 	# Starting from the root, make subtrees, adding in the sub-subtrees as we go
 	j = 2
 	list_of_subtrees_w_good_branchlengths = list_of_subtrees
-	for (j in 1:length(list_of_subtrees))
+	if (length(list_of_subtrees) > 0)
 		{
-		subtree = list_of_subtrees[[j]]
-
-		# Get the desired tip date for each OTU or clade root
-		clade_or_tipnames = list_of_clades_collapsed[[j]]
-		tip_ages = rep(0, length(clade_or_tipnames))
-		names(tip_ages) = clade_or_tipnames
-
-		for (i in 1:length(clade_or_tipnames))
+		for (j in 1:length(list_of_subtrees))
 			{
-			tmpname = clade_or_tipnames[i]
-			TF = (names_of_groups %in% tmpname) 
-			if (sum(TF) == 1)
+			subtree = list_of_subtrees[[j]]
+
+			# Get the desired tip date for each OTU or clade root
+			clade_or_tipnames = list_of_clades_collapsed[[j]]
+			tip_ages = rep(0, length(clade_or_tipnames))
+			names(tip_ages) = clade_or_tipnames
+
+			for (i in 1:length(clade_or_tipnames))
 				{
-				# Then it's a node, get the desired node age
-				tip_ages[i] = desired_node_ages[TF]
-				} else {
-				# Find it in the OTUs list
-				TF = (OTUs_df$OTUs %in% tmpname)
+				tmpname = clade_or_tipnames[i]
+				TF = (names_of_groups %in% tmpname) 
 				if (sum(TF) == 1)
 					{
-					tip_ages[i] = OTUs_df$tipdate[TF]
+					# Then it's a node, get the desired node age
+					tip_ages[i] = desired_node_ages[TF]
 					} else {
-					txt = paste0("STOP ERROR in construct_starting_tree(): the tip or clade '", tmpname, "' had no date specified that we could find.")
-					cat("\n\n")
-					cat(txt)
-					cat("\n\n")
-					stop(txt)
+					# Find it in the OTUs list
+					TF = (OTUs_df$OTUs %in% tmpname)
+					if (sum(TF) == 1)
+						{
+						tip_ages[i] = OTUs_df$tipdate[TF]
+						} else {
+						txt = paste0("STOP ERROR in construct_starting_tree(): the tip or clade '", tmpname, "' had no date specified that we could find.")
+						cat("\n\n")
+						cat(txt)
+						cat("\n\n")
+						stop(txt)
+						} # END if (sum(TF) == 1)
 					} # END if (sum(TF) == 1)
-				} # END if (sum(TF) == 1)
-			} # END for (i in 1:length(clade_or_tipnames))
+				} # END for (i in 1:length(clade_or_tipnames))
 
-		tip_ages
+			tip_ages
 
-		# Get the desired age of the root node
-		name_of_group = names_of_groups[j]
-		TF = (names_of_groups %in% name_of_group) 
-		if (sum(TF) == 1)
-			{
-			node_age = desired_node_ages[TF]
-			} else {
-			# If not found, the node age will be 10% of the range of the tip ages
-			range_val = max(tip_ages) - min(tip_ages)
-			node_age = max(tip_ages) + 0.1 * max(tip_ages)
-			}
+			# Get the desired age of the root node
+			name_of_group = names_of_groups[j]
+			TF = (names_of_groups %in% name_of_group) 
+			if (sum(TF) == 1)
+				{
+				node_age = desired_node_ages[TF]
+				} else {
+				# If not found, the node age will be 10% of the range of the tip ages
+				range_val = max(tip_ages) - min(tip_ages)
+				node_age = max(tip_ages) + 0.1 * max(tip_ages)
+				}
 
-		# Now, adjust these ages relative to the highest tip
-		youngest_tip_age = min(tip_ages)
-		node_age = node_age - youngest_tip_age
-		tip_ages = tip_ages - youngest_tip_age
+			# Now, adjust these ages relative to the highest tip
+			youngest_tip_age = min(tip_ages)
+			node_age = node_age - youngest_tip_age
+			tip_ages = tip_ages - youngest_tip_age
 
-		# Get the subtree table
-		subtr_table = prt(subtree, printflag=FALSE)
-		subtr_table
+			# Get the subtree table
+			subtr_table = prt(subtree, printflag=FALSE)
+			subtr_table
 
-		# How much to add to tips to get the subtree root the correct relative date?
-		root_nodenum = length(subtree$tip.label)
-		subtr_current_root_age = subtr_table$time_bp[root_nodenum]
-		add_to_tips = node_age - tip_ages
-		add_to_tips
+			# How much to add to tips to get the subtree root the correct relative date?
+			root_nodenum = length(subtree$tip.label)
+			subtr_current_root_age = subtr_table$time_bp[root_nodenum]
+			add_to_tips = node_age - tip_ages
+			add_to_tips
 
-		# Add to the tip branchlengths
-		for (i in 1:length(add_to_tips))
-			{
-			tip_to_add_to = names(add_to_tips)[i]
-			TFrow = subtr_table$label == tip_to_add_to
-			edgenum = subtr_table$parent_br[TFrow]
-			subtree$edge.length[edgenum] = subtree$edge.length[edgenum] + add_to_tips[i]
-			}
+			# Add to the tip branchlengths
+			for (i in 1:length(add_to_tips))
+				{
+				tip_to_add_to = names(add_to_tips)[i]
+				TFrow = subtr_table$label == tip_to_add_to
+				edgenum = subtr_table$parent_br[TFrow]
+				subtree$edge.length[edgenum] = subtree$edge.length[edgenum] + add_to_tips[i]
+				}
 	
-		list_of_subtrees_w_good_branchlengths[[j]] = subtree
-		} # END for (j in 1:length(list_of_subtrees))
-
+			list_of_subtrees_w_good_branchlengths[[j]] = subtree
+			} # END for (j in 1:length(list_of_subtrees))
+		} else {
+		
+		} # END if (length(list_of_subtrees) > 0)
 
 	# Let's assume the beginning tree, that we will build from,
 	# is called total_group_LCA

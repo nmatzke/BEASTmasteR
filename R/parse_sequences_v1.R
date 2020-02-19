@@ -2,6 +2,39 @@
 # Functions for parsing sequence data and adding to XML
 #######################################################
 
+# Convert all spaces, tabs, periods, etc. to underscores
+# (for normalizing OTU names for all programs)
+convert_chars_to_underscores <- function(txt)
+	{
+	txt2 = gsub(pattern=" ", replacement="_", x=txt)
+	txt2 = gsub(pattern=",", replacement="_", x=txt2)
+	txt2 = gsub(pattern="'", replacement="_", x=txt2)
+	txt2 = gsub(pattern='"', replacement="_", x=txt2)
+	txt2 = gsub(pattern="\\{", replacement="_", x=txt2)
+	txt2 = gsub(pattern="\\}", replacement="_", x=txt2)
+	txt2 = gsub(pattern="\\.", replacement="_", x=txt2)
+	txt2 = gsub(pattern="\\(", replacement="_", x=txt2)
+	txt2 = gsub(pattern="\\)", replacement="_", x=txt2)
+	txt2 = gsub(pattern="\\[", replacement="_", x=txt2)
+	txt2 = gsub(pattern="\\]", replacement="_", x=txt2)
+	txt2 = gsub(pattern="\\#", replacement="_", x=txt2)
+	txt2 = gsub(pattern="/", replacement="_", x=txt2)
+	txt2 = gsub(pattern=":", replacement="_", x=txt2) # causes Newick error
+	txt2 = gsub(pattern=";", replacement="_", x=txt2) # causes Newick error
+	
+	# Convert underscores back to _
+	txt2 = gsub(pattern="__", replacement="_", x=txt2)
+	txt2 = gsub(pattern="__", replacement="_", x=txt2)
+	txt2 = gsub(pattern="__", replacement="_", x=txt2)
+	txt2 = gsub(pattern="__", replacement="_", x=txt2)
+	txt2 = gsub(pattern="__", replacement="_", x=txt2)
+	txt2 = gsub(pattern="__", replacement="_", x=txt2)
+	txt2 = gsub(pattern="__", replacement="_", x=txt2)
+
+	return(txt2)
+	}
+
+
 convert_NEXUS_to_FASTA <- function(fasta_fn, out_nexus_aln_fn=NULL)
 	{
 	require(ape)
@@ -1034,7 +1067,10 @@ parse_datasets <- function(seqs_df, add_morphLength=TRUE, add_morphList=TRUE, OT
 			txt = paste0("\n\nERROR in parse_dataset(): datatype '", datatype, "' not recognized.\n\n")
 			stop(txt)
 			}
-	
+
+
+		cat("\n\nNOTE: parse_datasets() is attempting to read data files with e.g. read_nex_phyloch_to_list() or read_nexus_data2(), errors are common here.\n\n")
+		
 		if (datatype == toupper("DNA"))
 			{
 			if (seqs_read_functions[i] == "read_nex_phyloch_to_list")
@@ -1045,20 +1081,24 @@ parse_datasets <- function(seqs_df, add_morphLength=TRUE, add_morphList=TRUE, OT
 				} # END if (seqs_read_functions[i] == "read_nex_phyloch_to_list")
 
 			# Loads to whatever variable given by "dataset_name"
+			cat("\nRunning cmdstr #1: '", cmdstr, "'", sep="")
 			eval(parse(text=cmdstr))
 			
 			# Store the length (number of characters) of the raw dataset
 			cmdstr = paste0("dataset_lengths[i] = length(", dataset_name, "[[1]])")
+			cat("\nRunning cmdstr #2: '", cmdstr, "'", sep="")
 			eval(parse(text=cmdstr))
 
 			# Store the number of taxa of the raw dataset
 			cmdstr = paste0("dataset_ntaxa[i] = length(", dataset_name, ")")
+			cat("\nRunning cmdstr #3: '", cmdstr, "'", sep="")
 			eval(parse(text=cmdstr))
 			
 			
 			# Statistics on the DNA matrix
 			# typically seqs_DNA
 			cmdstr = paste0("DNAstats = DNA_matrix_stats(charslist=", dataset_name, ", charsdf=NULL)")
+			cat("\nRunning cmdstr #4: '", cmdstr, "'", sep="")
 			eval(parse(text=cmdstr))
 			matrices_stats_tmp = DNAstats
 			matrices_stats = c(matrices_stats, list(matrices_stats_tmp))
@@ -1069,6 +1109,7 @@ parse_datasets <- function(seqs_df, add_morphLength=TRUE, add_morphList=TRUE, OT
 			
 			# For this dataset, find numQs for the dataset
 			cmdstr = paste0("numQs_for_each_OTU = sapply(X=", dataset_name, ", FUN=count_ambig_DNA)")
+			cat("\nRunning cmdstr #5: '", cmdstr, "'", sep="")
 			eval(parse(text=cmdstr))
 			
 			meanQs[i] = mean(numQs_for_each_OTU, na.rm=TRUE)
