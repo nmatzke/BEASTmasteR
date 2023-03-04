@@ -381,22 +381,72 @@ file = confn
 '
 extractBEASTstats_orig <- function (file, digits=4, printflag=FALSE) 
 	{
-    X <- scan(file = file, what = "", sep = "\n", quiet = TRUE)
-    X <- X[grep("tree TREE1[[:space:]]+=", X)]
-    X <- gsub("tree TREE1[[:space:]]+= \\[&R\\] ", "", X)
-    tab <- unlist(strsplit(X, "\\["))[-1]
-    tab <- gsub("&|;|\\]", "", tab)
-    tab <- gsub(":.+$", "", tab)
+	X <- scan(file = file, what = "", sep = "\n", quiet = TRUE)
+	
+	# Get the node labels
+	plain_tr = phytools::readNexus(file=file, format="raxml")
+	plain_tr$node.label = paste0("[", (length(plain_tr$tip.label)+1):(length(plain_tr$tip.label)+plain_tr$Nnode), "]")
+	plain_tr_string = ape::write.tree(plain_tr, file="")
+
+	# Node labels in text order
+	nodelabels_in_text_order <- unlist(strsplit(plain_tr_string, "\\["))[-1]
+	nodelabels_in_text_order <- gsub("&|;|\\]", "", nodelabels_in_text_order, ignore.case=TRUE)
+	nodelabels_in_text_order <- gsub(":.+$", "", nodelabels_in_text_order, ignore.case=TRUE)
+	nodelabels_in_text_order = as.numeric(nodelabels_in_text_order)
+
+	# Get ALL node labels, including tips
+	plain_tr = phytools::readNexus(file=file, format="raxml")
+	plain_tr$node.label = paste0("[", (length(plain_tr$tip.label)+1):(length(plain_tr$tip.label)+plain_tr$Nnode), "]")
+	plain_tr$tip.label = paste0(plain_tr$tip.label, "[", 1:length(plain_tr$tip.label), "]")
+	plain_tr_string = ape::write.tree(plain_tr, file="")
+
+	# ALL node labels in text order
+	all_nodelabels_in_text_order <- unlist(strsplit(plain_tr_string, "\\["))[-1]
+	all_nodelabels_in_text_order <- gsub("&|;|\\]", "", all_nodelabels_in_text_order, ignore.case=TRUE)
+	all_nodelabels_in_text_order <- gsub(":.+$", "", all_nodelabels_in_text_order, ignore.case=TRUE)
+	all_nodelabels_in_text_order = as.numeric(all_nodelabels_in_text_order)
 
 
-    # This extracts ~19 objects delimited by [brackets
-    # In the consensus tree output
-    foo <- function(x)
-    	{
-        x <- unlist(strsplit(x, ","))
-        x
-    	}
-    tab <- lapply(tab, foo)
+	
+	beast_first_tree_string = "tree TREE1[[:space:]]+="
+	row_with_first_tree = grep(beast_first_tree_string, X, ignore.case=TRUE)
+	# Alternate starting string
+	if (length(row_with_first_tree) == 0)
+		{
+		beast_first_tree_string = "tree TREE_1[[:space:]]+="
+		row_with_first_tree = grep(beast_first_tree_string, X, ignore.case=TRUE)
+		}
+	
+	# Error check
+	if (length(row_with_first_tree) == 0)
+		{
+		txt = paste0("STOP ERROR in BEASTmasteR's extractBEASTstats3(). The variable 'row_with_first_tree' has length 0, meaning a starting string like 'tree TREE1[[:space:]]+=' or 'tree TREE_1[[:space:]]+=' was not found in your input file, file='", file, ".' Modify file, or function.")
+		cat("\n\n")
+		cat(txt)
+		cat("\n\n")
+		stop(txt)
+		}
+	
+	X <- X[row_with_first_tree]
+
+  X <- X[grep(beast_first_tree_string, X, ignore.case=TRUE)]
+	gsub_string = paste0(beast_first_tree_string, " \\[&R\\] ")
+
+	X <- gsub(gsub_string, "", X, ignore.case=TRUE)
+	X <- gsub("\\\t", "", X, ignore.case=TRUE)
+	tab <- unlist(strsplit(X, "\\["))[-1]
+	tab <- gsub("&|;|\\]", "", tab, ignore.case=TRUE)
+	tab <- gsub(":.+$", "", tab, ignore.case=TRUE)
+
+
+	# This extracts ~19 objects delimited by [brackets
+	# In the consensus tree output
+	foo <- function(x)
+		{
+			x <- unlist(strsplit(x, ","))
+			x
+		}
+	tab <- lapply(tab, foo)
     
 
 	#for (i in seq(along = tab))
@@ -405,20 +455,20 @@ extractBEASTstats_orig <- function (file, digits=4, printflag=FALSE)
     	{
     	# in each element in a tab(le) item, get the
     	# indices of anything containing "{"
-        ind <- grep("[{]", tab[[i]])
-        
-        # Change the name text of those elements (remove e.g. {)
-        names <- gsub("=.+$", "", tab[[i]][ind])
-        tab[[i]][ind] <- gsub("[{]", "", tab[[i]][ind])
-        
-        # Replace = with _MIN=
-        tab[[i]][ind] <- gsub("=", "_MIN=", tab[[i]][ind])
-        
-        # Remove the } bracket also
-        tab[[i]][ind + 1] <- gsub("[}]", "", tab[[i]][ind + 1])
-        
-        # And call this item MAX=
-        tab[[i]][ind + 1] <- paste(paste(names, "MAX=", sep = "_"), tab[[i]][ind + 1])
+			ind <- grep("[{]", tab[[i]])
+			
+			# Change the name text of those elements (remove e.g. {)
+			names <- gsub("=.+$", "", tab[[i]][ind])
+			tab[[i]][ind] <- gsub("[{]", "", tab[[i]][ind])
+			
+			# Replace = with _MIN=
+			tab[[i]][ind] <- gsub("=", "_MIN=", tab[[i]][ind])
+			
+			# Remove the } bracket also
+			tab[[i]][ind + 1] <- gsub("[}]", "", tab[[i]][ind + 1])
+			
+			# And call this item MAX=
+			tab[[i]][ind + 1] <- paste(paste(names, "MAX=", sep = "_"), tab[[i]][ind + 1])
     	}
 
 
@@ -460,13 +510,49 @@ extractBEASTstats_orig <- function (file, digits=4, printflag=FALSE)
 		}
 		
 	# Name the columns of the table
-    colnames(ttab) <- stats
+  colnames(ttab) <- stats
     
-    # Figure out which are the tips (doesn't matter, really)
-    tip <- which(is.na(ttab$posterior))
-    ttab
-    
-    
+	# Figure out which are the tips (doesn't matter, really)
+	#tip <- which(is.na(ttab$posterior))
+	
+	# Depending on how many [bracketed node labels] you had, label accordingly
+	numtips = length(plain_tr$tip.label)
+	num_internal = plain_tr$Nnode
+	num_internal_minus_root = plain_tr$Nnode - 1
+	
+	if (nrow(ttab) == (numtips+num_internal))
+		{
+    ttab = cbind(all_nodelabels_in_text_order, ttab)
+    colnames(ttab)[1] = "nodenum"		
+		}
+
+	if (nrow(ttab) == (numtips+num_internal_minus_root))
+		{
+		# Remove the root node
+		root_nodenum = 	length(plain_tr$tip.label)+1
+		TF = all_nodelabels_in_text_order %in% root_nodenum
+		all_nodelabels_in_text_order = all_nodelabels_in_text_order[TF == FALSE]
+    ttab = cbind(all_nodelabels_in_text_order, ttab)
+    colnames(ttab)[1] = "nodenum"		
+		}
+	
+	if (nrow(ttab) == num_internal)
+		{
+    ttab = cbind(nodelabels_in_text_order, ttab)
+    colnames(ttab)[1] = "nodenum"		
+		}
+
+	if (nrow(ttab) == num_internal_minus_root)
+		{
+		# Remove the root node
+		root_nodenum = 	length(plain_tr$tip.label)+1
+		TF = nodelabels_in_text_order %in% root_nodenum
+		nodelabels_in_text_order = nodelabels_in_text_order[TF == FALSE]
+
+    ttab = cbind(nodelabels_in_text_order, ttab)
+    colnames(ttab)[1] = "nodenum"		
+		}
+  
 # 	phy <- read.beast(file, digits = digits)
 # 	int <- phy$Nnode
 #     tips <- length(phy$tip.label)
@@ -474,6 +560,7 @@ extractBEASTstats_orig <- function (file, digits=4, printflag=FALSE)
 #     M <- cbind(node, ttab)
 #  	   
 #     return(M)
+	return(ttab)
 	}
 
 
@@ -491,15 +578,24 @@ extractBEASTstats_orig <- function (file, digits=4, printflag=FALSE)
 # From phyloch
 read.beast.table_original <- function (file, digits = 2) 
 	{
-    phy <- read.beast_original(file, digits = digits)
-    int <- phy$Nnode
-    stats <- phy[-(1:4)]
-    M <- matrix(unlist(stats), nrow = int, byrow = FALSE)
-    colnames(M) <- names(stats)
-    tips <- length(phy$tip.label)
-    node <- (tips + 1):(tips + int)
-    M <- cbind(node, M)
-    M
+	phy <- read.beast_original(file, digits = digits)
+	int <- phy$Nnode
+	
+	# zero out the node labels so they don't interfere
+	node_labels = phy$node.label
+	phy$node.label = NULL
+	
+	# Extract the stats from the rest
+	stats <- phy[-(1:4)]
+	
+	num_stats = length(stats)
+	M <- matrix(unlist(stats), ncol=num_stats, byrow = FALSE)
+	colnames(M) <- names(stats)
+	#tips <- length(phy$tip.label)
+	#node <- (tips + 1):(tips + int)
+	#M <- cbind(node, M)
+	colnames(M)[1] = "node"
+	return(M)
 	} # END read.beast.table_original <- function (file, digits = 2) 
 
 
@@ -517,15 +613,37 @@ file=confn
 
 extractBEASTstats3 <- function (file) 
 {
-    X <- scan(file = file, what = "", sep = "\n", quiet = TRUE)
-    phy <- read.nexus(file)
-    X <- X[grep("tree TREE1[[:space:]]+=", X)]
-    X <- gsub("^.*tree TREE1[[:space:]]+= \\[&R\\] ", "", X)
-    X <- gsub("[!]rotate=true,*|[!]rotate=false,*", "", X)
-    X <- gsub(";$", "", X)
+    X <- scan(file=file, what="", sep="\n", quiet=TRUE)
+    #phy <- read.nexus(file)
+    phy <- phytools::readNexus(file, format="raxml")
+    beast_first_tree_string = "tree TREE1[[:space:]]+="
+    row_with_first_tree = grep(beast_first_tree_string, X, ignore.case=TRUE)
+   	# Alternate starting string
+  	if (length(row_with_first_tree) == 0)
+    	{
+			beast_first_tree_string = "tree TREE_1[[:space:]]+="
+			row_with_first_tree = grep(beast_first_tree_string, X, ignore.case=TRUE)
+    	}
+    
+    # Error check
+    if (length(row_with_first_tree) == 0)
+    	{
+    	txt = paste0("STOP ERROR in BEASTmasteR's extractBEASTstats3(). The variable 'row_with_first_tree' has length 0, meaning a starting string like 'tree TREE1[[:space:]]+=' or 'tree TREE_1[[:space:]]+=' was not found in your input file, file='", file, ".' Modify file, or function.")
+    	cat("\n\n")
+    	cat(txt)
+    	cat("\n\n")
+    	stop(txt)
+    	}
+    
+    X <- X[row_with_first_tree]
+    gsub_string = paste0("^.*", beast_first_tree_string, " \\[&R\\] ")
+    #X <- gsub("^.*tree TREE1[[:space:]]+= \\[&R\\] ", "", X)
+    X <- gsub(pattern=gsub_string, replacement="", X, ignore.case=TRUE)
+    X <- gsub("[!]rotate=true,*|[!]rotate=false,*", "", X, ignore.case=TRUE)
+    X <- gsub(";$", "", X, ignore.case=TRUE)
     vals <- unlist(strsplit(X, "\\][[:alnum:]:.)]*\\[*&*"))
     foo <- function(x) {
-        x <- gsub(",([[:lower:]])", "xxx\\1", x)
+        x <- gsub(",([[:lower:]])", "xxx\\1", x, ignore.case=TRUE)
         x <- unlist(strsplit(x, "xxx"))
         names(x) <- sapply(x, function(x) {
             unlist(strsplit(x, split = "="))[1]
@@ -533,14 +651,14 @@ extractBEASTstats3 <- function (file)
         x <- sapply(x, function(x) {
             unlist(strsplit(x, split = "="))[2]
         })
-        x <- gsub("[{}]", "", x)
+        x <- gsub("[{}]", "", x, ignore.case=TRUE)
         x <- strsplit(x, ",")
         lapply(x, as.numeric)
     }
     vals <- lapply(vals, foo)
-    edges <- gsub("\\[(&[[:alnum:]_=%!.,{}-]+)\\]", "", X)
+    edges <- gsub("\\[(&[[:alnum:]_=%!.,{}-]+)\\]", "", X, ignore.case=TRUE)
     edges <- unlist(strsplit(gsub("[()]*", "", edges), ":"))
-    tips <- gsub("^[0-9]+.[0-9]+,*", "", edges)
+    tips <- gsub("^[0-9]+.[0-9]+,*", "", edges, ignore.case=TRUE)
 
 
 	re1='(,)'								# Any Single Character 1
@@ -586,7 +704,10 @@ extractBEASTstats3 <- function (file)
 extractMrBayesStats4 <- function (file) 
 {
     X <- scan(file = file, what = "", sep = "\n", quiet = TRUE)
-    phy <- read.nexus(file)
+    #phy <- read.nexus(file)
+    phy <- phytools::readNexus(file, format="raxml")
+
+
     X <- X[grep("tree TREE1[[:space:]]+=", X)]
     X <- gsub("^.*tree TREE1[[:space:]]+= \\[&R\\] ", "", X)
     X <- gsub("[!]rotate=true,*|[!]rotate=false,*", "", X)
@@ -642,6 +763,54 @@ extractMrBayesStats4 <- function (file)
 }
 
 
+
+
+# Remove equals signs from NEXUS tree files tip names
+remove_equals_from_tips <- function(nexfn, outfn="noEQs.nexus")
+	{
+	tr = phytools::readNexus(nexfn, format="raxml")
+	TF = grepl(pattern="\\=", x=tr$tip.label)
+	sum(TF)
+	tr$tip.label[TF]
+	
+	if (sum(TF) > 0)
+		{
+		new_tip_labels = gsub(pattern="\\=", replacement="EQ", x=tr$tip.label[TF])
+
+		txt = paste0("WARNING from remove_equals_from_tips(): ", sum(TF), " tip labels have an '=' symbol in them. This messes up read.nexus() and similar functions. The symbol '=' is being replaced with 'EQ', in file '", nexfn, "'.  Printing the offending tip.labels:")
+		cat("\n\n")
+		cat(txt)
+		cat("\n\n")
+		print(tr$tip.label[TF])
+		cat("\n")
+		warning(txt)
+		} else {
+		return(NULL)
+		}# END if (sum(TF) > 0)
+	
+	# Replace, in the original NEXUS file
+	tmpstrs = readLines(nexfn)
+	for (i in 1:length(tmpstrs))
+		{
+		tmpstr = tmpstrs[i]
+		newstr = ""
+		for (j in 1:length(tr$tip.label[TF]))
+			{
+			newstr = gsub(pattern=tr$tip.label[TF][j], replacement=new_tip_labels[j], x=tmpstr)
+			tmpstr = newstr
+			} # END for (j in 1:length(tr$tip.label))
+		tmpstrs[i] = tmpstr
+		} # END for (i in 1:length(tmpstrs))
+	
+	# Write to file
+	writeLines(text=tmpstrs, con=outfn)
+	return(outfn)
+	}
+
+
+
+
+
 #######################################################
 # read.beast_original: Reading a BEAST tree, with the stats
 #######################################################
@@ -657,58 +826,59 @@ extractMrBayesStats4 <- function (file)
 setup='
 file=confn
 digits = NULL
+printflag=FALSE
 '
 read.beast_original <- function (file, digits = NULL, printflag=FALSE) 
 	{
 	# Scan the files in
-    X <- scan(file = file, what = "", sep = "\n", quiet = TRUE)
-    
-    # LEFT is the lines containing [
-    # -- basically the tree lines
-    LEFT <- grep("\\[", X)
-    
-    # Extract all of the saved information at each node
-    tab <- extractBEASTstats_orig(file, printflag=FALSE)
-    if (!is.null(digits)) 
-        tab <- round(tab, digits = digits)
-        
-    # Nodes without posterior values are tip nodes (always 100%!)
-    interior <- which(!is.na(tab$posterior))
+	X <- scan(file = file, what = "", sep = "\n", quiet = TRUE)
+	
+	# LEFT is the lines containing [
+	# -- basically the tree lines
+	LEFT <- grep("\\[", X)
+	
+	# Extract all of the saved information at each node
+	tab <- extractBEASTstats_orig(file, printflag=FALSE)
+	stats_at_each_node = tab
+	if (!is.null(digits)) 
+		tab <- round(tab, digits = digits)
+			
+	# Nodes without posterior values are tip nodes (always 100%!)
+	interior <- which(!is.na(tab$posterior))
 
-    # Right is the lines containing ]
-    # -- basically the tree lines
-    RIGHT <- grep("\\]", X)    
-		
+	# Right is the lines containing ]
+	# -- basically the tree lines
+	RIGHT <- grep("\\]", X)    
+	
 	# Convert lines with fully annotated trees into 
 	# lines with just simple Newick-format trees
-    if (length(LEFT))
-    	{
-    	
-    	# Do ANY of the lines with [ correspond to lines with ]?
-        w <- LEFT == RIGHT
-        if (any(w))
-        	{        	
-            s <- LEFT[w]
-            
-            # For any lines with [ and ], 
-            # remove everything between square brackets
-            X[s] <- gsub("\\[[^]]*\\]", "", X[s])
-        	}
-        	
-        # For any lines that have ONLY [ or ONLY ]
-        # remove anything anything after [ or before ] (?)
-        w <- !w
-        if (any(w))
-        	{
-            s <- LEFT[w]
-            X[s] <- gsub("\\[.*", "", X[s])
-            sb <- RIGHT[w]
-            X[sb] <- gsub(".*\\]", "", X[sb])
-            if (any(s < sb - 1)) 
-                X <- X[-unlist(mapply(":", (s + 1), (sb - 1)))]
-        	}
-    	}
-    
+	if (length(LEFT))
+		{
+		# Do ANY of the lines with [ correspond to lines with ]?
+		w <- LEFT == RIGHT
+		if (any(w))
+			{        	
+				s <- LEFT[w]
+	
+				# For any lines with [ and ], 
+				# remove everything between square brackets
+				X[s] <- gsub("\\[[^]]*\\]", "", X[s])
+			}
+
+		# For any lines that have ONLY [ or ONLY ]
+		# remove anything anything after [ or before ] (?)
+		w <- !w
+		if (any(w))
+			{
+				s <- LEFT[w]
+				X[s] <- gsub("\\[.*", "", X[s])
+				sb <- RIGHT[w]
+				X[sb] <- gsub(".*\\]", "", X[sb])
+				if (any(s < sb - 1)) 
+						X <- X[-unlist(mapply(":", (s + 1), (sb - 1)))]
+			}
+		} # END if (length(LEFT))
+	
     # Get line numbers for END; and ENDBLOCK;
     endblock <- grep("END;|ENDBLOCK;", X, ignore.case = TRUE)
     
@@ -725,38 +895,41 @@ read.beast_original <- function (file, digits = NULL, printflag=FALSE)
     # No TRANSLATE block
     if (length(i2) != 0)
     	{    
-		# Last line with TRANSLATE items
-		end <- semico[semico > i2][1]
+			# Last line with TRANSLATE items
+			end <- semico[semico > i2][1]
 		
-		# Lines with TRANSLATE items
-		x <- X[(i2 + 1):end]
-		x <- unlist(strsplit(x, "[,; \t]"))
-		x <- x[nzchar(x)]
+			# Lines with TRANSLATE items
+			x <- X[(i2 + 1):end]
+			x <- unlist(strsplit(x, "[,; \t]"))
+			x <- x[nzchar(x)]
 		
-		# Get the translation information
-		TRANS <- matrix(x, ncol = 2, byrow = TRUE)
-		TRANS[, 2] <- gsub("['\"]", "", TRANS[, 2])
-		n <- dim(TRANS)[1]
+			# Get the translation information
+			TRANS <- matrix(x, ncol = 2, byrow = TRUE)
+			TRANS[, 2] <- gsub("['\"]", "", TRANS[, 2])
+			n <- dim(TRANS)[1]
 
-		# Start & end lines of the trees block
-		start <- semico[semico > i2][1] + 1
-		end <- endblock[endblock > i1][1] - 1
-		tree <- X[start:end]
-		} else {
-		# WITHOUT TRANSLATE block
-		# Start & end lines of the trees block
-		start <- i1+1
-		end <- endblock[endblock > i1][1] - 1
-		tree <- X[start:end]
-
-		}
-    
+			# Start & end lines of the trees block
+			start <- semico[semico > i2][1] + 1
+			end <- endblock[endblock > i1][1] - 1
+			tree <- X[start:end]
+			} else {
+			# WITHOUT TRANSLATE block
+			# Start & end lines of the trees block
+			start <- i1+1
+			end <- endblock[endblock > i1][1] - 1
+			tree <- X[start:end]
+			} # END if (length(i2) != 0)
+		
     
     # Remove everything up to the first =
     # (e.g. tree TREE1 =  
     #  in NEXUS files...)
-    tree <- gsub("^.*= *", "", tree)
+		#tree <- gsub("^.*= *", "", tree)
+		#newick_string = strip_tree_EQUALS_from_nexus_treestring(tmpstring=tree)
+		#tree = newick_string
     
+    # 2023-03-04
+    JUNK='
     # Branch lengths are everything after a :
     brl <- unlist(strsplit(tree, ":"))[-1]
     
@@ -781,45 +954,86 @@ read.beast_original <- function (file, digits = NULL, printflag=FALSE)
     for (i in seq(along = nodestats))
     #for (i in 1:1)
     	{
-        newtree <- tree
-        
-        # Paste together the nodestat & branchlength
-        val <- tab[, i]
-        ggg <- paste(val, brl, sep = "")
-        ggg[length(ggg)] <- paste(tail(val, 1), ";", sep = "")
-        
-        # Go through the interior nodes, and replace
-        # the branchlength with the node statistic in question
-        for (j in interior)
-        	{
-        	newtree <- gsub(brl[j], ggg[j], newtree)
-        	}
-        dt <- read.tree(text = newtree)
-        
-        # Then get these as node labels
-        z <- dt$node.label
-        z[z == "NA"] <- 9999
-        z <- as.numeric(z)
-        z[z == 9999] <- NA
-        
-        # Tabulate the nodestats
-        nodestats[[i]] <- z
-        names(nodestats)[i] <- colnames(tab)[i]
-    	}
-    
+			newtree <- tree
+			
+			# Paste together the nodestat & branchlength
+			val <- tab[, i]
+			ggg <- paste(val, brl, sep = "")
+			ggg[length(ggg)] <- paste(tail(val, 1), ";", sep = "")
+			
+			# Go through the interior nodes, and replace
+			# the branchlength with the node statistic in question
+			for (j in interior)
+				{
+				newtree <- gsub(brl[j], ggg[j], newtree)
+				}
+			#dt <- read.tree(text = newtree)
+			dt = phytools:::modified.text_to_tree(text=newtree, trans=NULL)
+			
+			
+			# Then get these as node labels
+			z <- dt$node.label
+			z[z == "NA"] <- 9999
+			z <- as.numeric(z)
+			z[z == 9999] <- NA
+			
+			# Tabulate the nodestats
+			nodestats[[i]] <- z
+			names(nodestats)[i] <- colnames(tab)[i]
+    	} # END for (i in seq(along = nodestats))
+    '
     
     # Read the input file as plain NEXUS
-    tr <- read.nexus(file)
+    #tr <- read.nexus(file)
+    tr <- phytools::readNexus(file, format="raxml")
+    # Use the node numbers as the node.label
+    tr$node.label = (length(tr$tip.label)+1):(length(tr$tip.label)+tr$Nnode)
+    
+    # Construct a nodestats table for ALL nodes
+    numtips = length(tr$tip.label)
+    numnodes = tr$Nnode
+    num_all = numtips + numnodes
+    nodestats = as.data.frame(nodestats, stringsAsFactors=FALSE)
+    colnames(nodestats) = names(tab)
+    for (i in 1:num_all)
+    	{
+    	#cat(i)
+    	#cat(",")
+    	tab_row = match(i, table=tab$nodenum)
+    	if (is.na(tab_row) == FALSE)
+    		{
+	    	nodestats[i,] = tab[tab_row,]
+	    	}
+    	if (is.na(tab_row) == TRUE)
+    		{
+	    	nodestats[i,] = c(i, NA)
+	    	}
+    	}
     
     # Add the stats to the standard tree object
-    tr <- c(tr[1:length(tr)], nodestats[1:length(nodestats)])
-    class(tr) <- ("phylo")
+    nodestats_as_list = unlist(apply(X=nodestats, MARGIN=2, FUN=list), recursive=FALSE)
+    outtr <- c(tr[1:length(tr)], nodestats_as_list)
+    class(outtr) <- ("phylo")
     
     # Add the origin attribute
-    attr(tr, "origin") <- file
-    tr
+    attr(outtr, "origin") <- file
+    return(outtr)
 	}
 
+
+# Convert NEXUS string to Newick string by stripping the tree = ...bit:
+# \ttree tree_1 =  ((chimp,human),gorilla)
+# ->
+# ((chimp,human),gorilla)
+#
+# Replaces e.g.: tree <- gsub("^.*= *", "", tree)
+strip_tree_EQUALS_from_nexus_treestring <- function(tmpstring)
+	{
+	# Position of the first equals in the string
+	first_equals = str_locate(string=tmpstring, pattern="=")
+	newick_string = trim(substr(x=tmpstring, start=first_equals[,"end"]+1, stop=str_length(tmpstring)))
+	return(newick_string)
+	}
 
 
 #######################################################
@@ -975,7 +1189,10 @@ read_beast_prt <- function (file, digits = 9, get_tipnames=TRUE, printflag=FALSE
     # Remove everything up to the first =
     # (e.g. tree TREE1 =  
     #  in NEXUS files...)
-    tree <- gsub("^.*= *", "", tree)
+   	#tree <- gsub("^.*= *", "", tree)
+		first_equals = str_locate(string=tmpstring, pattern="=")
+		newick_string = substr(x=tmpstring, start=first_equals[,"end"]+1, stop=str_length(tmpstring))
+    tree = trim(newick_string)
     
     # Branch lengths are everything after a :
     brl <- unlist(strsplit(tree, ":"))[-1]
@@ -1097,7 +1314,9 @@ read_beast_prt <- function (file, digits = 9, get_tipnames=TRUE, printflag=FALSE
     tipstats
     
     # Read the input file as plain NEXUS
-    tr <- read.nexus(file)
+    #tr <- read.nexus(file)
+    tr <- phytools::readNexus(file, format="raxml")
+
     
     # Add the stats (a bunch of sub-objects) to the standard 
     # tree object (4 sub-objects)
@@ -1345,12 +1564,13 @@ read_beasttree_rates <- function (trfn, digits = NULL)
 	start <- semico[semico > i2][1] + 1
 	end <- endblock[endblock > i1][1] - 1
 	tree <- X[start:end]
-	
-    # Remove everything up to the first =
-    # (e.g. tree TREE1 =  
-    #  in NEXUS trfns...)
-    tree <- gsub("^.*= *", "", tree)
-    
+
+	# Remove everything up to the first =
+	# (e.g. tree TREE1 =  
+	#  in NEXUS trfns...)
+	#tree <- gsub("^.*= *", "", tree)
+  newick_string = strip_tree_EQUALS_from_nexus_treestring(tmpstring=tree)
+  tree = newick_string
 
 	#====================================
 	# Get branch lengths in text trfn order    
@@ -1548,11 +1768,13 @@ read_beasttree_states <- function (trfn, digits = NULL)
 	start <- semico[semico > i2][1] + 1
 	end <- endblock[endblock > i1][1] - 1
 	tree <- X[start:end]
-	
-    # Remove everything up to the first =
-    # (e.g. tree TREE1 =  
-    #  in NEXUS trfns...)
-    tree <- gsub("^.*= *", "", tree)
+
+	# Remove everything up to the first =
+	# (e.g. tree TREE1 =  
+	#  in NEXUS trfns...)
+	#tree <- gsub("^.*= *", "", tree)
+  newick_string = strip_tree_EQUALS_from_nexus_treestring(tmpstring=tree)
+  tree = newick_string
     
 
 	#====================================
