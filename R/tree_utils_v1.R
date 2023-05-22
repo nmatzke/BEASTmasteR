@@ -766,9 +766,9 @@ extractMrBayesStats4 <- function (file)
 
 
 # Remove equals signs from NEXUS tree files tip names
-remove_equals_from_tips <- function(nexfn, outfn="noEQs.nexus")
+remove_equals_from_tips <- function(nexfn, outfn="noEQs.nexus", format="raxml")
 	{
-	tr = phytools::readNexus(nexfn, format="raxml")
+	tr = phytools::readNexus(nexfn, format=format)
 	TF = grepl(pattern="\\=", x=tr$tip.label)
 	sum(TF)
 	tr$tip.label[TF]
@@ -785,7 +785,10 @@ remove_equals_from_tips <- function(nexfn, outfn="noEQs.nexus")
 		cat("\n")
 		warning(txt)
 		} else {
-		return(NULL)
+		# Return input file
+		tmpstrs = readLines(nexfn)
+		writeLines(text=tmpstrs, con=outfn)
+		return(outfn)
 		}# END if (sum(TF) > 0)
 	
 	# Replace, in the original NEXUS file
