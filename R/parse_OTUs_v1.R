@@ -8,7 +8,7 @@ library(XML)
 # For use in sapply by make_XMLs_for_OTUs
 make_XML_for_OTU_id <- function(OTU)
 	{
-	xmlNode(name="taxon", attrs=list(id=OTU, spec="Taxon"))
+	xmlNode(name="taxon", attrs=list(id=OTU, spec="beast.base.evolution.alignment.Taxon"))
 	}
 
 make_XML_for_OTU_idref <- function(OTU)
@@ -18,7 +18,7 @@ make_XML_for_OTU_idref <- function(OTU)
 
 # If OTU_idref=TRUE, the taxa will be referred to with "idref" tags.
 # If OTU_idref=FALSE, the taxa will be referred to with "id" tags 
-#    and specified to be spec="Taxon"
+#    and specified to be spec="beast.base.evolution.alignment.Taxon"
 make_XMLs_for_OTUs <- function(OTUs, OTU_idref=TRUE, StarBeast2_TF=FALSE)
 	{
 	defaults='
@@ -47,7 +47,7 @@ make_XML_taxon_block <- function(taxon_name, XML_list_of_OTUs, xml=NULL)
 	XML_comment = xmlCommentNode(txt)
 	XML_comment
 	
-	XML_taxonset = xmlNode(name="taxonset", attrs=list(id=taxon_name, spec="TaxonSet"), .children=XML_list_of_OTUs)
+	XML_taxonset = xmlNode(name="taxonset", attrs=list(id=taxon_name, spec="beast.base.evolution.alignment.TaxonSet"), .children=XML_list_of_OTUs)
 	
 	XML_taxonset = c(list(XML_comment), list(XML_taxonset))
 	XML_taxonset
@@ -382,11 +382,11 @@ rowdf_to_XML_distribution <- function(rowdf, tipsonly="true", monophyletic="fals
 	# Now, make the prior probability distribution for this taxonset
 	########################################################################	
 	# TaxonSet
-	taxon_XML = xmlNode(name="taxon", attrs=list(idref=OTUname, spec="Taxon"))
-	taxonset_XML = xmlNode(name="taxonset", attrs=list(id=OTUtaxonset, spec="TaxonSet"), .children=list(taxon_XML))
+	taxon_XML = xmlNode(name="taxon", attrs=list(idref=OTUname, spec="beast.base.evolution.alignment.Taxon"))
+	taxonset_XML = xmlNode(name="taxonset", attrs=list(id=OTUtaxonset, spec="beast.base.evolution.alignment.TaxonSet"), .children=list(taxon_XML))
 	
 	# Overall Prior Distribution
-	prior_XML = xmlNode(name="distribution", attrs=list(id=OTU_priorname, tipsonly=tipsonly, monophyletic=monophyletic, tree=tree_idref, spec="beast.math.distributions.MRCAPrior"), .children=list(taxonset_XML, distrib_XML))
+	prior_XML = xmlNode(name="distribution", attrs=list(id=OTU_priorname, tipsonly=tipsonly, monophyletic=monophyletic, tree=tree_idref, spec="beast.base.evolution.tree.MRCAPrior"), .children=list(taxonset_XML, distrib_XML))
 	
 	comment_XML = xmlCommentNode(txt)
 	
@@ -410,7 +410,7 @@ rowdf_to_XML_distribution <- function(rowdf, tipsonly="true", monophyletic="fals
 	# 
 	# type mismatch for input 
 	# log. beast.core.Loggable.isAssignableFrom(class
-	# beast.evolution.alignment.TaxonSet)=false 
+	# beast.base.evolution.alignment.TaxonSet)=false 
 	# expected 'Loggable' but got 'TaxonSet'
 	# 
 	#date_of_tip_log_XML = xmlNode(name="log", attrs=list(idref=OTUtaxonset))
@@ -425,7 +425,7 @@ rowdf_to_XML_distribution <- function(rowdf, tipsonly="true", monophyletic="fals
 	# Make the window width 1/2 of the 99.9 CI
 	rowdf_as_uniform = convert_nonUniform_dates_to_uniform(rowdf, CI=0.999)
 	window_width = (rowdf_as_uniform$param2 - rowdf_as_uniform$param1) / 2
-	operator_XML = xmlNode(name="operator", attrs=list(id=operator_id, windowSize=window_width, taxonset=taxonset_idref, tree=tree_idref, weight="1.0", spec="beast.evolution.operators.TipDatesRandomWalker"))
+	operator_XML = xmlNode(name="operator", attrs=list(id=operator_id, windowSize=window_width, taxonset=taxonset_idref, tree=tree_idref, weight="1.0", spec="beast.base.evolution.operator.TipDatesRandomWalker"))
 
 	
 	
@@ -494,16 +494,16 @@ make_XML_tipdates <- function(name="tipDates", OTUs_df, alignment_name_w_taxa, b
 	XML_comment2 = xmlCommentNode(txt2)
 	
 	# Specify the taxonSet which the tipdate names refer to
-	txt3 = " 'taxa=' tag specifies the beast.evolution.alignment.TaxonSet which the tipdate names refer to. "
+	txt3 = " 'taxa=' tag specifies the beast.base.evolution.alignment.TaxonSet which the tipdate names refer to. "
 	XML_comment3 = xmlCommentNode(txt3)
 
 	txt4 = paste0(" Number of fossils: you have ", num_fossils, " tips with ages > 0 Ma ")
 	XML_comment4 = xmlCommentNode(txt4)
 
 	alignment_name_w_taxa_idref = paste0("@", alignment_name_w_taxa)
-	taxa_names_source_XML = xmlNode(name="taxa", attrs=list(alignment=alignment_name_w_taxa_idref, spec="beast.evolution.alignment.TaxonSet"))
+	taxa_names_source_XML = xmlNode(name="taxa", attrs=list(alignment=alignment_name_w_taxa_idref, spec="beast.base.evolution.alignment.TaxonSet"))
 	
-	XML_tipdates = xmlNode(name="trait", attrs=list(id=name, spec="beast.evolution.tree.TraitSet", traitname=traitname, units=units, value=tipdates_txt))
+	XML_tipdates = xmlNode(name="trait", attrs=list(id=name, spec="beast.base.evolution.tree.TraitSet", traitname=traitname, units=units, value=tipdates_txt))
 	XML_tipdates
 	
 	# Don't add children...

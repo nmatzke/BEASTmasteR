@@ -1,0 +1,2 @@
+partitionNames	startnums	endnums	byval
+seqs_DNA	1	20828	1

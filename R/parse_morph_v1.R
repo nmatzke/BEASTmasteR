@@ -303,12 +303,12 @@ data_section_name = unname(mapply(FUN=gsub, pattern="datatype_", x=data_section_
 			{
 			rateIndicator_id = paste0(substModel_id, "_rateIndicator")
 			rateIndicator_idref = paste0("@", rateIndicator_id)
-			rateIndicator_XML = xmlNode(name="rateIndicator", value=rate_vals_OnOff_txt, attrs=list(id=rateIndicator_id, dimension=numrates/2, estimate="false", spec="beast.core.parameter.BooleanParameter"))
+			rateIndicator_XML = xmlNode(name="rateIndicator", value=rate_vals_OnOff_txt, attrs=list(id=rateIndicator_id, dimension=numrates/2, estimate="false", spec="beast.base.inference.parameter.BooleanParameter"))
 			
 			# Only need half the rates, for a symmetric model (will use "SYM" substitution model)
-			substModel_XML = xmlNode(name="substModel", attrs=list(id=substModel_id, rates=rate_matrix_idref, symmetric="true", spec="beast.evolution.substitutionmodel.SVSGeneralSubstitutionModel"), .children=cl(rateIndicator_XML, morph_basefreqs_XMLs) )
+			substModel_XML = xmlNode(name="substModel", attrs=list(id=substModel_id, rates=rate_matrix_idref, symmetric="true", spec="beast.base.evolution.substitutionmodel.SVSGeneralSubstitutionModel"), .children=cl(rateIndicator_XML, morph_basefreqs_XMLs) )
 			} else {
-			substModel_XML = xmlNode(name="substModel", attrs=list(id=substModel_id, rates=rate_matrix_idref, spec="beast.evolution.substitutionmodel.GeneralSubstitutionModel"), .children=morph_basefreqs_XMLs )
+			substModel_XML = xmlNode(name="substModel", attrs=list(id=substModel_id, rates=rate_matrix_idref, spec="beast.base.evolution.substitutionmodel.GeneralSubstitutionModel"), .children=morph_basefreqs_XMLs )
 			}
 		substModel_XMLs = list(bl(), xmlCommentNode(comment_txt), substModel_XML)
 		

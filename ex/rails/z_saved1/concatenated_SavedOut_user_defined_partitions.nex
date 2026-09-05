@@ -1,0 +1,8 @@
+begin mrbayes;
+charset seq2_unordered_from_seqs_morph2_for_ = 1-213;
+charset seq3_unordered_from_seqs_morph3_for_ = 214-240;
+charset seq4_unordered_from_seqs_morph4_for_ = 241-254;
+charset seq5_unordered_from_seqs_morph5_for_ = 255-264;
+charset seq6_unordered_from_seqs_morph6_for_ = 265-271;
+partition userPartitions = 5: seq2_unordered_from_seqs_morph2_for_, seq3_unordered_from_seqs_morph3_for_, seq4_unordered_from_seqs_morph4_for_, seq5_unordered_from_seqs_morph5_for_, seq6_unordered_from_seqs_morph6_for_;
+END;

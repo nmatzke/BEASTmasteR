@@ -1,0 +1,11 @@
+matrix_stats
+numtaxa	93
+numchars	20828
+ttl_nchar	1937004
+ttl_nAmbig	3071
+ttl_nQ	736461
+ttl_nQ_woInvar	1572254
+complete_chars	1197472
+complete_percent	61.82
+complete_chars_woInvar	361679
+complete_percent_woInvar	18.67

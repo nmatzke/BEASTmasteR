@@ -1,0 +1,345 @@
+<itsabeastystatewerein version='2.0' sample='99'>
+<statenode id='starting_freqParameter_baseFreqs_params_Gene1_pos1'>starting_freqParameter_baseFreqs_params_Gene1_pos1[4 1] (0.0,1.0): 0.25 0.25 0.25 0.25 </statenode>
+<statenode id='starting_freqParameter_baseFreqs_params_Gene1_pos2'>starting_freqParameter_baseFreqs_params_Gene1_pos2[4 1] (0.0,1.0): 0.25 0.25 0.25 0.25 </statenode>
+<statenode id='starting_freqParameter_baseFreqs_params_Gene1_pos3'>starting_freqParameter_baseFreqs_params_Gene1_pos3[4 1] (0.0,1.0): 0.25 0.2560886897207911 0.25 0.2439113102792089 </statenode>
+<statenode id='starting_freqParameter_baseFreqs_params_Gene2_pos1'>starting_freqParameter_baseFreqs_params_Gene2_pos1[4 1] (0.0,1.0): 0.26581602801442705 0.23418397198557295 0.25 0.25 </statenode>
+<statenode id='starting_freqParameter_baseFreqs_params_Gene2_pos2'>starting_freqParameter_baseFreqs_params_Gene2_pos2[4 1] (0.0,1.0): 0.26371694975825444 0.25 0.22854547944122106 0.2577375708005245 </statenode>
+<statenode id='starting_freqParameter_baseFreqs_params_Gene2_pos3'>starting_freqParameter_baseFreqs_params_Gene2_pos3[4 1] (0.0,1.0): 0.25 0.25 0.25 0.25 </statenode>
+<statenode id='starting_freqParameter_baseFreqs_params_Gene3_pos1'>starting_freqParameter_baseFreqs_params_Gene3_pos1[4 1] (0.0,1.0): 0.25 0.25 0.25 0.25 </statenode>
+<statenode id='starting_freqParameter_baseFreqs_params_Gene3_pos2'>starting_freqParameter_baseFreqs_params_Gene3_pos2[4 1] (0.0,1.0): 0.254799915981403 0.25 0.24520008401859697 0.25 </statenode>
+<statenode id='starting_freqParameter_baseFreqs_params_Gene3_pos3'>starting_freqParameter_baseFreqs_params_Gene3_pos3[4 1] (0.0,1.0): 0.25 0.25 0.25 0.25 </statenode>
+<statenode id='starting_freqParameter_baseFreqs_params_Gene4_pos1'>starting_freqParameter_baseFreqs_params_Gene4_pos1[4 1] (0.0,1.0): 0.25 0.262549544027134 0.25 0.23745045597286601 </statenode>
+<statenode id='starting_freqParameter_baseFreqs_params_Gene4_pos2'>starting_freqParameter_baseFreqs_params_Gene4_pos2[4 1] (0.0,1.0): 0.25 0.25 0.25 0.25 </statenode>
+<statenode id='starting_freqParameter_baseFreqs_params_Gene4_pos3'>starting_freqParameter_baseFreqs_params_Gene4_pos3[4 1] (0.0,1.0): 0.25 0.25 0.25 0.25 </statenode>
+<statenode id='starting_freqParameter_baseFreqs_params_Gene5_pos1'>starting_freqParameter_baseFreqs_params_Gene5_pos1[4 1] (0.0,1.0): 0.25 0.25 0.25 0.25 </statenode>
+<statenode id='starting_freqParameter_baseFreqs_params_Gene5_pos2'>starting_freqParameter_baseFreqs_params_Gene5_pos2[4 1] (0.0,1.0): 0.25773585157698936 0.22112822968020285 0.2711359187428078 0.25 </statenode>
+<statenode id='starting_freqParameter_baseFreqs_params_Gene5_pos3'>starting_freqParameter_baseFreqs_params_Gene5_pos3[4 1] (0.0,1.0): 0.25 0.25 0.25 0.25 </statenode>
+<statenode id='starting_freqParameter_baseFreqs_params_Gene6_pos1'>starting_freqParameter_baseFreqs_params_Gene6_pos1[4 1] (0.0,1.0): 0.25 0.2160647433830372 0.25 0.28393525661696284 </statenode>
+<statenode id='starting_freqParameter_baseFreqs_params_Gene6_pos2'>starting_freqParameter_baseFreqs_params_Gene6_pos2[4 1] (0.0,1.0): 0.27605121740503763 0.24519860302560798 0.228685010221933 0.2500651693474214 </statenode>
+<statenode id='starting_freqParameter_baseFreqs_params_Gene6_pos3'>starting_freqParameter_baseFreqs_params_Gene6_pos3[4 1] (0.0,1.0): 0.25 0.3251429616643141 0.2133194826532653 0.21153755568242058 </statenode>
+<statenode id='starting_freqParameter_baseFreqs_params_Gene7_pos1'>starting_freqParameter_baseFreqs_params_Gene7_pos1[4 1] (0.0,1.0): 0.25 0.25 0.25 0.25 </statenode>
+<statenode id='starting_freqParameter_baseFreqs_params_Gene7_pos2'>starting_freqParameter_baseFreqs_params_Gene7_pos2[4 1] (0.0,1.0): 0.25 0.24634647441291677 0.25 0.2536535255870832 </statenode>
+<statenode id='starting_freqParameter_baseFreqs_params_Gene7_pos3'>starting_freqParameter_baseFreqs_params_Gene7_pos3[4 1] (0.0,1.0): 0.2532237886582088 0.21500303674919566 0.2817731745925955 0.25 </statenode>
+<statenode id='starting_freqParameter_baseFreqs_params_Gene8_pos1'>starting_freqParameter_baseFreqs_params_Gene8_pos1[4 1] (0.0,1.0): 0.25 0.25 0.25 0.25 </statenode>
+<statenode id='starting_freqParameter_baseFreqs_params_Gene8_pos2'>starting_freqParameter_baseFreqs_params_Gene8_pos2[4 1] (0.0,1.0): 0.20417706443844938 0.2815029873994788 0.3238376645664208 0.19048228359565103 </statenode>
+<statenode id='starting_freqParameter_baseFreqs_params_Gene8_pos3'>starting_freqParameter_baseFreqs_params_Gene8_pos3[4 1] (0.0,1.0): 0.21986507022507032 0.2801349297749297 0.25 0.25 </statenode>
+<statenode id='starting_freqParameter_baseFreqs_params_Gene9_pos1'>starting_freqParameter_baseFreqs_params_Gene9_pos1[4 1] (0.0,1.0): 0.269326100637714 0.25 0.25932950363187995 0.22134439573040604 </statenode>
+<statenode id='starting_freqParameter_baseFreqs_params_Gene9_pos2'>starting_freqParameter_baseFreqs_params_Gene9_pos2[4 1] (0.0,1.0): 0.25 0.25 0.26052477300555654 0.23947522699444346 </statenode>
+<statenode id='starting_freqParameter_baseFreqs_params_Gene9_pos3'>starting_freqParameter_baseFreqs_params_Gene9_pos3[4 1] (0.0,1.0): 0.20097547081107173 0.342190665423355 0.20683386376557325 0.25 </statenode>
+<statenode id='starting_freqParameter_baseFreqs_params_Gene10_pos1'>starting_freqParameter_baseFreqs_params_Gene10_pos1[4 1] (0.0,1.0): 0.25 0.25 0.25 0.25 </statenode>
+<statenode id='starting_freqParameter_baseFreqs_params_Gene10_pos2'>starting_freqParameter_baseFreqs_params_Gene10_pos2[4 1] (0.0,1.0): 0.25 0.21917262624308956 0.28082737375691047 0.25 </statenode>
+<statenode id='starting_freqParameter_baseFreqs_params_Gene10_pos3'>starting_freqParameter_baseFreqs_params_Gene10_pos3[4 1] (0.0,1.0): 0.30101286929627324 0.25 0.25 0.19898713070372678 </statenode>
+<statenode id='starting_freqParameter_baseFreqs_params_Cytb_pos1'>starting_freqParameter_baseFreqs_params_Cytb_pos1[4 1] (0.0,1.0): 0.25 0.25 0.25 0.25 </statenode>
+<statenode id='starting_freqParameter_baseFreqs_params_Cytb_pos2'>starting_freqParameter_baseFreqs_params_Cytb_pos2[4 1] (0.0,1.0): 0.2901583941247631 0.25095743131188447 0.20888417456335245 0.25 </statenode>
+<statenode id='starting_freqParameter_baseFreqs_params_Cytb_pos3'>starting_freqParameter_baseFreqs_params_Cytb_pos3[4 1] (0.0,1.0): 0.2501602538136856 0.25 0.24983974618631438 0.25 </statenode>
+<statenode id='starting_freqParameter_baseFreqs_params_16S'>starting_freqParameter_baseFreqs_params_16S[4 1] (0.0,1.0): 0.25 0.25 0.25 0.25 </statenode>
+<statenode id='starting_freqParameter_baseFreqs_params_COI_pos1'>starting_freqParameter_baseFreqs_params_COI_pos1[4 1] (0.0,1.0): 0.25 0.25 0.25 0.25 </statenode>
+<statenode id='starting_freqParameter_baseFreqs_params_COI_pos2'>starting_freqParameter_baseFreqs_params_COI_pos2[4 1] (0.0,1.0): 0.2843927145264023 0.2503275391074708 0.2496724608925292 0.21560728547359773 </statenode>
+<statenode id='starting_freqParameter_baseFreqs_params_COI_pos3'>starting_freqParameter_baseFreqs_params_COI_pos3[4 1] (0.0,1.0): 0.25 0.25 0.25 0.25 </statenode>
+<statenode id='rateAC_siteModel_subset1'>rateAC_siteModel_subset1[1 1] (0.0,Infinity): 1.0 </statenode>
+<statenode id='rateAG_siteModel_subset1'>rateAG_siteModel_subset1[1 1] (0.0,Infinity): 1.0 </statenode>
+<statenode id='rateAT_siteModel_subset1'>rateAT_siteModel_subset1[1 1] (0.0,Infinity): 1.0 </statenode>
+<statenode id='rateCG_siteModel_subset1'>rateCG_siteModel_subset1[1 1] (0.0,Infinity): 1.0 </statenode>
+<statenode id='rateCT_siteModel_subset1'>rateCT_siteModel_subset1[1 1] (0.0,Infinity): 1.0 </statenode>
+<statenode id='rateGT_siteModel_subset1'>rateGT_siteModel_subset1[1 1] (0.0,Infinity): 1.0 </statenode>
+<statenode id='kappa_Gene1_pos2'>kappa_Gene1_pos2[1 1] (0.0,Infinity): 2.0 </statenode>
+<statenode id='kappa_Gene2_pos1'>kappa_Gene2_pos1[1 1] (0.0,Infinity): 2.0 </statenode>
+<statenode id='kappa_Gene2_pos2'>kappa_Gene2_pos2[1 1] (0.0,Infinity): 2.0 </statenode>
+<statenode id='kappa_Gene2_pos3'>kappa_Gene2_pos3[1 1] (0.0,Infinity): 2.0 </statenode>
+<statenode id='kappa_Gene3_pos1'>kappa_Gene3_pos1[1 1] (0.0,Infinity): 1.0544307176860892 </statenode>
+<statenode id='kappa_Gene3_pos2'>kappa_Gene3_pos2[1 1] (0.0,Infinity): 2.0 </statenode>
+<statenode id='kappa_Gene3_pos3'>kappa_Gene3_pos3[1 1] (0.0,Infinity): 2.0 </statenode>
+<statenode id='kappa_Gene4_pos1'>kappa_Gene4_pos1[1 1] (0.0,Infinity): 2.0 </statenode>
+<statenode id='rateAC_siteModel_subset5'>rateAC_siteModel_subset5[1 1] (0.0,Infinity): 1.0 </statenode>
+<statenode id='rateAG_siteModel_subset5'>rateAG_siteModel_subset5[1 1] (0.0,Infinity): 1.0 </statenode>
+<statenode id='rateAT_siteModel_subset5'>rateAT_siteModel_subset5[1 1] (0.0,Infinity): 1.0 </statenode>
+<statenode id='rateCG_siteModel_subset5'>rateCG_siteModel_subset5[1 1] (0.0,Infinity): 1.0 </statenode>
+<statenode id='rateCT_siteModel_subset5'>rateCT_siteModel_subset5[1 1] (0.0,Infinity): 1.0 </statenode>
+<statenode id='rateGT_siteModel_subset5'>rateGT_siteModel_subset5[1 1] (0.0,Infinity): 1.0 </statenode>
+<statenode id='kappa_Gene4_pos3'>kappa_Gene4_pos3[1 1] (0.0,Infinity): 2.0 </statenode>
+<statenode id='kappa_Gene5_pos1'>kappa_Gene5_pos1[1 1] (0.0,Infinity): 2.0 </statenode>
+<statenode id='kappa_Gene5_pos2'>kappa_Gene5_pos2[1 1] (0.0,Infinity): 2.0 </statenode>
+<statenode id='kappa_Gene5_pos3'>kappa_Gene5_pos3[1 1] (0.0,Infinity): 1.9975252620756923 </statenode>
+<statenode id='kappa_Gene6_pos1'>kappa_Gene6_pos1[1 1] (0.0,Infinity): 2.0 </statenode>
+<statenode id='kappa_Gene6_pos2'>kappa_Gene6_pos2[1 1] (0.0,Infinity): 2.0 </statenode>
+<statenode id='kappa_Gene6_pos3'>kappa_Gene6_pos3[1 1] (0.0,Infinity): 2.0 </statenode>
+<statenode id='kappa_Gene7_pos1'>kappa_Gene7_pos1[1 1] (0.0,Infinity): 1.1332242650343556 </statenode>
+<statenode id='kappa_Gene8_pos1'>kappa_Gene8_pos1[1 1] (0.0,Infinity): 2.0 </statenode>
+<statenode id='kappa_Gene8_pos2'>kappa_Gene8_pos2[1 1] (0.0,Infinity): 2.0 </statenode>
+<statenode id='kappa_Gene8_pos3'>kappa_Gene8_pos3[1 1] (0.0,Infinity): 2.0 </statenode>
+<statenode id='kappa_Gene9_pos1'>kappa_Gene9_pos1[1 1] (0.0,Infinity): 2.0 </statenode>
+<statenode id='kappa_Gene10_pos1'>kappa_Gene10_pos1[1 1] (0.0,Infinity): 2.0 </statenode>
+<statenode id='kappa_Gene10_pos2'>kappa_Gene10_pos2[1 1] (0.0,Infinity): 2.0 </statenode>
+<statenode id='kappa_Gene10_pos3'>kappa_Gene10_pos3[1 1] (0.0,Infinity): 2.0 </statenode>
+<statenode id='rateAC_siteModel_subset10'>rateAC_siteModel_subset10[1 1] (0.0,Infinity): 1.0 </statenode>
+<statenode id='rateAG_siteModel_subset10'>rateAG_siteModel_subset10[1 1] (0.0,Infinity): 1.0 </statenode>
+<statenode id='rateAT_siteModel_subset10'>rateAT_siteModel_subset10[1 1] (0.0,Infinity): 1.0 </statenode>
+<statenode id='rateCG_siteModel_subset10'>rateCG_siteModel_subset10[1 1] (0.0,Infinity): 0.8755284467955373 </statenode>
+<statenode id='rateCT_siteModel_subset10'>rateCT_siteModel_subset10[1 1] (0.0,Infinity): 1.0 </statenode>
+<statenode id='rateGT_siteModel_subset10'>rateGT_siteModel_subset10[1 1] (0.0,Infinity): 1.0 </statenode>
+<statenode id='kappa_Cytb_pos2'>kappa_Cytb_pos2[1 1] (0.0,Infinity): 2.0 </statenode>
+<statenode id='rateAC_siteModel_subset12'>rateAC_siteModel_subset12[1 1] (0.0,Infinity): 1.0 </statenode>
+<statenode id='rateAG_siteModel_subset12'>rateAG_siteModel_subset12[1 1] (0.0,Infinity): 1.0 </statenode>
+<statenode id='rateAT_siteModel_subset12'>rateAT_siteModel_subset12[1 1] (0.0,Infinity): 0.7715561827381816 </statenode>
+<statenode id='rateCG_siteModel_subset12'>rateCG_siteModel_subset12[1 1] (0.0,Infinity): 1.0 </statenode>
+<statenode id='rateCT_siteModel_subset12'>rateCT_siteModel_subset12[1 1] (0.0,Infinity): 1.0 </statenode>
+<statenode id='rateGT_siteModel_subset12'>rateGT_siteModel_subset12[1 1] (0.0,Infinity): 1.0 </statenode>
+<statenode id='kappa_COI_pos1'>kappa_COI_pos1[1 1] (0.0,Infinity): 2.0 </statenode>
+<statenode id='rateAC_siteModel_subset13'>rateAC_siteModel_subset13[1 1] (0.0,Infinity): 1.0 </statenode>
+<statenode id='rateAG_siteModel_subset13'>rateAG_siteModel_subset13[1 1] (0.0,Infinity): 1.0 </statenode>
+<statenode id='rateAT_siteModel_subset13'>rateAT_siteModel_subset13[1 1] (0.0,Infinity): 1.0 </statenode>
+<statenode id='rateCG_siteModel_subset13'>rateCG_siteModel_subset13[1 1] (0.0,Infinity): 1.0 </statenode>
+<statenode id='rateCT_siteModel_subset13'>rateCT_siteModel_subset13[1 1] (0.0,Infinity): 1.0 </statenode>
+<statenode id='rateGT_siteModel_subset13'>rateGT_siteModel_subset13[1 1] (0.0,Infinity): 1.0 </statenode>
+<statenode id='gammaShape_gammaShape_Gene1_pos1'>gammaShape_gammaShape_Gene1_pos1[1 1] (0.001,1000.0): 1.0 </statenode>
+<statenode id='gammaShape_gammaShape_Gene1_pos2'>gammaShape_gammaShape_Gene1_pos2[1 1] (0.001,1000.0): 0.9670324935666263 </statenode>
+<statenode id='gammaShape_gammaShape_Gene1_pos3'>gammaShape_gammaShape_Gene1_pos3[1 1] (-Infinity,Infinity): 1.0 </statenode>
+<statenode id='gammaShape_gammaShape_Gene2_pos1'>gammaShape_gammaShape_Gene2_pos1[1 1] (0.001,1000.0): 1.0 </statenode>
+<statenode id='gammaShape_gammaShape_Gene2_pos2'>gammaShape_gammaShape_Gene2_pos2[1 1] (-Infinity,Infinity): 1.0 </statenode>
+<statenode id='gammaShape_gammaShape_Gene2_pos3'>gammaShape_gammaShape_Gene2_pos3[1 1] (0.001,1000.0): 1.0 </statenode>
+<statenode id='gammaShape_gammaShape_Gene3_pos1'>gammaShape_gammaShape_Gene3_pos1[1 1] (-Infinity,Infinity): 1.0 </statenode>
+<statenode id='gammaShape_gammaShape_Gene3_pos2'>gammaShape_gammaShape_Gene3_pos2[1 1] (-Infinity,Infinity): 1.0 </statenode>
+<statenode id='gammaShape_gammaShape_Gene3_pos3'>gammaShape_gammaShape_Gene3_pos3[1 1] (-Infinity,Infinity): 1.0 </statenode>
+<statenode id='gammaShape_gammaShape_Gene4_pos1'>gammaShape_gammaShape_Gene4_pos1[1 1] (-Infinity,Infinity): 1.0 </statenode>
+<statenode id='gammaShape_gammaShape_Gene4_pos2'>gammaShape_gammaShape_Gene4_pos2[1 1] (0.001,1000.0): 1.0 </statenode>
+<statenode id='gammaShape_gammaShape_Gene4_pos3'>gammaShape_gammaShape_Gene4_pos3[1 1] (0.001,1000.0): 1.0 </statenode>
+<statenode id='gammaShape_gammaShape_Gene5_pos1'>gammaShape_gammaShape_Gene5_pos1[1 1] (-Infinity,Infinity): 1.0 </statenode>
+<statenode id='gammaShape_gammaShape_Gene5_pos2'>gammaShape_gammaShape_Gene5_pos2[1 1] (-Infinity,Infinity): 1.0 </statenode>
+<statenode id='gammaShape_gammaShape_Gene5_pos3'>gammaShape_gammaShape_Gene5_pos3[1 1] (-Infinity,Infinity): 1.374680031489676 </statenode>
+<statenode id='gammaShape_gammaShape_Gene6_pos1'>gammaShape_gammaShape_Gene6_pos1[1 1] (-Infinity,Infinity): 1.0 </statenode>
+<statenode id='gammaShape_gammaShape_Gene6_pos2'>gammaShape_gammaShape_Gene6_pos2[1 1] (-Infinity,Infinity): 1.0 </statenode>
+<statenode id='gammaShape_gammaShape_Gene6_pos3'>gammaShape_gammaShape_Gene6_pos3[1 1] (-Infinity,Infinity): 1.0 </statenode>
+<statenode id='gammaShape_gammaShape_Gene7_pos1'>gammaShape_gammaShape_Gene7_pos1[1 1] (-Infinity,Infinity): 1.0 </statenode>
+<statenode id='gammaShape_gammaShape_Gene7_pos2'>gammaShape_gammaShape_Gene7_pos2[1 1] (-Infinity,Infinity): 1.0046380087114044 </statenode>
+<statenode id='gammaShape_gammaShape_Gene7_pos3'>gammaShape_gammaShape_Gene7_pos3[1 1] (-Infinity,Infinity): 1.0 </statenode>
+<statenode id='gammaShape_gammaShape_Gene8_pos1'>gammaShape_gammaShape_Gene8_pos1[1 1] (0.001,1000.0): 1.0 </statenode>
+<statenode id='gammaShape_gammaShape_Gene8_pos2'>gammaShape_gammaShape_Gene8_pos2[1 1] (-Infinity,Infinity): 1.0 </statenode>
+<statenode id='gammaShape_gammaShape_Gene8_pos3'>gammaShape_gammaShape_Gene8_pos3[1 1] (0.001,1000.0): 1.0 </statenode>
+<statenode id='gammaShape_gammaShape_Gene9_pos1'>gammaShape_gammaShape_Gene9_pos1[1 1] (-Infinity,Infinity): 1.0 </statenode>
+<statenode id='gammaShape_gammaShape_Gene9_pos2'>gammaShape_gammaShape_Gene9_pos2[1 1] (-Infinity,Infinity): 1.0 </statenode>
+<statenode id='gammaShape_gammaShape_Gene9_pos3'>gammaShape_gammaShape_Gene9_pos3[1 1] (-Infinity,Infinity): 1.0 </statenode>
+<statenode id='gammaShape_gammaShape_Gene10_pos1'>gammaShape_gammaShape_Gene10_pos1[1 1] (0.001,1000.0): 1.0 </statenode>
+<statenode id='gammaShape_gammaShape_Gene10_pos2'>gammaShape_gammaShape_Gene10_pos2[1 1] (-Infinity,Infinity): 1.0 </statenode>
+<statenode id='gammaShape_gammaShape_Gene10_pos3'>gammaShape_gammaShape_Gene10_pos3[1 1] (-Infinity,Infinity): 1.0 </statenode>
+<statenode id='gammaShape_gammaShape_Cytb_pos1'>gammaShape_gammaShape_Cytb_pos1[1 1] (0.001,1000.0): 1.0 </statenode>
+<statenode id='gammaShape_gammaShape_Cytb_pos2'>gammaShape_gammaShape_Cytb_pos2[1 1] (0.001,1000.0): 1.0 </statenode>
+<statenode id='gammaShape_gammaShape_Cytb_pos3'>gammaShape_gammaShape_Cytb_pos3[1 1] (0.001,1000.0): 1.0 </statenode>
+<statenode id='gammaShape_gammaShape_16S'>gammaShape_gammaShape_16S[1 1] (-Infinity,Infinity): 1.0 </statenode>
+<statenode id='gammaShape_gammaShape_COI_pos1'>gammaShape_gammaShape_COI_pos1[1 1] (-Infinity,Infinity): 1.0 </statenode>
+<statenode id='gammaShape_gammaShape_COI_pos2'>gammaShape_gammaShape_COI_pos2[1 1] (-Infinity,Infinity): 1.0 </statenode>
+<statenode id='gammaShape_gammaShape_COI_pos3'>gammaShape_gammaShape_COI_pos3[1 1] (0.001,1000.0): 0.6771155250837122 </statenode>
+<statenode id='relRate_Gene1_pos1'>relRate_Gene1_pos1[1 1] (0.0,Infinity): 1.0 </statenode>
+<statenode id='relRate_Gene1_pos2'>relRate_Gene1_pos2[1 1] (0.0,Infinity): 1.0 </statenode>
+<statenode id='relRate_Gene1_pos3'>relRate_Gene1_pos3[1 1] (-Infinity,Infinity): 1.0 </statenode>
+<statenode id='relRate_Gene2_pos1'>relRate_Gene2_pos1[1 1] (0.0,Infinity): 1.0 </statenode>
+<statenode id='relRate_Gene2_pos2'>relRate_Gene2_pos2[1 1] (-Infinity,Infinity): 1.0 </statenode>
+<statenode id='relRate_Gene2_pos3'>relRate_Gene2_pos3[1 1] (0.0,Infinity): 1.0 </statenode>
+<statenode id='relRate_Gene3_pos1'>relRate_Gene3_pos1[1 1] (-Infinity,Infinity): 1.0 </statenode>
+<statenode id='relRate_Gene3_pos2'>relRate_Gene3_pos2[1 1] (-Infinity,Infinity): 1.0 </statenode>
+<statenode id='relRate_Gene3_pos3'>relRate_Gene3_pos3[1 1] (-Infinity,Infinity): 1.0 </statenode>
+<statenode id='relRate_Gene4_pos1'>relRate_Gene4_pos1[1 1] (-Infinity,Infinity): 1.0 </statenode>
+<statenode id='relRate_Gene4_pos2'>relRate_Gene4_pos2[1 1] (0.0,Infinity): 1.0 </statenode>
+<statenode id='relRate_Gene4_pos3'>relRate_Gene4_pos3[1 1] (0.0,Infinity): 1.0 </statenode>
+<statenode id='relRate_Gene5_pos1'>relRate_Gene5_pos1[1 1] (-Infinity,Infinity): 1.0 </statenode>
+<statenode id='relRate_Gene5_pos2'>relRate_Gene5_pos2[1 1] (-Infinity,Infinity): 1.0 </statenode>
+<statenode id='relRate_Gene5_pos3'>relRate_Gene5_pos3[1 1] (-Infinity,Infinity): 1.0 </statenode>
+<statenode id='relRate_Gene6_pos1'>relRate_Gene6_pos1[1 1] (-Infinity,Infinity): 1.0 </statenode>
+<statenode id='relRate_Gene6_pos2'>relRate_Gene6_pos2[1 1] (-Infinity,Infinity): 1.0 </statenode>
+<statenode id='relRate_Gene6_pos3'>relRate_Gene6_pos3[1 1] (-Infinity,Infinity): 1.0 </statenode>
+<statenode id='relRate_Gene7_pos1'>relRate_Gene7_pos1[1 1] (-Infinity,Infinity): 1.0 </statenode>
+<statenode id='relRate_Gene7_pos2'>relRate_Gene7_pos2[1 1] (-Infinity,Infinity): 1.0 </statenode>
+<statenode id='relRate_Gene7_pos3'>relRate_Gene7_pos3[1 1] (-Infinity,Infinity): 1.0 </statenode>
+<statenode id='relRate_Gene8_pos1'>relRate_Gene8_pos1[1 1] (0.0,Infinity): 1.0 </statenode>
+<statenode id='relRate_Gene8_pos2'>relRate_Gene8_pos2[1 1] (-Infinity,Infinity): 1.0 </statenode>
+<statenode id='relRate_Gene8_pos3'>relRate_Gene8_pos3[1 1] (0.0,Infinity): 1.0 </statenode>
+<statenode id='relRate_Gene9_pos1'>relRate_Gene9_pos1[1 1] (-Infinity,Infinity): 1.0 </statenode>
+<statenode id='relRate_Gene9_pos2'>relRate_Gene9_pos2[1 1] (-Infinity,Infinity): 1.0 </statenode>
+<statenode id='relRate_Gene9_pos3'>relRate_Gene9_pos3[1 1] (-Infinity,Infinity): 1.0 </statenode>
+<statenode id='relRate_Gene10_pos1'>relRate_Gene10_pos1[1 1] (0.0,Infinity): 1.0 </statenode>
+<statenode id='relRate_Gene10_pos2'>relRate_Gene10_pos2[1 1] (-Infinity,Infinity): 1.0 </statenode>
+<statenode id='relRate_Gene10_pos3'>relRate_Gene10_pos3[1 1] (-Infinity,Infinity): 1.0 </statenode>
+<statenode id='relRate_Cytb_pos1'>relRate_Cytb_pos1[1 1] (0.0,Infinity): 1.0 </statenode>
+<statenode id='relRate_Cytb_pos2'>relRate_Cytb_pos2[1 1] (0.0,Infinity): 1.0 </statenode>
+<statenode id='relRate_Cytb_pos3'>relRate_Cytb_pos3[1 1] (0.0,Infinity): 1.0 </statenode>
+<statenode id='relRate_16S'>relRate_16S[1 1] (-Infinity,Infinity): 1.0 </statenode>
+<statenode id='relRate_COI_pos1'>relRate_COI_pos1[1 1] (-Infinity,Infinity): 1.0 </statenode>
+<statenode id='relRate_COI_pos2'>relRate_COI_pos2[1 1] (-Infinity,Infinity): 1.0 </statenode>
+<statenode id='relRate_COI_pos3'>relRate_COI_pos3[1 1] (0.0,Infinity): 1.0 </statenode>
+<statenode id='morphFiltered2_relRate'>morphFiltered2_relRate[1 1] (0.0,Infinity): 1.0 </statenode>
+<statenode id='morphFiltered3_relRate'>morphFiltered3_relRate[1 1] (0.0,Infinity): 1.0 </statenode>
+<statenode id='morphFiltered4_relRate'>morphFiltered4_relRate[1 1] (0.0,Infinity): 1.0 </statenode>
+<statenode id='morphFiltered5_relRate'>morphFiltered5_relRate[1 1] (0.0,Infinity): 1.0 </statenode>
+<statenode id='morphFiltered6_relRate'>morphFiltered6_relRate[1 1] (0.0,Infinity): 1.0 </statenode>
+<statenode id='ucld_Mean_of_shared_clock'>ucld_Mean_of_shared_clock[1 1] (1.0E-5,2.0): 0.0036484775611541832 </statenode>
+<statenode id='ucld_Stdev_of_shared_clock'>ucld_Stdev_of_shared_clock[1 1] (0.0,10.0): 0.01 </statenode>
+<statenode id='rateCategories_of_shared_clock'>rateCategories_of_shared_clock[378 1] (0,377): 349 281 289 38 140 34 6 76 31 88 210 223 321 346 202 324 67 280 311 308 80 306 306 48 55 13 76 376 142 17 156 77 290 179 48 32 53 340 219 232 138 251 261 70 339 342 140 2 365 259 46 69 293 3 220 343 56 92 170 137 268 206 122 80 1 232 328 138 248 279 11 236 163 201 38 100 105 189 199 240 238 68 125 334 214 170 120 62 74 73 296 18 225 113 198 283 276 226 354 370 216 332 210 321 226 148 20 315 245 328 366 11 316 213 326 92 6 132 306 34 53 335 260 363 325 208 104 139 135 376 294 96 201 306 94 326 281 287 168 29 86 110 139 79 271 80 332 268 51 49 50 97 164 35 191 357 31 318 52 256 143 148 329 270 207 292 53 134 168 240 350 367 220 230 357 231 142 107 307 228 252 219 211 22 193 332 134 7 93 303 273 186 204 89 132 117 264 225 319 233 315 29 15 171 16 1 1 331 139 197 184 246 174 61 292 167 271 294 43 237 111 344 248 227 202 141 103 206 254 97 241 122 252 167 90 276 363 210 267 340 334 334 24 139 162 93 15 74 153 289 326 372 251 292 70 212 189 138 61 277 321 235 87 50 13 275 118 218 326 323 247 6 139 222 33 328 34 141 92 244 300 102 191 284 342 326 365 109 350 192 303 231 196 310 5 3 144 224 342 325 330 117 327 192 208 330 286 27 228 365 114 143 324 144 99 202 217 114 42 231 32 98 326 348 16 75 361 282 112 357 154 152 50 196 283 81 16 208 208 324 232 146 193 318 279 75 124 233 221 186 278 99 325 255 365 314 188 228 148 123 221 294 95 223 170 165 227 120 94 339 292 209 168 212 362 191 254 292 </statenode>
+<statenode id='gammaShape_morphPr'>gammaShape_morphPr[1 1] (0.001,1000.0): 1.0 </statenode>
+<statenode id='gammaShape_morphSl'>gammaShape_morphSl[1 1] (0.001,1000.0): 1.0 </statenode>
+<statenode id='gammaShape_morphFiltered4'>gammaShape_morphFiltered4[1 1] (0.001,1000.0): 1.0 </statenode>
+<statenode id='gammaShape_morphFiltered5'>gammaShape_morphFiltered5[1 1] (0.001,1000.0): 1.0 </statenode>
+<statenode id='gammaShape_morphFiltered6'>gammaShape_morphFiltered6[1 1] (0.001,1000.0): 1.0 </statenode>
+<statenode id='shared_tree'>(((((((((((((((0:35.4711324726486,31:35.4711324726486)190:8.867605767193254E-5,77:35.47122114870627)191:8.867605765772169E-5,(105:35.47122114870627,148:35.47122114870627)192:8.867605765772169E-5)193:8.867605766482711E-5,(19:35.47130982476393,106:35.47130982476393)194:8.867605766482711E-5)195:8.867605766482711E-5,(((1:35.47122114870627,41:35.47122114870627)196:8.867605765772169E-5,3:35.47130982476393)197:8.867605766482711E-5,(78:35.47130982476393,82:35.47130982476393)198:8.867605766482711E-5)199:8.867605766482711E-5)200:8.867605766482711E-5,(90:35.47038717687922,123:35.47038717687922)201:8.867605766482711E-5)202:8.867605766482711E-5,(33:35.47037585293688,(((43:35.47130982476393,57:35.47130982476393)203:8.867605766482711E-5,126:35.47039850082156)204:8.867605766482711E-5,((64:35.47130982476393,107:35.47130982476393)205:8.867605766482711E-5,(92:35.47130982476393,112:35.47130982476393)206:8.867605766482711E-5)207:8.867605766482711E-5)208:8.867605766482711E-5)209:8.867605766482711E-5)210:8.867605765772169E-5,((((((((2:35.47104379659093,46:35.47104379659093)211:8.867605766482711E-5,(60:35.47104379659093,(76:35.470955120533276,88:35.470955120533276)212:8.867605765772169E-5)213:8.867605766482711E-5)214:8.867605767193254E-5,((98:35.47104379659093,(103:35.470955120533276,111:35.470955120533276)215:8.867605765772169E-5)216:8.867605766482711E-5,(104:35.47104379659093,153:35.370443796590905)217:8.867605766482711E-5)218:8.867605767193254E-5)219:8.867605765772169E-5,(((20:35.47104379659093,141:35.47104379659093)220:8.867605766482711E-5,83:35.4711324726486)221:8.867605767193254E-5,(85:35.4711324726486,156:35.46043247264857)222:8.867605767193254E-5)223:8.867605765772169E-5)224:8.867605766482711E-5,((9:35.47122114870627,(120:35.4711324726486,133:35.4711324726486)225:8.867605767193254E-5)226:8.867605765772169E-5,((63:35.4711324726486,157:35.46043247264857)227:8.867605767193254E-5,(75:35.4711324726486,91:35.4711324726486)228:8.867605767193254E-5)229:8.867605765772169E-5)230:8.867605766482711E-5)231:8.867605766482711E-5,((42:17.882837426920176,118:17.882837426920176)232:17.588506697788894,((50:35.47122114870627,110:35.47122114870627)233:8.867605765772169E-5,51:35.47130982476393)234:3.429994514192458E-5)235:1.4305217018772964E-4)236:8.867605766482711E-5,((((((((((((4:35.47051174024496,101:35.47051174024496)237:8.867605766482711E-5,(7:35.47051174024496,145:35.47051174024496)238:8.867605766482711E-5)239:6.7783766532159E-5,14:35.470668200069156)240:1.0956834879749522E-4,(80:35.47068909236029,150:35.47068909236029)241:8.867605766482711E-5)242:8.867605766482711E-5,((10:35.47068909236029,(23:35.470600416302624,29:35.470600416302624)243:8.867605766482711E-5)244:8.867605766482711E-5,(((18:35.47051174024496,155:35.460511740244954)245:8.867605766482711E-5,86:35.470600416302624)246:8.867605766482711E-5,93:35.47068909236029)247:8.867605766482711E-5)248:8.867605766482711E-5)249:8.867605765772169E-5,154:33.37045512053325)250:8.867605765772169E-5,((((5:35.47068909236029,11:35.47068909236029)251:8.867605766482711E-5,151:35.35047776841794)252:8.867605766482711E-5,66:35.47086644447562)253:8.867605765772169E-5,(109:35.47086644447562,137:35.47086644447562)254:8.867605765772169E-5)255:8.867605765772169E-5)256:8.867605766482711E-5,((67:35.470955120533276,73:35.470955120533276)257:8.867605765772169E-5,(68:35.470955120533276,96:35.470955120533276)258:8.867605765772169E-5)259:8.867605766482711E-5)260:8.867605767193254E-5,(32:35.4711324726486,94:35.4711324726486)261:8.867605767193254E-5)262:8.867605765772169E-5,(30:35.47122114870627,35:35.47122114870627)263:8.867605765772169E-5)264:8.867605766482711E-5,((((((((6:35.47068909236029,56:35.47068909236029)265:8.867605766482711E-5,24:35.47077776841795)266:8.867605766482711E-5,(34:35.47077776841795,100:35.47077776841795)267:8.867605766482711E-5)268:8.867605765772169E-5,((108:35.47077776841795,144:35.47077776841795)269:8.867605766482711E-5,135:35.47086644447562)270:8.867605765772169E-5)271:8.867605765772169E-5,(((37:35.47077776841795,40:35.47077776841795)272:8.867605766482711E-5,121:35.47086644447562)273:8.867605765772169E-5,146:35.470955120533276)274:8.867605765772169E-5)275:8.867605766482711E-5,113:35.4711324726486)276:8.867605767193254E-5,(((53:35.470955120533276,(65:35.47086644447562,125:35.47086644447562)277:8.867605765772169E-5)278:8.867605765772169E-5,152:35.35044379659091)279:8.867605766482711E-5,(131:35.47104379659093,136:35.47104379659093)280:8.867605766482711E-5)281:8.867605767193254E-5)282:8.867605765772169E-5,(54:35.47122114870627,129:35.47122114870627)283:8.867605765772169E-5)284:8.867605766482711E-5)285:8.867605766482711E-5,(45:35.47039850082156,132:35.47039850082156)286:8.867605766482711E-5)287:8.867605766482711E-5)288:8.867605766482711E-5,((((((8:35.4711324726486,(38:35.47104379659093,124:35.47104379659093)289:8.867605766482711E-5)290:8.867605767193254E-5,16:35.47122114870627)291:8.867605765772169E-5,((((((26:35.47077776841795,79:35.47077776841795)292:8.867605766482711E-5,116:35.47086644447562)293:8.867605765772169E-5,(74:35.47086644447562,139:35.47086644447562)294:8.867605765772169E-5)295:8.867605765772169E-5,84:35.47104379659093)296:8.867605766482711E-5,(81:35.47104379659093,(89:35.470955120533276,134:35.470955120533276)297:8.867605765772169E-5)298:8.867605766482711E-5)299:8.867605767193254E-5,((((((52:35.47068909236029,128:35.47068909236029)300:8.867605766482711E-5,147:35.47077776841795)301:8.867605766482711E-5,61:35.47086644447562)302:8.867605765772169E-5,(59:35.47086644447562,99:35.47086644447562)303:8.867605765772169E-5)304:8.867605765772169E-5,(55:35.470955120533276,71:35.470955120533276)305:8.867605765772169E-5)306:8.867605766482711E-5,(72:35.47104379659093,140:35.47104379659093)307:8.867605766482711E-5)308:8.867605767193254E-5)309:8.867605765772169E-5)310:8.867605766482711E-5,((((((13:35.47086644447562,(102:35.47077776841795,127:35.47077776841795)311:8.867605766482711E-5)312:8.867605765772169E-5,((47:35.47077776841795,115:35.47077776841795)313:8.867605766482711E-5,(87:35.47077776841795,138:35.47077776841795)314:8.867605766482711E-5)315:8.867605765772169E-5)316:8.867605765772169E-5,69:35.47104379659093)317:8.867605766482711E-5,((15:35.470955120533276,62:35.470955120533276)318:8.867605765772169E-5,((27:35.47086644447562,44:35.47086644447562)319:8.867605765772169E-5,70:35.470955120533276)320:8.867605765772169E-5)321:8.867605766482711E-5)322:8.867605767193254E-5,(((21:35.470955120533276,36:35.470955120533276)323:8.867605765772169E-5,97:35.47104379659093)324:8.867605766482711E-5,(117:35.47104379659093,119:35.47104379659093)325:8.867605766482711E-5)326:8.867605767193254E-5)327:8.867605765772169E-5,((17:35.4711324726486,22:35.4711324726486)328:3.430016857919327E-5,114:35.47116677281718)329:1.4305194675046096E-4)330:8.867605766482711E-5)331:8.867605766482711E-5,((((12:35.4711324726486,142:35.4711324726486)332:8.867605767193254E-5,(((25:35.470955120533276,58:35.470955120533276)333:8.867605765772169E-5,49:35.47104379659093)334:8.867605766482711E-5,48:35.4711324726486)335:8.867605767193254E-5)336:8.867605765772169E-5,143:35.47130982476393)337:8.867605766482711E-5,(39:35.47130982476393,149:35.47130982476393)338:8.867605766482711E-5)339:8.867605766482711E-5)340:8.867605766482711E-5,(((28:35.47130982476393,95:35.47130982476393)341:8.867605766482711E-5,122:35.47039850082156)342:8.867605766482711E-5,130:35.47038717687922)343:8.867605766482711E-5)344:8.867605766482711E-5)345:8.867605765772169E-5)346:70.94093480443226,185:106.41118800948445)347:8.867605767193254E-5,177:106.41117668554212)348:8.867605765772169E-5,((159:106.41118072305956,(173:106.4111993334268,186:106.4111993334268)349:8.138963275428068E-5)350:9.596248256116269E-5,(163:106.41118800948445,170:106.41118800948445)351:8.867605767193254E-5)352:8.867605765772169E-5)353:8.867605767193254E-5,(169:106.41116536159977,183:106.41116536159977)354:8.867605767193254E-5)355:8.867605764351083E-5,(((158:106.41117668554212,166:106.41117668554212)356:8.867605765772169E-5,(((161:106.4111993334268,189:106.4111993334268)357:1.0571222836119887E-4,176:106.41120504565517)358:7.16398869542445E-5,168:106.41117668554212)359:8.867605765772169E-5)360:8.867605767193254E-5,172:106.41115403765744)361:8.867605764351083E-5)362:8.867605767193254E-5,(160:106.4111427137151,(178:106.41115403765744,(((179:106.41118800948445,(180:106.4111993334268,188:106.4111993334268)363:8.867605764351083E-5)364:8.867605767193254E-5,182:106.41117668554212)365:8.867605765772169E-5,184:106.41116536159977)366:8.867605767193254E-5)367:8.867605764351083E-5)368:8.867605767193254E-5)369:8.867605765772169E-5,((((162:106.41116536159977,181:106.41116536159977)370:8.867605767193254E-5,167:106.41115403765744)371:8.867605764351083E-5,171:106.4111427137151)372:1.0866034614309683E-6,((164:106.41115403765744,187:106.41115403765744)373:8.867605764351083E-5,((165:106.41116536159977,175:106.41116536159977)374:8.867605767193254E-5,174:106.41115403765744)375:8.867605764351083E-5)376:1.0866034614309683E-6)377:1.7626551186822326E-4)378:0.0</statenode>
+<statenode id='originTime'>originTime[1 1] (0.0,4600.0): 450.0 </statenode>
+<statenode id='birthRate'>birthRate[1 1] (1.0E-5,10.0): 0.17590332459204322 </statenode>
+<statenode id='deathRate'>deathRate[1 1] (1.0E-5,10.0): 0.02 </statenode>
+<statenode id='samplingRate'>samplingRate[1 1] (1.0E-5,10.0): 0.083355701382079 </statenode>
+<statenode id='birthRateChangeTimes_tops'>birthRateChangeTimes_tops[1 1] (-Infinity,Infinity): 0.0 </statenode>
+<statenode id='deathRateChangeTimes_tops'>deathRateChangeTimes_tops[1 1] (-Infinity,Infinity): 0.0 </statenode>
+<statenode id='samplingRateChangeTimes_tops'>samplingRateChangeTimes_tops[1 1] (-Infinity,Infinity): 0.0 </statenode>
+<statenode id='rho'>rho[1 1] (0.0,Infinity): 1.0 </statenode>
+<statenode id='rhoSamplingTimes'>rhoSamplingTimes[1 1] (-Infinity,Infinity): 0.0 </statenode>
+<statenode id='reverseTimeArrays'>reverseTimeArrays[5 1] (null,true): true true true true true </statenode>
+<statenode id='shared_tree'>(((((((((((((((0:35.4711324726486,31:35.4711324726486)190:8.867605767193254E-5,77:35.47122114870627)191:8.867605765772169E-5,(105:35.47122114870627,148:35.47122114870627)192:8.867605765772169E-5)193:8.867605766482711E-5,(19:35.47130982476393,106:35.47130982476393)194:8.867605766482711E-5)195:8.867605766482711E-5,(((1:35.47122114870627,41:35.47122114870627)196:8.867605765772169E-5,3:35.47130982476393)197:8.867605766482711E-5,(78:35.47130982476393,82:35.47130982476393)198:8.867605766482711E-5)199:8.867605766482711E-5)200:8.867605766482711E-5,(90:35.47038717687922,123:35.47038717687922)201:8.867605766482711E-5)202:8.867605766482711E-5,(33:35.47037585293688,(((43:35.47130982476393,57:35.47130982476393)203:8.867605766482711E-5,126:35.47039850082156)204:8.867605766482711E-5,((64:35.47130982476393,107:35.47130982476393)205:8.867605766482711E-5,(92:35.47130982476393,112:35.47130982476393)206:8.867605766482711E-5)207:8.867605766482711E-5)208:8.867605766482711E-5)209:8.867605766482711E-5)210:8.867605765772169E-5,((((((((2:35.47104379659093,46:35.47104379659093)211:8.867605766482711E-5,(60:35.47104379659093,(76:35.470955120533276,88:35.470955120533276)212:8.867605765772169E-5)213:8.867605766482711E-5)214:8.867605767193254E-5,((98:35.47104379659093,(103:35.470955120533276,111:35.470955120533276)215:8.867605765772169E-5)216:8.867605766482711E-5,(104:35.47104379659093,153:35.370443796590905)217:8.867605766482711E-5)218:8.867605767193254E-5)219:8.867605765772169E-5,(((20:35.47104379659093,141:35.47104379659093)220:8.867605766482711E-5,83:35.4711324726486)221:8.867605767193254E-5,(85:35.4711324726486,156:35.46043247264857)222:8.867605767193254E-5)223:8.867605765772169E-5)224:8.867605766482711E-5,((9:35.47122114870627,(120:35.4711324726486,133:35.4711324726486)225:8.867605767193254E-5)226:8.867605765772169E-5,((63:35.4711324726486,157:35.46043247264857)227:8.867605767193254E-5,(75:35.4711324726486,91:35.4711324726486)228:8.867605767193254E-5)229:8.867605765772169E-5)230:8.867605766482711E-5)231:8.867605766482711E-5,((42:17.882837426920176,118:17.882837426920176)232:17.588506697788894,((50:35.47122114870627,110:35.47122114870627)233:8.867605765772169E-5,51:35.47130982476393)234:3.429994514192458E-5)235:1.4305217018772964E-4)236:8.867605766482711E-5,((((((((((((4:35.47051174024496,101:35.47051174024496)237:8.867605766482711E-5,(7:35.47051174024496,145:35.47051174024496)238:8.867605766482711E-5)239:6.7783766532159E-5,14:35.470668200069156)240:1.0956834879749522E-4,(80:35.47068909236029,150:35.47068909236029)241:8.867605766482711E-5)242:8.867605766482711E-5,((10:35.47068909236029,(23:35.470600416302624,29:35.470600416302624)243:8.867605766482711E-5)244:8.867605766482711E-5,(((18:35.47051174024496,155:35.460511740244954)245:8.867605766482711E-5,86:35.470600416302624)246:8.867605766482711E-5,93:35.47068909236029)247:8.867605766482711E-5)248:8.867605766482711E-5)249:8.867605765772169E-5,154:33.37045512053325)250:8.867605765772169E-5,((((5:35.47068909236029,11:35.47068909236029)251:8.867605766482711E-5,151:35.35047776841794)252:8.867605766482711E-5,66:35.47086644447562)253:8.867605765772169E-5,(109:35.47086644447562,137:35.47086644447562)254:8.867605765772169E-5)255:8.867605765772169E-5)256:8.867605766482711E-5,((67:35.470955120533276,73:35.470955120533276)257:8.867605765772169E-5,(68:35.470955120533276,96:35.470955120533276)258:8.867605765772169E-5)259:8.867605766482711E-5)260:8.867605767193254E-5,(32:35.4711324726486,94:35.4711324726486)261:8.867605767193254E-5)262:8.867605765772169E-5,(30:35.47122114870627,35:35.47122114870627)263:8.867605765772169E-5)264:8.867605766482711E-5,((((((((6:35.47068909236029,56:35.47068909236029)265:8.867605766482711E-5,24:35.47077776841795)266:8.867605766482711E-5,(34:35.47077776841795,100:35.47077776841795)267:8.867605766482711E-5)268:8.867605765772169E-5,((108:35.47077776841795,144:35.47077776841795)269:8.867605766482711E-5,135:35.47086644447562)270:8.867605765772169E-5)271:8.867605765772169E-5,(((37:35.47077776841795,40:35.47077776841795)272:8.867605766482711E-5,121:35.47086644447562)273:8.867605765772169E-5,146:35.470955120533276)274:8.867605765772169E-5)275:8.867605766482711E-5,113:35.4711324726486)276:8.867605767193254E-5,(((53:35.470955120533276,(65:35.47086644447562,125:35.47086644447562)277:8.867605765772169E-5)278:8.867605765772169E-5,152:35.35044379659091)279:8.867605766482711E-5,(131:35.47104379659093,136:35.47104379659093)280:8.867605766482711E-5)281:8.867605767193254E-5)282:8.867605765772169E-5,(54:35.47122114870627,129:35.47122114870627)283:8.867605765772169E-5)284:8.867605766482711E-5)285:8.867605766482711E-5,(45:35.47039850082156,132:35.47039850082156)286:8.867605766482711E-5)287:8.867605766482711E-5)288:8.867605766482711E-5,((((((8:35.4711324726486,(38:35.47104379659093,124:35.47104379659093)289:8.867605766482711E-5)290:8.867605767193254E-5,16:35.47122114870627)291:8.867605765772169E-5,((((((26:35.47077776841795,79:35.47077776841795)292:8.867605766482711E-5,116:35.47086644447562)293:8.867605765772169E-5,(74:35.47086644447562,139:35.47086644447562)294:8.867605765772169E-5)295:8.867605765772169E-5,84:35.47104379659093)296:8.867605766482711E-5,(81:35.47104379659093,(89:35.470955120533276,134:35.470955120533276)297:8.867605765772169E-5)298:8.867605766482711E-5)299:8.867605767193254E-5,((((((52:35.47068909236029,128:35.47068909236029)300:8.867605766482711E-5,147:35.47077776841795)301:8.867605766482711E-5,61:35.47086644447562)302:8.867605765772169E-5,(59:35.47086644447562,99:35.47086644447562)303:8.867605765772169E-5)304:8.867605765772169E-5,(55:35.470955120533276,71:35.470955120533276)305:8.867605765772169E-5)306:8.867605766482711E-5,(72:35.47104379659093,140:35.47104379659093)307:8.867605766482711E-5)308:8.867605767193254E-5)309:8.867605765772169E-5)310:8.867605766482711E-5,((((((13:35.47086644447562,(102:35.47077776841795,127:35.47077776841795)311:8.867605766482711E-5)312:8.867605765772169E-5,((47:35.47077776841795,115:35.47077776841795)313:8.867605766482711E-5,(87:35.47077776841795,138:35.47077776841795)314:8.867605766482711E-5)315:8.867605765772169E-5)316:8.867605765772169E-5,69:35.47104379659093)317:8.867605766482711E-5,((15:35.470955120533276,62:35.470955120533276)318:8.867605765772169E-5,((27:35.47086644447562,44:35.47086644447562)319:8.867605765772169E-5,70:35.470955120533276)320:8.867605765772169E-5)321:8.867605766482711E-5)322:8.867605767193254E-5,(((21:35.470955120533276,36:35.470955120533276)323:8.867605765772169E-5,97:35.47104379659093)324:8.867605766482711E-5,(117:35.47104379659093,119:35.47104379659093)325:8.867605766482711E-5)326:8.867605767193254E-5)327:8.867605765772169E-5,((17:35.4711324726486,22:35.4711324726486)328:3.430016857919327E-5,114:35.47116677281718)329:1.4305194675046096E-4)330:8.867605766482711E-5)331:8.867605766482711E-5,((((12:35.4711324726486,142:35.4711324726486)332:8.867605767193254E-5,(((25:35.470955120533276,58:35.470955120533276)333:8.867605765772169E-5,49:35.47104379659093)334:8.867605766482711E-5,48:35.4711324726486)335:8.867605767193254E-5)336:8.867605765772169E-5,143:35.47130982476393)337:8.867605766482711E-5,(39:35.47130982476393,149:35.47130982476393)338:8.867605766482711E-5)339:8.867605766482711E-5)340:8.867605766482711E-5,(((28:35.47130982476393,95:35.47130982476393)341:8.867605766482711E-5,122:35.47039850082156)342:8.867605766482711E-5,130:35.47038717687922)343:8.867605766482711E-5)344:8.867605766482711E-5)345:8.867605765772169E-5)346:70.94093480443226,185:106.41118800948445)347:8.867605767193254E-5,177:106.41117668554212)348:8.867605765772169E-5,((159:106.41118072305956,(173:106.4111993334268,186:106.4111993334268)349:8.138963275428068E-5)350:9.596248256116269E-5,(163:106.41118800948445,170:106.41118800948445)351:8.867605767193254E-5)352:8.867605765772169E-5)353:8.867605767193254E-5,(169:106.41116536159977,183:106.41116536159977)354:8.867605767193254E-5)355:8.867605764351083E-5,(((158:106.41117668554212,166:106.41117668554212)356:8.867605765772169E-5,(((161:106.4111993334268,189:106.4111993334268)357:1.0571222836119887E-4,176:106.41120504565517)358:7.16398869542445E-5,168:106.41117668554212)359:8.867605765772169E-5)360:8.867605767193254E-5,172:106.41115403765744)361:8.867605764351083E-5)362:8.867605767193254E-5,(160:106.4111427137151,(178:106.41115403765744,(((179:106.41118800948445,(180:106.4111993334268,188:106.4111993334268)363:8.867605764351083E-5)364:8.867605767193254E-5,182:106.41117668554212)365:8.867605765772169E-5,184:106.41116536159977)366:8.867605767193254E-5)367:8.867605764351083E-5)368:8.867605767193254E-5)369:8.867605765772169E-5,((((162:106.41116536159977,181:106.41116536159977)370:8.867605767193254E-5,167:106.41115403765744)371:8.867605764351083E-5,171:106.4111427137151)372:1.0866034614309683E-6,((164:106.41115403765744,187:106.41115403765744)373:8.867605764351083E-5,((165:106.41116536159977,175:106.41116536159977)374:8.867605767193254E-5,174:106.41115403765744)375:8.867605764351083E-5)376:1.0866034614309683E-6)377:1.7626551186822326E-4)378:0.0</statenode>
+</itsabeastystatewerein>
+<!--
+{"operators":[
+{"id":"starting_freqParameter_baseFreqs_params_Gene1_pos1_Exchanger","p":0.10000000000000002,"accept":0,"reject":1,"acceptFC":0,"rejectFC":0,"rejectIv":0,"rejectOp":0},
+{"id":"starting_freqParameter_baseFreqs_params_Gene1_pos2_Exchanger","p":0.1,"accept":0,"reject":0,"acceptFC":0,"rejectFC":0,"rejectIv":0,"rejectOp":0},
+{"id":"starting_freqParameter_baseFreqs_params_Gene1_pos3_Exchanger","p":0.10000000000000002,"accept":1,"reject":0,"acceptFC":0,"rejectFC":0,"rejectIv":0,"rejectOp":0},
+{"id":"starting_freqParameter_baseFreqs_params_Gene2_pos1_Exchanger","p":0.10000000000000002,"accept":1,"reject":2,"acceptFC":0,"rejectFC":0,"rejectIv":0,"rejectOp":0},
+{"id":"starting_freqParameter_baseFreqs_params_Gene2_pos2_Exchanger","p":0.10000000000000002,"accept":2,"reject":0,"acceptFC":0,"rejectFC":0,"rejectIv":0,"rejectOp":0},
+{"id":"starting_freqParameter_baseFreqs_params_Gene2_pos3_Exchanger","p":0.10000000000000002,"accept":0,"reject":2,"acceptFC":0,"rejectFC":0,"rejectIv":0,"rejectOp":0},
+{"id":"starting_freqParameter_baseFreqs_params_Gene3_pos1_Exchanger","p":0.1,"accept":0,"reject":0,"acceptFC":0,"rejectFC":0,"rejectIv":0,"rejectOp":0},
+{"id":"starting_freqParameter_baseFreqs_params_Gene3_pos2_Exchanger","p":0.10000000000000002,"accept":1,"reject":0,"acceptFC":0,"rejectFC":0,"rejectIv":0,"rejectOp":0},
+{"id":"starting_freqParameter_baseFreqs_params_Gene3_pos3_Exchanger","p":0.1,"accept":0,"reject":0,"acceptFC":0,"rejectFC":0,"rejectIv":0,"rejectOp":0},
+{"id":"starting_freqParameter_baseFreqs_params_Gene4_pos1_Exchanger","p":0.10000000000000002,"accept":1,"reject":0,"acceptFC":0,"rejectFC":0,"rejectIv":0,"rejectOp":0},
+{"id":"starting_freqParameter_baseFreqs_params_Gene4_pos2_Exchanger","p":0.10000000000000002,"accept":0,"reject":2,"acceptFC":0,"rejectFC":0,"rejectIv":0,"rejectOp":0},
+{"id":"starting_freqParameter_baseFreqs_params_Gene4_pos3_Exchanger","p":0.1,"accept":0,"reject":0,"acceptFC":0,"rejectFC":0,"rejectIv":0,"rejectOp":0},
+{"id":"starting_freqParameter_baseFreqs_params_Gene5_pos1_Exchanger","p":0.1,"accept":0,"reject":0,"acceptFC":0,"rejectFC":0,"rejectIv":0,"rejectOp":0},
+{"id":"starting_freqParameter_baseFreqs_params_Gene5_pos2_Exchanger","p":0.10000000000000002,"accept":2,"reject":0,"acceptFC":0,"rejectFC":0,"rejectIv":0,"rejectOp":0},
+{"id":"starting_freqParameter_baseFreqs_params_Gene5_pos3_Exchanger","p":0.1,"accept":0,"reject":0,"acceptFC":0,"rejectFC":0,"rejectIv":0,"rejectOp":0},
+{"id":"starting_freqParameter_baseFreqs_params_Gene6_pos1_Exchanger","p":0.10000000000000002,"accept":1,"reject":0,"acceptFC":0,"rejectFC":0,"rejectIv":0,"rejectOp":0},
+{"id":"starting_freqParameter_baseFreqs_params_Gene6_pos2_Exchanger","p":0.10000000000000002,"accept":4,"reject":0,"acceptFC":0,"rejectFC":0,"rejectIv":0,"rejectOp":0},
+{"id":"starting_freqParameter_baseFreqs_params_Gene6_pos3_Exchanger","p":0.10000000000000002,"accept":2,"reject":0,"acceptFC":0,"rejectFC":0,"rejectIv":0,"rejectOp":0},
+{"id":"starting_freqParameter_baseFreqs_params_Gene7_pos1_Exchanger","p":0.1,"accept":0,"reject":0,"acceptFC":0,"rejectFC":0,"rejectIv":0,"rejectOp":0},
+{"id":"starting_freqParameter_baseFreqs_params_Gene7_pos2_Exchanger","p":0.10000000000000002,"accept":1,"reject":0,"acceptFC":0,"rejectFC":0,"rejectIv":0,"rejectOp":0},
+{"id":"starting_freqParameter_baseFreqs_params_Gene7_pos3_Exchanger","p":0.10000000000000002,"accept":3,"reject":0,"acceptFC":0,"rejectFC":0,"rejectIv":0,"rejectOp":0},
+{"id":"starting_freqParameter_baseFreqs_params_Gene8_pos1_Exchanger","p":0.10000000000000002,"accept":0,"reject":2,"acceptFC":0,"rejectFC":0,"rejectIv":0,"rejectOp":0},
+{"id":"starting_freqParameter_baseFreqs_params_Gene8_pos2_Exchanger","p":0.10000000000000002,"accept":4,"reject":0,"acceptFC":0,"rejectFC":0,"rejectIv":0,"rejectOp":0},
+{"id":"starting_freqParameter_baseFreqs_params_Gene8_pos3_Exchanger","p":0.10000000000000002,"accept":1,"reject":1,"acceptFC":0,"rejectFC":0,"rejectIv":0,"rejectOp":0},
+{"id":"starting_freqParameter_baseFreqs_params_Gene9_pos1_Exchanger","p":0.10000000000000002,"accept":2,"reject":0,"acceptFC":0,"rejectFC":0,"rejectIv":0,"rejectOp":0},
+{"id":"starting_freqParameter_baseFreqs_params_Gene9_pos2_Exchanger","p":0.10000000000000002,"accept":1,"reject":0,"acceptFC":0,"rejectFC":0,"rejectIv":0,"rejectOp":0},
+{"id":"starting_freqParameter_baseFreqs_params_Gene9_pos3_Exchanger","p":0.10000000000000002,"accept":2,"reject":0,"acceptFC":0,"rejectFC":0,"rejectIv":0,"rejectOp":0},
+{"id":"starting_freqParameter_baseFreqs_params_Gene10_pos1_Exchanger","p":0.1,"accept":0,"reject":0,"acceptFC":0,"rejectFC":0,"rejectIv":0,"rejectOp":0},
+{"id":"starting_freqParameter_baseFreqs_params_Gene10_pos2_Exchanger","p":0.10000000000000002,"accept":1,"reject":0,"acceptFC":0,"rejectFC":0,"rejectIv":0,"rejectOp":0},
+{"id":"starting_freqParameter_baseFreqs_params_Gene10_pos3_Exchanger","p":0.10000000000000002,"accept":3,"reject":0,"acceptFC":0,"rejectFC":0,"rejectIv":0,"rejectOp":0},
+{"id":"starting_freqParameter_baseFreqs_params_Cytb_pos1_Exchanger","p":0.10000000000000002,"accept":0,"reject":1,"acceptFC":0,"rejectFC":0,"rejectIv":0,"rejectOp":0},
+{"id":"starting_freqParameter_baseFreqs_params_Cytb_pos2_Exchanger","p":0.10000000000000002,"accept":2,"reject":2,"acceptFC":0,"rejectFC":0,"rejectIv":0,"rejectOp":0},
+{"id":"starting_freqParameter_baseFreqs_params_Cytb_pos3_Exchanger","p":0.10000000000000002,"accept":1,"reject":1,"acceptFC":0,"rejectFC":0,"rejectIv":0,"rejectOp":0},
+{"id":"starting_freqParameter_baseFreqs_params_16S_Exchanger","p":0.1,"accept":0,"reject":0,"acceptFC":0,"rejectFC":0,"rejectIv":0,"rejectOp":0},
+{"id":"starting_freqParameter_baseFreqs_params_COI_pos1_Exchanger","p":0.1,"accept":0,"reject":0,"acceptFC":0,"rejectFC":0,"rejectIv":0,"rejectOp":0},
+{"id":"starting_freqParameter_baseFreqs_params_COI_pos2_Exchanger","p":0.10000000000000002,"accept":2,"reject":0,"acceptFC":0,"rejectFC":0,"rejectIv":0,"rejectOp":0},
+{"id":"starting_freqParameter_baseFreqs_params_COI_pos3_Exchanger","p":0.1,"accept":0,"reject":0,"acceptFC":0,"rejectFC":0,"rejectIv":0,"rejectOp":0},
+{"id":"rateAC_siteModel_subset1_Scaler","p":0.5,"accept":0,"reject":0,"acceptFC":0,"rejectFC":0,"rejectIv":0,"rejectOp":0},
+{"id":"rateAG_siteModel_subset1_Scaler","p":0.5,"accept":0,"reject":0,"acceptFC":0,"rejectFC":0,"rejectIv":0,"rejectOp":0},
+{"id":"rateAT_siteModel_subset1_Scaler","p":0.5,"accept":0,"reject":0,"acceptFC":0,"rejectFC":0,"rejectIv":0,"rejectOp":0},
+{"id":"rateCG_siteModel_subset1_Scaler","p":0.5,"accept":0,"reject":0,"acceptFC":0,"rejectFC":0,"rejectIv":0,"rejectOp":0},
+{"id":"rateCT_siteModel_subset1_Scaler","p":0.5,"accept":0,"reject":0,"acceptFC":0,"rejectFC":0,"rejectIv":0,"rejectOp":0},
+{"id":"kappa_Gene1_pos2_Scaler","p":0.5,"accept":0,"reject":0,"acceptFC":0,"rejectFC":0,"rejectIv":0,"rejectOp":0},
+{"id":"kappa_Gene2_pos1_Scaler","p":0.5,"accept":0,"reject":0,"acceptFC":0,"rejectFC":0,"rejectIv":0,"rejectOp":0},
+{"id":"kappa_Gene2_pos2_Scaler","p":0.5,"accept":0,"reject":0,"acceptFC":0,"rejectFC":0,"rejectIv":0,"rejectOp":0},
+{"id":"kappa_Gene2_pos3_Scaler","p":0.5,"accept":0,"reject":0,"acceptFC":0,"rejectFC":0,"rejectIv":0,"rejectOp":0},
+{"id":"kappa_Gene3_pos1_Scaler","p":0.5,"accept":1,"reject":0,"acceptFC":0,"rejectFC":0,"rejectIv":0,"rejectOp":0},
+{"id":"kappa_Gene3_pos2_Scaler","p":0.5,"accept":0,"reject":0,"acceptFC":0,"rejectFC":0,"rejectIv":0,"rejectOp":0},
+{"id":"kappa_Gene3_pos3_Scaler","p":0.5,"accept":0,"reject":0,"acceptFC":0,"rejectFC":0,"rejectIv":0,"rejectOp":0},
+{"id":"kappa_Gene4_pos1_Scaler","p":0.5,"accept":0,"reject":0,"acceptFC":0,"rejectFC":0,"rejectIv":0,"rejectOp":0},
+{"id":"rateAC_siteModel_subset5_Scaler","p":0.5,"accept":0,"reject":0,"acceptFC":0,"rejectFC":0,"rejectIv":0,"rejectOp":0},
+{"id":"rateAG_siteModel_subset5_Scaler","p":0.5,"accept":0,"reject":0,"acceptFC":0,"rejectFC":0,"rejectIv":0,"rejectOp":0},
+{"id":"rateAT_siteModel_subset5_Scaler","p":0.5,"accept":0,"reject":0,"acceptFC":0,"rejectFC":0,"rejectIv":0,"rejectOp":0},
+{"id":"rateCG_siteModel_subset5_Scaler","p":0.5,"accept":0,"reject":0,"acceptFC":0,"rejectFC":0,"rejectIv":0,"rejectOp":0},
+{"id":"rateCT_siteModel_subset5_Scaler","p":0.5,"accept":0,"reject":0,"acceptFC":0,"rejectFC":0,"rejectIv":0,"rejectOp":0},
+{"id":"kappa_Gene4_pos3_Scaler","p":0.5,"accept":0,"reject":0,"acceptFC":0,"rejectFC":0,"rejectIv":0,"rejectOp":0},
+{"id":"kappa_Gene5_pos1_Scaler","p":0.5,"accept":0,"reject":0,"acceptFC":0,"rejectFC":0,"rejectIv":0,"rejectOp":0},
+{"id":"kappa_Gene5_pos2_Scaler","p":0.5,"accept":0,"reject":0,"acceptFC":0,"rejectFC":0,"rejectIv":0,"rejectOp":0},
+{"id":"kappa_Gene5_pos3_Scaler","p":0.5,"accept":1,"reject":0,"acceptFC":0,"rejectFC":0,"rejectIv":0,"rejectOp":0},
+{"id":"kappa_Gene6_pos1_Scaler","p":0.5,"accept":0,"reject":1,"acceptFC":0,"rejectFC":0,"rejectIv":0,"rejectOp":0},
+{"id":"kappa_Gene6_pos2_Scaler","p":0.5,"accept":0,"reject":0,"acceptFC":0,"rejectFC":0,"rejectIv":0,"rejectOp":0},
+{"id":"kappa_Gene6_pos3_Scaler","p":0.5,"accept":0,"reject":0,"acceptFC":0,"rejectFC":0,"rejectIv":0,"rejectOp":0},
+{"id":"kappa_Gene7_pos1_Scaler","p":0.5,"accept":2,"reject":0,"acceptFC":0,"rejectFC":0,"rejectIv":0,"rejectOp":0},
+{"id":"kappa_Gene8_pos1_Scaler","p":0.5,"accept":0,"reject":0,"acceptFC":0,"rejectFC":0,"rejectIv":0,"rejectOp":0},
+{"id":"kappa_Gene8_pos2_Scaler","p":0.5,"accept":0,"reject":1,"acceptFC":0,"rejectFC":0,"rejectIv":0,"rejectOp":0},
+{"id":"kappa_Gene8_pos3_Scaler","p":0.5,"accept":0,"reject":1,"acceptFC":0,"rejectFC":0,"rejectIv":0,"rejectOp":0},
+{"id":"kappa_Gene9_pos1_Scaler","p":0.5,"accept":0,"reject":0,"acceptFC":0,"rejectFC":0,"rejectIv":0,"rejectOp":0},
+{"id":"kappa_Gene10_pos1_Scaler","p":0.5,"accept":0,"reject":0,"acceptFC":0,"rejectFC":0,"rejectIv":0,"rejectOp":0},
+{"id":"kappa_Gene10_pos2_Scaler","p":0.5,"accept":0,"reject":0,"acceptFC":0,"rejectFC":0,"rejectIv":0,"rejectOp":0},
+{"id":"kappa_Gene10_pos3_Scaler","p":0.5,"accept":0,"reject":0,"acceptFC":0,"rejectFC":0,"rejectIv":0,"rejectOp":0},
+{"id":"rateAC_siteModel_subset10_Scaler","p":0.5,"accept":0,"reject":0,"acceptFC":0,"rejectFC":0,"rejectIv":0,"rejectOp":0},
+{"id":"rateAG_siteModel_subset10_Scaler","p":0.5,"accept":0,"reject":0,"acceptFC":0,"rejectFC":0,"rejectIv":0,"rejectOp":0},
+{"id":"rateAT_siteModel_subset10_Scaler","p":0.5,"accept":0,"reject":0,"acceptFC":0,"rejectFC":0,"rejectIv":0,"rejectOp":0},
+{"id":"rateCG_siteModel_subset10_Scaler","p":0.5,"accept":1,"reject":0,"acceptFC":0,"rejectFC":0,"rejectIv":0,"rejectOp":0},
+{"id":"rateCT_siteModel_subset10_Scaler","p":0.5,"accept":0,"reject":0,"acceptFC":0,"rejectFC":0,"rejectIv":0,"rejectOp":0},
+{"id":"kappa_Cytb_pos2_Scaler","p":0.5,"accept":0,"reject":0,"acceptFC":0,"rejectFC":0,"rejectIv":0,"rejectOp":0},
+{"id":"rateAC_siteModel_subset12_Scaler","p":0.5,"accept":0,"reject":1,"acceptFC":0,"rejectFC":0,"rejectIv":0,"rejectOp":0},
+{"id":"rateAG_siteModel_subset12_Scaler","p":0.5,"accept":0,"reject":0,"acceptFC":0,"rejectFC":0,"rejectIv":0,"rejectOp":0},
+{"id":"rateAT_siteModel_subset12_Scaler","p":0.5,"accept":1,"reject":0,"acceptFC":0,"rejectFC":0,"rejectIv":0,"rejectOp":0},
+{"id":"rateCG_siteModel_subset12_Scaler","p":0.5,"accept":0,"reject":0,"acceptFC":0,"rejectFC":0,"rejectIv":0,"rejectOp":0},
+{"id":"rateCT_siteModel_subset12_Scaler","p":0.5,"accept":0,"reject":0,"acceptFC":0,"rejectFC":0,"rejectIv":0,"rejectOp":0},
+{"id":"kappa_COI_pos1_Scaler","p":0.5,"accept":0,"reject":0,"acceptFC":0,"rejectFC":0,"rejectIv":0,"rejectOp":0},
+{"id":"rateAC_siteModel_subset13_Scaler","p":0.5,"accept":0,"reject":0,"acceptFC":0,"rejectFC":0,"rejectIv":0,"rejectOp":0},
+{"id":"rateAG_siteModel_subset13_Scaler","p":0.5,"accept":0,"reject":0,"acceptFC":0,"rejectFC":0,"rejectIv":0,"rejectOp":0},
+{"id":"rateAT_siteModel_subset13_Scaler","p":0.5,"accept":0,"reject":0,"acceptFC":0,"rejectFC":0,"rejectIv":0,"rejectOp":0},
+{"id":"rateCG_siteModel_subset13_Scaler","p":0.5,"accept":0,"reject":0,"acceptFC":0,"rejectFC":0,"rejectIv":0,"rejectOp":0},
+{"id":"rateCT_siteModel_subset13_Scaler","p":0.5,"accept":0,"reject":0,"acceptFC":0,"rejectFC":0,"rejectIv":0,"rejectOp":0},
+{"id":"gammaShapeScaler_for_gammaShape_gammaShape_Gene1_pos1","p":0.5,"accept":0,"reject":0,"acceptFC":0,"rejectFC":0,"rejectIv":0,"rejectOp":0},
+{"id":"gammaShapeScaler_for_gammaShape_gammaShape_Gene1_pos2","p":0.5,"accept":1,"reject":0,"acceptFC":0,"rejectFC":0,"rejectIv":0,"rejectOp":0},
+{"id":"gammaShapeScaler_for_gammaShape_gammaShape_Gene1_pos3","p":0.5,"accept":0,"reject":0,"acceptFC":0,"rejectFC":0,"rejectIv":0,"rejectOp":0},
+{"id":"gammaShapeScaler_for_gammaShape_gammaShape_Gene2_pos1","p":0.5,"accept":0,"reject":0,"acceptFC":0,"rejectFC":0,"rejectIv":0,"rejectOp":0},
+{"id":"gammaShapeScaler_for_gammaShape_gammaShape_Gene2_pos2","p":0.5,"accept":0,"reject":0,"acceptFC":0,"rejectFC":0,"rejectIv":0,"rejectOp":0},
+{"id":"gammaShapeScaler_for_gammaShape_gammaShape_Gene2_pos3","p":0.5,"accept":0,"reject":0,"acceptFC":0,"rejectFC":0,"rejectIv":0,"rejectOp":0},
+{"id":"gammaShapeScaler_for_gammaShape_gammaShape_Gene3_pos1","p":0.5,"accept":0,"reject":1,"acceptFC":0,"rejectFC":0,"rejectIv":0,"rejectOp":0},
+{"id":"gammaShapeScaler_for_gammaShape_gammaShape_Gene3_pos2","p":0.5,"accept":0,"reject":0,"acceptFC":0,"rejectFC":0,"rejectIv":0,"rejectOp":0},
+{"id":"gammaShapeScaler_for_gammaShape_gammaShape_Gene3_pos3","p":0.5,"accept":0,"reject":0,"acceptFC":0,"rejectFC":0,"rejectIv":0,"rejectOp":0},
+{"id":"gammaShapeScaler_for_gammaShape_gammaShape_Gene4_pos1","p":0.5,"accept":0,"reject":0,"acceptFC":0,"rejectFC":0,"rejectIv":0,"rejectOp":0},
+{"id":"gammaShapeScaler_for_gammaShape_gammaShape_Gene4_pos2","p":0.5,"accept":0,"reject":0,"acceptFC":0,"rejectFC":0,"rejectIv":0,"rejectOp":0},
+{"id":"gammaShapeScaler_for_gammaShape_gammaShape_Gene4_pos3","p":0.5,"accept":0,"reject":0,"acceptFC":0,"rejectFC":0,"rejectIv":0,"rejectOp":0},
+{"id":"gammaShapeScaler_for_gammaShape_gammaShape_Gene5_pos1","p":0.5,"accept":0,"reject":0,"acceptFC":0,"rejectFC":0,"rejectIv":0,"rejectOp":0},
+{"id":"gammaShapeScaler_for_gammaShape_gammaShape_Gene5_pos2","p":0.5,"accept":0,"reject":0,"acceptFC":0,"rejectFC":0,"rejectIv":0,"rejectOp":0},
+{"id":"gammaShapeScaler_for_gammaShape_gammaShape_Gene5_pos3","p":0.5,"accept":1,"reject":0,"acceptFC":0,"rejectFC":0,"rejectIv":0,"rejectOp":0},
+{"id":"gammaShapeScaler_for_gammaShape_gammaShape_Gene6_pos1","p":0.5,"accept":0,"reject":0,"acceptFC":0,"rejectFC":0,"rejectIv":0,"rejectOp":0},
+{"id":"gammaShapeScaler_for_gammaShape_gammaShape_Gene6_pos2","p":0.5,"accept":0,"reject":0,"acceptFC":0,"rejectFC":0,"rejectIv":0,"rejectOp":0},
+{"id":"gammaShapeScaler_for_gammaShape_gammaShape_Gene6_pos3","p":0.5,"accept":0,"reject":0,"acceptFC":0,"rejectFC":0,"rejectIv":0,"rejectOp":0},
+{"id":"gammaShapeScaler_for_gammaShape_gammaShape_Gene7_pos1","p":0.5,"accept":0,"reject":0,"acceptFC":0,"rejectFC":0,"rejectIv":0,"rejectOp":0},
+{"id":"gammaShapeScaler_for_gammaShape_gammaShape_Gene7_pos2","p":0.5,"accept":1,"reject":0,"acceptFC":0,"rejectFC":0,"rejectIv":0,"rejectOp":0},
+{"id":"gammaShapeScaler_for_gammaShape_gammaShape_Gene7_pos3","p":0.5,"accept":0,"reject":0,"acceptFC":0,"rejectFC":0,"rejectIv":0,"rejectOp":0},
+{"id":"gammaShapeScaler_for_gammaShape_gammaShape_Gene8_pos1","p":0.5,"accept":0,"reject":1,"acceptFC":0,"rejectFC":0,"rejectIv":0,"rejectOp":0},
+{"id":"gammaShapeScaler_for_gammaShape_gammaShape_Gene8_pos2","p":0.5,"accept":0,"reject":0,"acceptFC":0,"rejectFC":0,"rejectIv":0,"rejectOp":0},
+{"id":"gammaShapeScaler_for_gammaShape_gammaShape_Gene8_pos3","p":0.5,"accept":0,"reject":0,"acceptFC":0,"rejectFC":0,"rejectIv":0,"rejectOp":0},
+{"id":"gammaShapeScaler_for_gammaShape_gammaShape_Gene9_pos1","p":0.5,"accept":0,"reject":0,"acceptFC":0,"rejectFC":0,"rejectIv":0,"rejectOp":0},
+{"id":"gammaShapeScaler_for_gammaShape_gammaShape_Gene9_pos2","p":0.5,"accept":0,"reject":0,"acceptFC":0,"rejectFC":0,"rejectIv":0,"rejectOp":0},
+{"id":"gammaShapeScaler_for_gammaShape_gammaShape_Gene9_pos3","p":0.5,"accept":0,"reject":0,"acceptFC":0,"rejectFC":0,"rejectIv":0,"rejectOp":0},
+{"id":"gammaShapeScaler_for_gammaShape_gammaShape_Gene10_pos1","p":0.5,"accept":0,"reject":0,"acceptFC":0,"rejectFC":0,"rejectIv":0,"rejectOp":0},
+{"id":"gammaShapeScaler_for_gammaShape_gammaShape_Gene10_pos2","p":0.5,"accept":0,"reject":0,"acceptFC":0,"rejectFC":0,"rejectIv":0,"rejectOp":0},
+{"id":"gammaShapeScaler_for_gammaShape_gammaShape_Gene10_pos3","p":0.5,"accept":0,"reject":0,"acceptFC":0,"rejectFC":0,"rejectIv":0,"rejectOp":0},
+{"id":"gammaShapeScaler_for_gammaShape_gammaShape_Cytb_pos1","p":0.5,"accept":0,"reject":0,"acceptFC":0,"rejectFC":0,"rejectIv":0,"rejectOp":0},
+{"id":"gammaShapeScaler_for_gammaShape_gammaShape_Cytb_pos2","p":0.5,"accept":0,"reject":0,"acceptFC":0,"rejectFC":0,"rejectIv":0,"rejectOp":0},
+{"id":"gammaShapeScaler_for_gammaShape_gammaShape_Cytb_pos3","p":0.5,"accept":0,"reject":0,"acceptFC":0,"rejectFC":0,"rejectIv":0,"rejectOp":0},
+{"id":"gammaShapeScaler_for_gammaShape_gammaShape_16S","p":0.5,"accept":0,"reject":0,"acceptFC":0,"rejectFC":0,"rejectIv":0,"rejectOp":0},
+{"id":"gammaShapeScaler_for_gammaShape_gammaShape_COI_pos1","p":0.5,"accept":0,"reject":0,"acceptFC":0,"rejectFC":0,"rejectIv":0,"rejectOp":0},
+{"id":"gammaShapeScaler_for_gammaShape_gammaShape_COI_pos2","p":0.5,"accept":0,"reject":0,"acceptFC":0,"rejectFC":0,"rejectIv":0,"rejectOp":0},
+{"id":"gammaShapeScaler_for_gammaShape_gammaShape_COI_pos3","p":0.5,"accept":1,"reject":0,"acceptFC":0,"rejectFC":0,"rejectIv":0,"rejectOp":0},
+{"id":"ucld_Mean_of_shared_clock_scaler","p":0.5,"accept":1,"reject":1,"acceptFC":0,"rejectFC":0,"rejectIv":0,"rejectOp":0},
+{"id":"ucld_Stdev_of_shared_clock_scaler","p":0.5,"accept":0,"reject":0,"acceptFC":0,"rejectFC":0,"rejectIv":0,"rejectOp":0},
+{"id":"ucld_Mean_of_shared_clock_relaxedUpDownOperator","p":0.75,"accept":0,"reject":0,"acceptFC":0,"rejectFC":0,"rejectIv":0,"rejectOp":0},
+{"id":"CategoriesRandomWalk_shared_clock","p":"NaN","accept":0,"reject":1,"acceptFC":0,"rejectFC":0,"rejectIv":1,"rejectOp":1},
+{"id":"CategoriesSwapOperator_shared_clock","p":"NaN","accept":0,"reject":1,"acceptFC":0,"rejectFC":0,"rejectIv":0,"rejectOp":0},
+{"id":"CategoriesUniformOperator_shared_clock","p":"NaN","accept":3,"reject":0,"acceptFC":0,"rejectFC":0,"rejectIv":0,"rejectOp":0},
+{"id":"FixMeanMutationRatesOperator_for_partitions_within_shared_clock","p":0.75,"accept":0,"reject":0,"acceptFC":0,"rejectFC":0,"rejectIv":0,"rejectOp":0},
+{"id":"gammaShape_morphPr_Scaler","p":0.5,"accept":0,"reject":0,"acceptFC":0,"rejectFC":0,"rejectIv":0,"rejectOp":0},
+{"id":"gammaShape_morphSl_Scaler","p":0.5,"accept":0,"reject":0,"acceptFC":0,"rejectFC":0,"rejectIv":0,"rejectOp":0},
+{"id":"gammaShape_morphFiltered4_Scaler","p":0.5,"accept":0,"reject":0,"acceptFC":0,"rejectFC":0,"rejectIv":0,"rejectOp":0},
+{"id":"gammaShape_morphFiltered5_Scaler","p":0.5,"accept":0,"reject":0,"acceptFC":0,"rejectFC":0,"rejectIv":0,"rejectOp":0},
+{"id":"gammaShape_morphFiltered6_Scaler","p":0.5,"accept":0,"reject":0,"acceptFC":0,"rejectFC":0,"rejectIv":0,"rejectOp":0},
+{"id":"rateScaler_birthRate_shared_tree","p":0.75,"accept":1,"reject":1,"acceptFC":0,"rejectFC":0,"rejectIv":0,"rejectOp":0},
+{"id":"rateScaler_deathRate_shared_tree","p":0.75,"accept":0,"reject":1,"acceptFC":0,"rejectFC":0,"rejectIv":0,"rejectOp":0},
+{"id":"rateScaler_samplingRate_shared_tree","p":0.75,"accept":1,"reject":2,"acceptFC":0,"rejectFC":0,"rejectIv":0,"rejectOp":0},
+{"id":"rateScaler_originTime_shared_tree","p":0.75,"accept":0,"reject":0,"acceptFC":0,"rejectFC":0,"rejectIv":0,"rejectOp":0},
+{"id":"TreeDimensionJump_shared_tree","p":"NaN","accept":0,"reject":2,"acceptFC":0,"rejectFC":0,"rejectIv":2,"rejectOp":2},
+{"id":"treeScaler_shared_tree","p":0.9500000000000001,"accept":2,"reject":1,"acceptFC":0,"rejectFC":0,"rejectIv":0,"rejectOp":0},
+{"id":"treeRootScaler_shared_tree","p":0.95,"accept":0,"reject":0,"acceptFC":0,"rejectFC":0,"rejectIv":0,"rejectOp":0},
+{"id":"UniformOperator_shared_tree","p":"NaN","accept":7,"reject":0,"acceptFC":0,"rejectFC":0,"rejectIv":0,"rejectOp":0},
+{"id":"updownTree_shared_tree","p":0.9500000000000001,"accept":2,"reject":1,"acceptFC":0,"rejectFC":0,"rejectIv":0,"rejectOp":0},
+{"id":"narrowExchange_shared_tree","p":"NaN","accept":2,"reject":1,"acceptFC":0,"rejectFC":0,"rejectIv":1,"rejectOp":1},
+{"id":"wideExchange_shared_tree","p":"NaN","accept":0,"reject":1,"acceptFC":0,"rejectFC":0,"rejectIv":1,"rejectOp":1},
+{"id":"WilsonBalding_shared_tree","p":"NaN","accept":0,"reject":0,"acceptFC":0,"rejectFC":0,"rejectIv":0,"rejectOp":0}
+]}
+-->

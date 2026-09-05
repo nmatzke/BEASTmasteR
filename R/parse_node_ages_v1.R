@@ -628,7 +628,7 @@ nodeline_to_cladePrior <- function(nodeline, tree_name="shared_tree", Calibrated
 		txt = paste(" Distribution on the date (no prior) of taxon: ", taxon_name, " (CalibrationPoint doesn't specify monophyly vs.not) ", sep="")
 		XML_comment = xmlCommentNode(txt)
 
-		priordist_XML = xmlNode(name="calibrations", attrs=list(id=prior_id, spec="beast.evolution.speciation.CalibrationPoint", parentOf=useStem_txt), .children=c(list(taxonset_node), list(distrib_XML)))
+		priordist_XML = xmlNode(name="calibrations", attrs=list(id=prior_id, spec="beast.base.evolution.speciation.CalibrationPoint", parentOf=useStem_txt), .children=c(list(taxonset_node), list(distrib_XML)))
 		priordist_XML_list = list(bl(), XML_comment, priordist_XML)		
 		
 		# Exit early
@@ -642,7 +642,7 @@ nodeline_to_cladePrior <- function(nodeline, tree_name="shared_tree", Calibrated
 		txt = paste(" NOTE: ConvertedForStartTree...Prior distribution on the date of monophyletic taxon: ", taxon_name, " ", sep="")
 		XML_comment = xmlCommentNode(txt)
 
-		priordist_XML = xmlNode(name="distribution", attrs=list(id=prior_id, monophyletic=mono_txt, spec="beast.math.distributions.MRCAPrior", tree=tree_name_idref, useOriginate=useStem_txt, tipsonly=tipsOnly_TF), .children=c(list(taxonset_node), list(distrib_XML)))
+		priordist_XML = xmlNode(name="distribution", attrs=list(id=prior_id, monophyletic=mono_txt, spec="beast.base.evolution.tree.MRCAPrior", tree=tree_name_idref, useOriginate=useStem_txt, tipsonly=tipsOnly_TF), .children=c(list(taxonset_node), list(distrib_XML)))
 	
 		priordist_XML_list = list(bl(), XML_comment, priordist_XML)
 		}
@@ -653,7 +653,7 @@ nodeline_to_cladePrior <- function(nodeline, tree_name="shared_tree", Calibrated
 		txt = paste(" Prior distribution on the date of taxon: ", taxon_name, " (not constrained to be monophyletic) ", sep="")
 		XML_comment = xmlCommentNode(txt)
 
-		priordist_XML = xmlNode(name="distribution", attrs=list(id=prior_id, monophyletic=mono_txt, spec="beast.math.distributions.MRCAPrior", tree=tree_name_idref, useOriginate=useStem_txt, tipsonly=tipsOnly_TF), .children=c(list(taxonset_node), list(distrib_XML)))
+		priordist_XML = xmlNode(name="distribution", attrs=list(id=prior_id, monophyletic=mono_txt, spec="beast.base.evolution.tree.MRCAPrior", tree=tree_name_idref, useOriginate=useStem_txt, tipsonly=tipsOnly_TF), .children=c(list(taxonset_node), list(distrib_XML)))
 	
 		priordist_XML_list = list(bl(), XML_comment, priordist_XML)
 		}
@@ -665,7 +665,7 @@ nodeline_to_cladePrior <- function(nodeline, tree_name="shared_tree", Calibrated
 		txt = paste(" Distribution on the date (no prior) of monophyletic taxon: ", taxon_name, " ", sep="")
 		XML_comment = xmlCommentNode(txt)
 
-		priordist_XML = xmlNode(name="distribution", attrs=list(id=prior_id, monophyletic=mono_txt, spec="beast.math.distributions.MRCAPrior", tree=tree_name_idref, useOriginate=useStem_txt, tipsonly=tipsOnly_TF), .children=c(list(taxonset_node)))
+		priordist_XML = xmlNode(name="distribution", attrs=list(id=prior_id, monophyletic=mono_txt, spec="beast.base.evolution.tree.MRCAPrior", tree=tree_name_idref, useOriginate=useStem_txt, tipsonly=tipsOnly_TF), .children=c(list(taxonset_node)))
 	
 		priordist_XML_list = list(bl(), XML_comment, priordist_XML)
 		}			
@@ -676,7 +676,7 @@ nodeline_to_cladePrior <- function(nodeline, tree_name="shared_tree", Calibrated
 		txt = paste(" Distribution on the date (no prior) of taxon: ", taxon_name, " (not constrained to be monophyletic) ", sep="")
 		XML_comment = xmlCommentNode(txt)
 
-		priordist_XML = xmlNode(name="distribution", attrs=list(id=prior_id, monophyletic=mono_txt, spec="beast.math.distributions.MRCAPrior", tree=tree_name_idref, useOriginate=useStem_txt, tipsonly=tipsOnly_TF), .children=c(list(taxonset_node)))
+		priordist_XML = xmlNode(name="distribution", attrs=list(id=prior_id, monophyletic=mono_txt, spec="beast.base.evolution.tree.MRCAPrior", tree=tree_name_idref, useOriginate=useStem_txt, tipsonly=tipsOnly_TF), .children=c(list(taxonset_node)))
 	
 		priordist_XML_list = list(bl(), XML_comment, priordist_XML)		
 		}

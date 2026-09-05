@@ -1,0 +1,4 @@
+begin mrbayes;
+charset seqs_DNA = 1-20828;
+partition userPartitions = 1: seqs_DNA;
+END;

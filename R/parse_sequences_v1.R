@@ -78,7 +78,7 @@ make_seq_XML <- function(txtseq, OTU_name, dataset_name, totalcount)
 # 	XML_comment3 = xmlCommentNode(txt3)
 # 	taxa_names_source_XML = xmlNode(name="taxa", attrs=list(idref=taxon_name))
 # 	
-# 	XML_tipdates = xmlNode(name="trait", tipdates_txt, attrs=list(id=name, spec="beast.evolution.tree.TraitSet", traitname=traitname))
+# 	XML_tipdates = xmlNode(name="trait", tipdates_txt, attrs=list(id=name, spec="beast.base.evolution.tree.TraitSet", traitname=traitname))
 # 	XML_tipdates
 # 
 
@@ -388,7 +388,7 @@ make_BEAST2_userDataTypes <- function(numstates_morph_list, nexd6, dataset_name=
 		morphList = rbind(morphList, morphList_row)
 		
 		# Add this 
-		userDataType_node = xmlNode("userDataType", attrs=list(id=name_of_userDataType, spec="beast.evolution.datatype.UserDataType", states=numstates, codeMap=codeMap_txts, codelength="1"))
+		userDataType_node = xmlNode("userDataType", attrs=list(id=name_of_userDataType, spec="beast.base.evolution.datatype.UserDataType", states=numstates, codeMap=codeMap_txts, codelength="1"))
 		
 		if (numstates == 2)
 			{
@@ -665,7 +665,7 @@ write_BEAST2_morphology_characters <- function(nexd7, numstates_morph_list, data
 			
 			# DO NOT STRIP invariant sites from the likelihood (strip="true") when ascertainment is Mk
 			# (so: strip=false)
-			morph_alignment_nodes_list[[(anum=anum+1)]] = xmlNode(name="data", attrs=list(id=partition_name, dataType="user defined", ascertained="false", statecount=numstates, strip="false", spec="beast.evolution.alignment.AscertainedAlignment"), .children=sequence_nodes_list)
+			morph_alignment_nodes_list[[(anum=anum+1)]] = xmlNode(name="data", attrs=list(id=partition_name, dataType="user defined", ascertained="false", statecount=numstates, strip="false", spec="beast.base.evolution.alignment.AscertainedAlignment"), .children=sequence_nodes_list)
 			} # END if (ascertainment == "Mk")
 
 		if (ascertainment == "Mkv")
@@ -679,7 +679,7 @@ write_BEAST2_morphology_characters <- function(nexd7, numstates_morph_list, data
 			excludefrom = 0
 			excludeto = nchar(states_to_exclude_txt) - 0 
 			excludeevery = 1
-			morph_alignment_nodes_list[[(anum=anum+1)]] = xmlNode(name="data", attrs=list(id=partition_name, dataType="user defined", ascertained="true", statecount=numstates, excludefrom=excludefrom, excludeto=excludeto, excludeevery=excludeevery, strip="false", spec="beast.evolution.alignment.AscertainedAlignment"), .children=sequence_nodes_list)
+			morph_alignment_nodes_list[[(anum=anum+1)]] = xmlNode(name="data", attrs=list(id=partition_name, dataType="user defined", ascertained="true", statecount=numstates, excludefrom=excludefrom, excludeto=excludeto, excludeevery=excludeevery, strip="false", spec="beast.base.evolution.alignment.AscertainedAlignment"), .children=sequence_nodes_list)
 			} # END if (ascertainment == "Mkv")
 
 
@@ -694,7 +694,7 @@ write_BEAST2_morphology_characters <- function(nexd7, numstates_morph_list, data
 			excludefrom = 0
 			excludeto = num_parsInf_dummy_characters - 0 
 			excludeevery = 1
-			morph_alignment_nodes_list[[(anum=anum+1)]] = xmlNode(name="data", attrs=list(id=partition_name, dataType="user defined", ascertained="true", statecount=numstates, excludefrom=excludefrom, excludeto=excludeto, excludeevery=excludeevery, strip="false", spec="beast.evolution.alignment.AscertainedAlignment"), .children=sequence_nodes_list)
+			morph_alignment_nodes_list[[(anum=anum+1)]] = xmlNode(name="data", attrs=list(id=partition_name, dataType="user defined", ascertained="true", statecount=numstates, excludefrom=excludefrom, excludeto=excludeto, excludeevery=excludeevery, strip="false", spec="beast.base.evolution.alignment.AscertainedAlignment"), .children=sequence_nodes_list)
 			} # END if (ascertainment == "Mkv")
 
 
@@ -705,7 +705,7 @@ write_BEAST2_morphology_characters <- function(nexd7, numstates_morph_list, data
 			excludefrom = 0
 			excludeto = nchar(states_to_exclude_txt) - 0 
 			excludeevery = 1
-			morph_alignment_nodes_list[[(anum=anum+1)]] = xmlNode(name="data", attrs=list(id=partition_name, dataType="user defined", ascertained="true", statecount=numstates, excludefrom=excludefrom, excludeto=excludeto, excludeevery=excludeevery, strip="false", spec="beast.evolution.alignment.AscertainedAlignment"), .children=sequence_nodes_list)
+			morph_alignment_nodes_list[[(anum=anum+1)]] = xmlNode(name="data", attrs=list(id=partition_name, dataType="user defined", ascertained="true", statecount=numstates, excludefrom=excludefrom, excludeto=excludeto, excludeevery=excludeevery, strip="false", spec="beast.base.evolution.alignment.AscertainedAlignment"), .children=sequence_nodes_list)
 			} # END if (ascertainment == "noabsencesites")
 
 		if (ascertainment == "nopresencesites")
@@ -715,7 +715,7 @@ write_BEAST2_morphology_characters <- function(nexd7, numstates_morph_list, data
 			excludefrom = 0
 			excludeto = nchar(states_to_exclude_txt) - 0 
 			excludeevery = 1
-			morph_alignment_nodes_list[[(anum=anum+1)]] = xmlNode(name="data", attrs=list(id=partition_name, dataType="user defined", ascertained="true", statecount=numstates, excludefrom=excludefrom, excludeto=excludeto, excludeevery=excludeevery, strip="false", spec="beast.evolution.alignment.AscertainedAlignment"), .children=sequence_nodes_list)
+			morph_alignment_nodes_list[[(anum=anum+1)]] = xmlNode(name="data", attrs=list(id=partition_name, dataType="user defined", ascertained="true", statecount=numstates, excludefrom=excludefrom, excludeto=excludeto, excludeevery=excludeevery, strip="false", spec="beast.base.evolution.alignment.AscertainedAlignment"), .children=sequence_nodes_list)
 			} # END if (ascertainment == "nopresencesites")
 
 
@@ -732,7 +732,7 @@ write_BEAST2_morphology_characters <- function(nexd7, numstates_morph_list, data
 
 # If add_morphLength=TRUE, add the length of the morphology data to the xml output
 # CUT: check_numstates If TRUE (default), then conflicts between the observed number of states, and the theoretical number
-parse_datasets <- function(seqs_df, add_morphLength=TRUE, add_morphList=TRUE, OTUs=NULL, printall="short", convert_ambiguous_to_IUPAC=FALSE, xml=NULL, xlsfn=NULL, return_charsdf=TRUE)#, check_numstates=TRUE)
+parse_datasets <- function(seqs_df, add_morphLength=TRUE, add_morphList=TRUE, OTUs=NULL, printall="short", convert_ambiguous_to_IUPAC=FALSE, xml=NULL, xlsfn=NULL, return_charsdf=TRUE, add_allQ_DNA_seqs_in_TF=TRUE)#, check_numstates=TRUE)
 	{
 	defaults='
 	# Example script defaults
@@ -1394,11 +1394,31 @@ parse_datasets <- function(seqs_df, add_morphLength=TRUE, add_morphList=TRUE, OT
 				OTU_names = OTU_names[keepTF]
 				
 				txtseqs = as.list(txtseqs[keepTF])
+
+				#add_allQ_DNA_seqs_in_TF = TRUE
+				if (add_allQ_DNA_seqs_in_TF == TRUE)
+					{
+					# List of strings for DNA sequences
+					seqnames_to_add_TF = (OTUs %in% OTU_names) == FALSE
+					seqnames_to_add = OTUs[seqnames_to_add_TF]
+					numQs = nchar(txtseqs[1])
+					allQs = paste0(rep("?", times=numQs), collapse="")
+					
+					new_txtseqs = rep(allQs, times=length(OTUs))
+					new_txtseqs[seqnames_to_add_TF==FALSE] = txtseqs
+					names(new_txtseqs) = OTUs
+					txtseqs = new_txtseqs
+					OTU_names = OTUs
+					} # END if (add_allQ_DNA_seqs_in_TF == TRUE)
+
 				} # END if (is.null(OTUs) == FALSE)
 
 			cat("Length of DNA seqs list after cutting unused OTUs: ", length(txtseqs))
 			cat("\n")
-
+			
+			
+			
+			
 			# For a geneTree, you might want to cut some specific sequences from an
 			# alignment. These are listed in "seqNames_to_cut"
 			if (isblank_TF(geneTreeNames[i]) == FALSE)
@@ -1504,7 +1524,7 @@ parse_datasets <- function(seqs_df, add_morphLength=TRUE, add_morphList=TRUE, OT
 			# in this partition
 			dataset_name = dataset_names[i]
 			userDataType_id = paste0("userDataType_for_", dataset_name)
-			userDataType_XML = xmlNode(name="userDataType", attrs=list(id=userDataType_id, spec="beast.evolution.datatype.ContinuousDataType"))
+			userDataType_XML = xmlNode(name="userDataType", attrs=list(id=userDataType_id, spec="beast.base.evolution.datatype.ContinuousDataType"))
 			userDataType_XML
 			txt = " The continuous datatype; same element used by all continuous characters in the partition (assumes independence) "
 			userDataType_XMLs = list(bl(), xmlCommentNode(txt), userDataType_XML)
@@ -1637,7 +1657,7 @@ parse_datasets <- function(seqs_df, add_morphLength=TRUE, add_morphList=TRUE, OT
 				# This error is easy to get and very frustrating:
 				##########################################################################
 				# java.lang.NullPointerException
-				# 	at beast.evolution.tree.TreeTraitMap.initAndValidate(Unknown Source)
+				# 	at beast.base.evolution.tree.TreeTraitMap.initAndValidate(Unknown Source)
 				# 	at beast.util.XMLParser.initPlugins(Unknown Source)
 				# 	at beast.util.XMLParser.parse(Unknown Source)
 				# 	at beast.util.XMLParser.parseFile(Unknown Source)
@@ -1651,11 +1671,11 @@ parse_datasets <- function(seqs_df, add_morphLength=TRUE, add_morphList=TRUE, OT
 				# Error detected about here:
 				#   <beast>
 				#       <run id='mcmc' spec='MCMC'>
-				#           <distribution id='posterior' spec='util.CompoundDistribution'>
-				#               <distribution id='prior' spec='util.CompoundDistribution'>
+				#           <distribution id='posterior' spec='beast.base.inference.CompoundDistribution'>
+				#               <distribution id='prior' spec='beast.base.inference.CompoundDistribution'>
 				#                   <prior id='Prior_on_traits_table_trait1_rootTrait' name='distribution'>
-				#                       <x id='traits_table_trait1_rootTrait' spec='beast.evolution.tree.RootTrait'>
-				#                           <traitmap id='traitmap1' spec='beast.evolution.tree.TreeTraitMap'>
+				#                       <x id='traits_table_trait1_rootTrait' spec='beast.base.evolution.tree.RootTrait'>
+				#                           <traitmap id='traitmap1' spec='beast.base.evolution.tree.TreeTraitMap'>
 				##########################################################################
 				# 
 				# The following things cause this error:
@@ -1693,7 +1713,7 @@ parse_datasets <- function(seqs_df, add_morphLength=TRUE, add_morphList=TRUE, OT
 				#######################################
 				# Make traitmap XML
 				#######################################
-				traitmap_XML = xmlNode(name="traitmap", trait_data_txt, attrs=list(id=traitmap_id, traitName=traitName, initByMean="true", randomizelower=randomizelower_val, randomizeupper=randomizeupper_val, jitter=jitterval, parameter=traitNodeVals_idref, tree="@shared_tree", spec="beast.evolution.tree.TreeTraitMap") )
+				traitmap_XML = xmlNode(name="traitmap", trait_data_txt, attrs=list(id=traitmap_id, traitName=traitName, initByMean="true", randomizelower=randomizelower_val, randomizeupper=randomizeupper_val, jitter=jitterval, parameter=traitNodeVals_idref, tree="@shared_tree", spec="beast.base.evolution.tree.TreeTraitMap") )
 				comment_txt = paste0(" Trait data for dataset: ", dataset_name, ", trait #", colnum, " (#", charnums[colnum], " of original matrix); trait name: ", traitName, ". ")
 				comment_XML = xmlCommentNode(comment_txt)
 				traitmap_XMLs = list(bl(), comment_XML, traitmap_XML)
@@ -1712,9 +1732,9 @@ parse_datasets <- function(seqs_df, add_morphLength=TRUE, add_morphList=TRUE, OT
 				rootTrait_id = paste0(dataset_name, "_", traitName, "_rootTrait")
 				
 				# Old, doesn't work
-				# x_XML = xmlNode(name="x", attrs=list(id=rootTrait_id, traitmap=traitmap_idref, spec="beast.evolution.tree.RootTrait") )
+				# x_XML = xmlNode(name="x", attrs=list(id=rootTrait_id, traitmap=traitmap_idref, spec="beast.base.evolution.tree.RootTrait") )
 				# Works, put traitmap inside prior
-				x_XML = xmlNode(name="x", attrs=list(id=rootTrait_id, spec="beast.evolution.tree.RootTrait"), .children=traitmap_XMLs )
+				x_XML = xmlNode(name="x", attrs=list(id=rootTrait_id, spec="beast.base.evolution.tree.RootTrait"), .children=traitmap_XMLs )
 				
 				comment_txt = paste0(" rootTrait for dataset: ", dataset_name, ", trait #", colnum, " (#", charnums[colnum], " of original matrix); trait name: ", traitName, ". ")
 				comment_XML = xmlCommentNode(comment_txt)
@@ -1792,7 +1812,7 @@ parse_datasets <- function(seqs_df, add_morphLength=TRUE, add_morphList=TRUE, OT
 				# overall clock model!!
 				# <branchRateModel clock.rate="@clockRate.c:location"
 				# id="StrictClock.c:location"
-				# spec="beast.evolution.branchratemodel.StrictClockModel"/>
+				# spec="beast.base.evolution.branchratemodel.StrictClockModel"/>
 				branchRateModel_XML = xmlNode(name="branchRateModel", attrs=list(idref=clockModel_names[i]))
 				
 				tmp_children = c(list(dataref_for_trait_XML), continuous_siteModel_XMLs, list(branchRateModel_XML))
@@ -1849,7 +1869,7 @@ parse_datasets <- function(seqs_df, add_morphLength=TRUE, add_morphList=TRUE, OT
 				scaleMatrix_parameter_id = paste0("scaleMatrix_parameter_for_precisionPrior_for_", precisionMatrix_id)
 				scaleMatrix_parameter_XML = xmlNode(name="parameter", attrs=list(id=scaleMatrix_parameter_id, value=1.0, dimension=1, minordimension=1, name="scaleMatrix"))
 				precisionPrior_for_GibbsOperator_id = paste0("precisionPrior_for_GibbsOperator_for_", precisionMatrix_id)
-				precisionPrior_for_GibbsOperator_XML = xmlNode(name="prior", attrs=list(id=precisionPrior_for_GibbsOperator_id, arg=precisionMatrix_idref, df="1.0", spec="beast.math.distributions.WishartDistribution"), .children=list(scaleMatrix_parameter_XML))
+				precisionPrior_for_GibbsOperator_XML = xmlNode(name="prior", attrs=list(id=precisionPrior_for_GibbsOperator_id, arg=precisionMatrix_idref, df="1.0", spec="beast.base.inference.distribution.WishartDistribution"), .children=list(scaleMatrix_parameter_XML))
 
 
 				precisionMatrix_GibbsOperator_id = paste0("precisionGibbsOperator_for_", precisionMatrix_id)
@@ -2028,7 +2048,7 @@ parse_datasets <- function(seqs_df, add_morphLength=TRUE, add_morphList=TRUE, OT
 				result2 = make_BEAST2_userDataTypes(numstates_morph_list_subset, nexd6=nexd6, dataset_name=dataset_name, ordering=order_types[i], morph_transition_rates=morph_transition_rates[i], baseFreqs=baseFreqs[i], numGammaCat=numGammaCat, clockModel_name=clockModel_name, clockModel_relRate=clockModel_relRate, gammaShape_suffix=gammaShape_suffix, add_morphList=add_morphList, printall=printall)
 				
 				# NJM edit for 2 different morphology matrices
-				if ( !is.null(morphList) && (dim(morphList) == dim(result2$morphList)) && all(morphList == result2$morphList) )
+				if ( !is.null(morphList) && all(dim(morphList) == dim(result2$morphList)) && all(morphList == result2$morphList) )
 					{
 					morphList = result2$morphList
 					} else {
@@ -2318,7 +2338,7 @@ make_partitions_XML <- function(seqs_df, xml=NULL, add_partitionLength=TRUE, dat
 		# Make the partition nodes
 		# data reference
 		dataref_XML = xmlNode(name="data", attrs=list(idref=datasetName) )
-		partitionNode = xmlNode(name="alignment", attrs=list(id=partitionName, filter=stored_filtertxt, spec="FilteredAlignment"), .children=list(dataref_XML) )
+		partitionNode = xmlNode(name="alignment", attrs=list(id=partitionName, filter=stored_filtertxt, spec="beast.base.evolution.alignment.FilteredAlignment"), .children=list(dataref_XML) )
 
 	
 		partitionNode_XMLlist = list(bl(), partitionNode_comment, partitionNode)

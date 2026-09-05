@@ -193,7 +193,7 @@ make_generic_XML_prior <- function(dfline, colname_prefix="birthRate", param_nam
 		id_of_distribution_on_param = paste0("prP_OneOnX_Distrib_on_param_", param_name)
 
 		distribution_name = paste0("OneOnX_Distrib_on_param_", param_name)
-		distrib_XML = xmlNode(name="OneOnX", attrs=list(id=distribution_name, name="distr", offset=tmp_offset, spec="beast.math.distributions.OneOnX"))
+		distrib_XML = xmlNode(name="OneOnX", attrs=list(id=distribution_name, name="distr", offset=tmp_offset, spec="beast.base.inference.distribution.OneOnX"))
 
 		txt = paste0(" Prior probability density on the value of the parameter '", param_name, "', according to a ", distrib, " distribution. ")
 		} # END if (distribution == "OneOnX")

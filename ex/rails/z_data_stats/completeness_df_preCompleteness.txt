@@ -1,0 +1,7 @@
+dataset_names	dataset_lengths	allSameLength	dataset_ntaxa	nMajData	pctData	minQs	meanQs	maxQs
+1	seqs_morph2_morph2_unordered	213	yes	190	136	65.7	0	73	211
+2	seqs_morph3_morph3_unordered	27	yes	190	136	71.9	0	7.59	24
+3	seqs_morph4_morph4_unordered	14	yes	190	136	77.8	0	3.12	10
+4	seqs_morph5_morph5_unordered	10	yes	190	190	85.8	0	1.42	5
+5	seqs_morph6_morph6_unordered	7	yes	190	190	95.9	0	0.29	1
+6	seqs_DNA	20828	yes	190	61	30.3	245	14509.35	20828

@@ -1,0 +1,227 @@
+
+cd /drives/GDrive/__GDrive_projects/2015-01-16_Laura_Saila/05_Beast2/2017-01-11_ALL_v4
+
+java -Xms1024m -Xmx1024m -jar /Applications/BEAST_2.1.3/treeannotator.jar -heights median -burnin 500 -limit 0 species.trees species.mcc
+
+Rscript plotMCC_v3.R
+
+
+
+LOCAL
+
+java -Xms1024m -Xmx1024m -jar /Applications/BEAST_2.4.3/lib/beast.jar -seed 754321123 -instances 15 -threads 15 -overwrite runthis_v1.xml
+
+nohup java -Xms1024m -Xmx1024m -jar /Applications/BEAST_2.4.3/lib/beast.jar -seed 754321123 -instances 15 -threads 15 -overwrite runthis_v1.xml > screenoutput.txt &
+
+
+REMOTE
+
+nohup java -Xms1024m -Xmx1024m -jar ~/.beast/2.4/BEAST/lib/beast.jar -seed 754321123 -instances 15 -threads 15 -overwrite runthis_v1.xml > screenoutput.txt &
+
+tail screenoutput.txt
+
+
+cd /home/matzke/proj/doggies/2016-12-19_morphOnly_v2
+nohup java -Xms1024m -Xmx1024m -jar ~/.beast/2.4/BEAST/lib/beast.jar -seed 754321123 -instances 2 -threads 2 -overwrite runthis_v1.xml > screenoutput.txt &
+
+tail screenoutput.txt
+
+
+
+
+cd /home/matzke/proj/doggies/2016-12-19_dnaOnly_v2/
+
+nohup java -Xms1024m -Xmx1024m -jar ~/.beast/2.4/BEAST/lib/beast.jar -seed 754321123 -instances 13 -threads 13 -overwrite runthis_v1.xml > screenoutput.txt &
+
+tail screenoutput.txt
+
+
+
+
+cd /home/matzke/proj/doggies/2017-01-12_dataOnly_v3/
+
+nohup java -Xms1024m -Xmx1024m -jar ~/.beast/2.4/BEAST/lib/beast.jar -seed 754321123433 -instances 13 -threads 13 -overwrite runthis_v1.xml > screenoutput.txt &
+
+tail screenoutput.txt
+
+
+
+
+cd /home/matzke/proj/doggies/2017-01-12_dataOnly_v3_noConstraints/
+
+nohup java -Xms1024m -Xmx1024m -jar ~/.beast/2.4/BEAST/lib/beast.jar -seed 754321123333 -instances 13 -threads 13 -overwrite runthis_v1.xml > screenoutput.txt &
+
+tail screenoutput.txt
+
+
+
+
+SSH to Linux box 150.203.51.101
+ssh -X matzke@150.203.51.101
+matzke
+berkeleyc
+
+scp CHS_geog.txt matzke@150.203.51.101:/home/matzke/proj/Brassicaceae/05_BGB_CHS/CHS_geog.txt
+
+/drives/GDrive/__GDrive_projects/2016-08-31_ANZ_crucifers_Brassica
+scp -r 05_BGB_CHS matzke@150.203.51.101:/home/matzke/proj/Brassicaceae/05_BGB_CHS
+
+
+
+
+SSH to Linux box 150.203.51.101
+ssh -X matzke@150.203.51.101
+matzke
+berkeleyc
+
+cd /drives/GDrive/__GDrive_projects/2016-08-31_ANZ_crucifers_Brassica/
+
+scp -r 05_BGB_PHYA matzke@150.203.51.101:/home/matzke/proj/Brassicaceae/05_BGB_PHYA
+
+nohup Rscript script_v1.R > output.txt &
+
+
+
+
+REMOTE RUN
+
+cd ~/.beast/2.4/BEAST/lib
+
+java -cp beast.jar beast.util.AddOnManager -add BEASTLabs
+java -cp beast.jar beast.util.AddOnManager -add StarBEAST2
+java -cp beast.jar beast.util.AddOnManager -add BDSKY
+java -cp beast.jar beast.util.AddOnManager -add SA
+java -cp beast.jar beast.util.AddOnManager -add BEASTShell
+java -cp beast.jar beast.util.AddOnManager -add phylodynamics
+java -cp beast.jar beast.util.AddOnManager -add bdmm
+
+cd /drives/GDrive/__GDrive_projects/2015-01-16_Laura_Saila/02_Beast2_morphOnly 
+
+scp runthis_v1.xml matzke@150.203.51.101:/home/matzke/proj/doggies/05_Beast2_dataOnly/runthis_v1.xml
+
+
+ssh -X matzke@150.203.51.101
+matzke
+berkeleyc
+
+
+cd /home/matzke/proj/doggies/05_Beast2_dataOnly/
+
+#java -Xms1024m -Xmx1024m -jar ~/.beast/2.4/BEAST/lib/beast.jar -seed 7543211233 -overwrite runthis_v1.xml 
+
+nohup java -Xms1024m -Xmx1024m -jar ~/.beast/2.4/BEAST/lib/beast.jar -seed 7543211233 -overwrite runthis_v1.xml > screenoutput.txt &
+
+
+scp runthis_v1.xml matzke@150.203.51.101:/home/matzke/proj/doggies/05_Beast2_dataOnly/runthis_v1.xml
+
+
+
+
+
+/home/matzke/proj/doggies/05_Beast2_dataOnly
+
+
+
+========================================================
+
+LOCAL RUN:
+
+/Applications/BEAST_2.4.3/bin/addonmanager -list
+
+
+cd /drives/GDrive/__GDrive_projects/2015-01-16_Laura_Saila/05_Beast2/2016-12-08_dataOnly_v2/ 
+
+java -Xms1024m -Xmx1024m -jar /Applications/BEAST_2.4.3/lib/beast.jar -seed 754321123 -instances 15 -threads 15 -overwrite runthis_v1.xml
+
+
+cd /home/matzke/proj/doggies/05_Beast2_dataOnly/
+java -cp /home/matzke/.beast/2.4/BEAST/lib/beast.jar 
+
+
+XML documentation to 
+java -cp /Applications/BEAST_2.4.2/lib/beast.jar beast.app.DocMaker
+
+Beagle info:
+java -Xms512m -Xmx512m -Djava.library.path="$BEAST_LIB:/usr/local/lib" -jar /Applications/BEAST_2.4.2/lib/beast.jar -beagle_info
+
+
+RUN, WITH the Beagle libraries:
+
+
+cd /drives/GDrive/__GDrive_projects/2016-08-31_ANZ_crucifers_Brassica/02_Beast2_PHYA_v1/
+
+
+
+# NEED TO RAISE MEMORY A LOT, only Beast2 GUI ran to completion!
+java -Xms512m -Xmx512m -jar /Applications/BEAST_2.4.2/lib/beast.jar -seed 754321123 -overwrite Gehyra_skel_v1.xml
+
+nohup java -Xms2048m -Xmx2048m -Djava.library.path="$BEAST_LIB:/usr/local/lib" -jar /Applications/BEAST_2.4.2/lib/beast.jar -seed 7543211233 -overwrite runthis_v1.xml > screenoutput.txt &
+
+java -Xms1024m -Xmx1024m -jar /Applications/BEAST_2.1.3/treeannotator.jar -heights median -burnin 500 -limit 0 species.trees species.mcc
+
+Rscript plotMCC_v3.R
+
+
+
+
+cd /drives/GDrive/__GDrive_projects/2016-08-31_ANZ_crucifers_Brassica/02_Beast2_PHYA_v1/
+
+Rscript make_XML_outline_v1.R
+
+open runthis_v1.xml
+
+Rscript make_XML_outline_v1.R; java -jar /Applications/BEAST_2.4.2/lib/beast.jar -java -seed 754321 -overwrite runthis_v1.xml &
+
+
+java -Xms2048m -Xmx2048m -Djava.library.path="$BEAST_LIB:/usr/local/lib" -jar /Applications/BEAST_2.4.2/lib/beast.jar -java -seed 754321 -overwrite runthis_v1.xml &
+
+
+java -Xms2048m -Xmx2048m -jar /Applications/BEAST_2.1.3/treeannotator.jar -heights median -burnin 200 -limit 0 treeLog.txt treeLog.mcc
+
+
+java -Xms2048m -Xmx2048m -Djava.library.path="$BEAST_LIB:/usr/local/lib" -jar /Applications/BEAST_2.4.2/lib/beast.jar -java -seed 754321 -overwrite runthis_v1.xml &
+
+Rscript plotMCC_v3.R
+
+
+
+java -Xms2048m -Xmx2048m -jar /Applications/BEAST_2.1.3/treeannotator.jar -heights median -burnin 400 -limit 0 treeLog_wEnd.txt treeLog.mcc
+Rscript plotMCC_v3.R
+========================================================
+
+
+
+
+
+
+
+
+
+
+
+(First: VPN to ANU with Cisco secure client)
+SSH to Linux box 150.203.51.101
+ssh -X matzke@150.203.51.101
+matzke
+berkeleyc
+
+cd /drives/GDrive/__GDrive_projects/2016-08-31_ANZ_crucifers_Brassica/
+
+scp -r 05_BGB_PHYA matzke@150.203.51.101:/home/matzke/proj/Brassicaceae/05_BGB_PHYA
+
+
+cd /drives/GDrive/__GDrive_projects/2016-08-31_ANZ_crucifers_Brassica/05_BGB_PHYA
+
+scp -r script_v1_linux.R matzke@150.203.51.101:/home/matzke/proj/Brassicaceae/05_BGB_PHYA/script_v1_linux.R
+
+scp -r _cmds.txt matzke@150.203.51.101:/home/matzke/proj/Brassicaceae/05_BGB_PHYA/_cmds.txt
+
+
+(First: VPN to ANU with Cisco secure client)
+SSH to Linux box 150.203.51.101
+ssh -X matzke@150.203.51.101
+matzke
+berkeleyc
+
+cd /home/matzke/proj/Brassicaceae/05_BGB_PHYA
+nohup Rscript script_v1.R > output.txt &

@@ -1,0 +1,6 @@
+partitionNames	startnums	endnums	byval
+seq2_unordered_from_seqs_morph2_for_	1	213	1
+seq3_unordered_from_seqs_morph3_for_	214	240	1
+seq4_unordered_from_seqs_morph4_for_	241	254	1
+seq5_unordered_from_seqs_morph5_for_	255	264	1
+seq6_unordered_from_seqs_morph6_for_	265	271	1

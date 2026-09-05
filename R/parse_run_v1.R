@@ -264,23 +264,38 @@ parse_run <- function(run_df, xml, outfn="run_df", burnin_fraction=0.5, dataset_
 	
 	# Make the header XML_namespaces
 	# (XML_namespaces will be included in the <beast> tag)
-	XML_namespaces = "beast.core:beast.evolution.alignment:beast.evolution.tree.coalescent:beast.core.util:beast.evolution.nuc:beast.evolution.operators:beast.evolution.sitemodel:beast.evolution.substitutionmodel:beast.evolution.likelihood"
+	XML_namespaces = "beast.pkgmgmt:beast.base.core:beast.base.inference:beast.base.evolution.tree.coalescent:beast.pkgmgmt:beast.base.core:beast.base.inference.util:beast.base.evolution.nuc:beast.base.evolution.operator:beast.base.inference.operator:beast.base.evolution.sitemodel:beast.base.evolution.substitutionmodel:beast.base.evolution.likelihood"
 	
 	# Make the map XML
 	map_XML_list = list(
 	bl(),
 	xmlCommentNode(" A list of class mappings used in this Beast2 XML "),
-	xmlNode(name="map", "beast.evolution.sitemodel.SiteModel", attrs=list(name="SiteModel") ),
-	xmlNode(name="map", "beast.math.distributions.Beta", attrs=list(name="Beta") ),
-	xmlNode(name="map", "beast.math.distributions.Exponential", attrs=list(name="Exponential") ),
-	xmlNode(name="map", "beast.math.distributions.InverseGamma", attrs=list(name="InverseGamma") ),
-	xmlNode(name="map", "beast.math.distributions.LogNormalDistributionModel", attrs=list(name="LogNormal") ),
-	xmlNode(name="map", "beast.math.distributions.Gamma", attrs=list(name="Gamma") ),
-	xmlNode(name="map", "beast.math.distributions.Uniform", attrs=list(name="Uniform") ),
-	xmlNode(name="map", "beast.math.distributions.Prior", attrs=list(name="prior") ),
-	xmlNode(name="map", "beast.math.distributions.LaplaceDistribution", attrs=list(name="LaplaceDistribution") ),
-	xmlNode(name="map", "beast.math.distributions.OneOnX", attrs=list(name="OneOnX") ),
-	xmlNode(name="map", "beast.math.distributions.Normal", attrs=list(name="Normal") )
+	xmlNode(name="map", "beast.base.evolution.sitemodel.SiteModel", attrs=list(name="SiteModel") ),
+	xmlNode(name="map", "beast.base.inference.distribution.Beta", attrs=list(name="Beta") ),
+	xmlNode(name="map", "beast.base.inference.distribution.Exponential", attrs=list(name="Exponential") ),
+	xmlNode(name="map", "beast.base.inference.distribution.InverseGamma", attrs=list(name="InverseGamma") ),
+	xmlNode(name="map", "beast.base.inference.distribution.LogNormalDistributionModel", attrs=list(name="LogNormal") ),
+	xmlNode(name="map", "beast.base.inference.distribution.Gamma", attrs=list(name="Gamma") ),
+	xmlNode(name="map", "beast.base.inference.distribution.Uniform", attrs=list(name="Uniform") ),
+	xmlNode(name="map", "beast.base.inference.distribution.Prior", attrs=list(name="prior") ),
+	xmlNode(name="map", "beast.base.inference.distribution.LaplaceDistribution", attrs=list(name="LaplaceDistribution") ),
+	xmlNode(name="map", "beast.base.inference.distribution.OneOnX", attrs=list(name="OneOnX") ),
+	xmlNode(name="map", "beast.base.inference.distribution.Normal", attrs=list(name="Normal") )
+
+	# 2019 version
+	#xmlNode(name="map", "beast.base.evolution.sitemodel.SiteModel", attrs=list(name="SiteModel") ),
+	#xmlNode(name="map", "beast.base.inference.distribution.Beta", attrs=list(name="Beta") ),
+	#xmlNode(name="map", "beast.base.inference.distribution.Exponential", attrs=list(name="Exponential") ),
+	#xmlNode(name="map", "beast.base.inference.distribution.InverseGamma", attrs=list(name="InverseGamma") ),
+	#xmlNode(name="map", "beast.base.inference.distribution.LogNormalDistributionModel", attrs=list(name="LogNormal") ),
+	#xmlNode(name="map", "beast.base.inference.distribution.Gamma", attrs=list(name="Gamma") ),
+	#xmlNode(name="map", "beast.base.inference.distribution.Uniform", attrs=list(name="Uniform") ),
+	#xmlNode(name="map", "beast.base.inference.distribution.Prior", attrs=list(name="prior") ),
+	#xmlNode(name="map", "beast.base.inference.distribution.LaplaceDistribution", attrs=list(name="LaplaceDistribution") ),
+	#xmlNode(name="map", "beast.base.inference.distribution.OneOnX", attrs=list(name="OneOnX") ),
+	#xmlNode(name="map", "beast.base.inference.distribution.Normal", attrs=list(name="Normal") )
+	
+
 	) # END map_XML_list
 	xml$header = c(xml$header, map_XML_list)
 	
@@ -319,16 +334,16 @@ parse_run <- function(run_df, xml, outfn="run_df", burnin_fraction=0.5, dataset_
 	
 	# Prior
 	prior_id = "prior"
-	prior_XML = xmlNode(name="distribution", attrs=list(id=prior_id, spec="util.CompoundDistribution"), .children=xml$priors )
+	prior_XML = xmlNode(name="distribution", attrs=list(id=prior_id, spec="beast.base.inference.CompoundDistribution"), .children=xml$priors )
 
 	# Likelihood
 	like_id = "likelihood"
-	like_XML = xmlNode(name="distribution", attrs=list(id=like_id, spec="util.CompoundDistribution"), .children=xml$likes )
+	like_XML = xmlNode(name="distribution", attrs=list(id=like_id, spec="beast.base.inference.CompoundDistribution"), .children=xml$likes )
 	
 	# Posterior
 	posterior_id = "posterior"
 	posterior_idref = paste0("@", posterior_id)
-	posterior_XML = xmlNode(name="distribution", attrs=list(id=posterior_id, spec="util.CompoundDistribution"), .children=list(prior_XML, like_XML) )
+	posterior_XML = xmlNode(name="distribution", attrs=list(id=posterior_id, spec="beast.base.inference.CompoundDistribution"), .children=list(prior_XML, like_XML) )
 	
 	# Logs of prior, likelihood, posterior
 	logs_XML = list(

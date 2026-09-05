@@ -1,0 +1,2 @@
+char_is_autapomorphic	nstates_per_char	state0	state1	state2	state3	state4	state5
+1	0	6	7	5	40	57	25	1

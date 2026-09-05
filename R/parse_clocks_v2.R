@@ -291,7 +291,7 @@ priors_on_stdev_of_shared_clock_XML = NULL
 		# Branch rate model -- used in the likelihood calculation of each partition
 		#######################################################
 		# XML for branchRateModel
-		branchRateModel_XML = xmlNode(name="branchRateModel", attrs=list(id=clockModel_name, clock.rate=clock_rate_mean_idref, spec="beast.evolution.branchratemodel.StrictClockModel") )
+		branchRateModel_XML = xmlNode(name="branchRateModel", attrs=list(id=clockModel_name, clock.rate=clock_rate_mean_idref, spec="beast.base.evolution.branchratemodel.StrictClockModel") )
 
 		# Make into a list
 		branchRateModel_XMLs = list(bl(), bl(), shared_clock_title_XML, bl(), clock_type_XML, branchRateModel_XML)
@@ -471,7 +471,7 @@ priors_on_stdev_of_shared_clock_XML = NULL
 		branchRateModel_logNormal_XMLcomment = xmlCommentNode(" logNormal distribution inside branchRateModel ")
 
 		# XML for branchRateModel
-		branchRateModel_XML = xmlNode(name="branchRateModel", attrs=list(id=clockModel_name, clock.rate=clock_rate_mean_idref, rateCategories=rateCategories_idref, spec="beast.evolution.branchratemodel.UCRelaxedClockModel", tree=tree_name_idref), .children=list(bl(), branchRateModel_logNormal_XMLcomment, branchRateModel_logNormal_id_XML))
+		branchRateModel_XML = xmlNode(name="branchRateModel", attrs=list(id=clockModel_name, clock.rate=clock_rate_mean_idref, rateCategories=rateCategories_idref, spec="beast.base.evolution.branchratemodel.UCRelaxedClockModel", tree=tree_name_idref), .children=list(bl(), branchRateModel_logNormal_XMLcomment, branchRateModel_logNormal_id_XML))
 
 		# Make into a list
 		branchRateModel_XMLs = list(bl(), bl(), shared_clock_title_XML, bl(), clock_type_XML, branchRateModel_XML)
@@ -567,7 +567,7 @@ priors_on_stdev_of_shared_clock_XML = NULL
 		branchRateModel_Exponential_XMLcomment = xmlCommentNode(" Exponential distribution inside branchRateModel ")
 
 		# XML for branchRateModel
-		branchRateModel_XML = xmlNode(name="branchRateModel", attrs=list(id=clockModel_name, clock.rate=clock_rate_mean_idref, rateCategories=rateCategories_idref, spec="beast.evolution.branchratemodel.UCRelaxedClockModel", tree=tree_name_idref), .children=list(bl(), branchRateModel_Exponential_XMLcomment, branchRateModel_Exponential_id_XML))
+		branchRateModel_XML = xmlNode(name="branchRateModel", attrs=list(id=clockModel_name, clock.rate=clock_rate_mean_idref, rateCategories=rateCategories_idref, spec="beast.base.evolution.branchratemodel.UCRelaxedClockModel", tree=tree_name_idref), .children=list(bl(), branchRateModel_Exponential_XMLcomment, branchRateModel_Exponential_id_XML))
 
 		# Make into a list
 		branchRateModel_XMLs = list(bl(), bl(), shared_clock_title_XML, bl(), clock_type_XML, branchRateModel_XML)
@@ -668,7 +668,7 @@ priors_on_stdev_of_shared_clock_XML = NULL
 		branchRateModel_Exponential_mean_XMLcomment = xmlCommentNode(" The random local clock has no internal distribution of branch rates ")
 	
 		# XML for branchRateModel
-		branchRateModel_XML = xmlNode(name="branchRateModel", attrs=list(id=clockModel_name, clock.rate=clock_rate_mean_idref, indicators=Indicators_idref, rates=LocalRates_idref, spec="beast.evolution.branchratemodel.RandomLocalClockModel", tree=tree_name_idref) )
+		branchRateModel_XML = xmlNode(name="branchRateModel", attrs=list(id=clockModel_name, clock.rate=clock_rate_mean_idref, indicators=Indicators_idref, rates=LocalRates_idref, spec="beast.base.evolution.branchratemodel.RandomLocalClockModel", tree=tree_name_idref) )
 
 		# Make into a list
 		branchRateModel_XMLs = list(bl(), bl(), shared_clock_title_XML, bl(), clock_type_XML, branchRateModel_XML)	

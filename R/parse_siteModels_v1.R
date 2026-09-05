@@ -162,6 +162,7 @@ parse_DNA_AA_siteModels <- function(seqs_df, xml=NULL, tree_name="shared_tree", 
 	clockModel_traceLog_XML = NULL
 
 	
+	#for (i in 1:5)
 	for (i in 1:length(rownums))
 		{
 		rownum = rownums[i]
@@ -382,8 +383,8 @@ parse_DNA_AA_siteModels <- function(seqs_df, xml=NULL, tree_name="shared_tree", 
 					kappaParam_idref = paste0("@kappa_", siteModel_name)
 					} else {
 					# User-specified name for kappa
-					kappa_id = paste0("kappa_", seqs_df$kappa_for_HKY_suffix[rownum])
-					kappaParam_idref = paste0("@kappa_", seqs_df$kappa_for_HKY_suffix[rownum])
+					kappa_id = paste0("", seqs_df$kappa_for_HKY_suffix[rownum])
+					kappaParam_idref = paste0("@", seqs_df$kappa_for_HKY_suffix[rownum])
 					}
 				kappaModel_name = kappa_id
 				
@@ -403,18 +404,19 @@ parse_DNA_AA_siteModels <- function(seqs_df, xml=NULL, tree_name="shared_tree", 
 					# priors on kappas
 					# Store this in "xml$miscellaneous"
 					partition_idref = paste0("@", siteModel_name)
-					param1_id = paste0("logNormal_mean_for_kappa_prior_partition_", siteModel_name)
-					param2_id = paste0("logNormal_stddev_for_kappa_prior_partition_", siteModel_name)
+					param1_id = paste0("logNormal_mean_for_kappa_prior_partition_", kappa_id)
+					param2_id = paste0("logNormal_stddev_for_kappa_prior_partition_", kappa_id)
 					param1_XML = xmlNode(name="parameter", 1.0, attrs=list(id=param1_id, name="M", estimate="false"))
 					param2_XML = xmlNode(name="parameter", 1.25, attrs=list(id=param2_id, name="S", estimate="false"))
-					logNormal_distrib_for_kappa_priors_XML_id = paste0("logNormal_distrib_for_kappa_priors_", siteModel_name)
+					logNormal_distrib_for_kappa_priors_XML_id = paste0("logNormal_distrib_for_kappa_priors_", kappa_id)
 					logNormal_distrib_for_kappa_priors_XML = xmlNode(name="LogNormal", attrs=list(id=logNormal_distrib_for_kappa_priors_XML_id, name="distr"), .children=list(param1_XML, param2_XML))
-					kappa_prior_id = paste0("prior_for_kappa_", siteModel_name)
+					kappa_prior_id = paste0("prior_for_kappa_", kappa_id)
 
 					kappa_prior_XML = xmlNode(name="prior", attrs=list(id=kappa_prior_id, name="distribution", x=kappaParam_idref), .children=list(logNormal_distrib_for_kappa_priors_XML))
 
 					# Store the kappa priors in the general siteModel priors
-					#siteModel_prior_XML = kappa_prior_XML
+					# 2026-09-05 uncomment
+					siteModel_prior_XML = kappa_prior_XML
 			
 					# Trace Log of siteModel parameter(s)
 					log_kappa_XML = xmlNode(name="parameter", attrs=list(idref=kappa_id, name="log") )
@@ -907,13 +909,29 @@ parse_DNA_AA_siteModels <- function(seqs_df, xml=NULL, tree_name="shared_tree", 
 				kappa_params_operators_XML = cl(kappa_params_operators_XML, kappa_param_operator_XML)
 				kappa_priors_XML = cl(kappa_priors_XML, kappa_prior_XML)
 				log_kappas_XML = cl(log_kappas_XML, log_kappa_XML)
+
+				siteModel_params_starting_states_XML = cl(siteModel_params_starting_states_XML, kappa_starting_states_XML)
+				siteModel_params_operators_XML = cl(siteModel_params_operators_XML, kappa_param_operator_XML)
+				siteModel_priors_XML = cl(siteModel_priors_XML, kappa_priors_XML)
+				log_siteModels_XML = cl(log_siteModels_XML, log_kappas_XML)
 			
 				# Add siteModel_name to the list of siteModel_names already used.
 				kappaModel_names_used = c(kappaModel_names_used, kappaModel_name)
 				}
 			} # END if (seqs_df$model[rownum] == "HKY")
 			
-			
+		# Put the kappas in the siteModel parameters, if it's an HKY model
+		if (seqs_df$model[rownum] == "HKY")
+			{
+# Done just above
+#			siteModel_params_starting_states_XML = cl(siteModel_params_starting_states_XML, kappa_starting_states_XML)
+#			siteModel_params_operators_XML = cl(siteModel_params_operators_XML, kappa_param_operator_XML)
+#			siteModel_priors_XML = cl(siteModel_priors_XML, kappa_priors_XML)
+#			log_siteModels_XML = cl(log_siteModels_XML, log_kappas_XML)
+			}
+		# Add the base frequency priors (if any)
+		siteModel_priors_XML = cl(siteModel_priors_XML, frequencies_priors_XML)
+		
 
 		
 		# STORE likelihoods (for EVERY line, i.e. EVERY data section)
@@ -932,7 +950,7 @@ parse_DNA_AA_siteModels <- function(seqs_df, xml=NULL, tree_name="shared_tree", 
 			log_mutationRates_XML = cl(log_mutationRates_XML, log_mutationRate_XML)
 			}
 		clockModel_names_used = c(clockModel_names_used, clockModel_name)
-		} # END for (i in 1:length(uniq_partitions))
+		} # END for (i in 1:length(rownums))
 	#######################################################
 	# END Loop through each sequence partition
 	#######################################################	
@@ -940,16 +958,6 @@ parse_DNA_AA_siteModels <- function(seqs_df, xml=NULL, tree_name="shared_tree", 
 
 
 
-		# Put the kappas in the siteModel parameters, if it's an HKY model
-		if (seqs_df$model[rownum] == "HKY")
-			{
-			siteModel_params_starting_states_XML = cl(siteModel_params_starting_states_XML, kappa_starting_states_XML)
-			siteModel_params_operators_XML = cl(siteModel_params_operators_XML, kappa_param_operator_XML)
-			siteModel_priors_XML = cl(siteModel_priors_XML, kappa_priors_XML)
-			log_siteModels_XML = cl(log_siteModels_XML, log_kappas_XML)
-			}
-		# Add the base frequency priors (if any)
-		siteModel_priors_XML = cl(siteModel_priors_XML, frequencies_priors_XML)
 	
 	# Add in the morphological relRates
 	mutationRate_params_starting_states_XML = cl(mutationRate_params_starting_states_XML, morph_mutationRate_params_starting_states_XML)

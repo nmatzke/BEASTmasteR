@@ -200,7 +200,7 @@ clock_df_row_to_XML_distribution_meanSD <- function(clock_df, tree_name="shared_
 		meanval = clock_df$clockrate_prior_param1
 		 
 		distribution_name = paste0("OneOnX_Distrib_on_mean_of_", clockModel_name)
-		distrib_XML = xmlNode(name="OneOnX", attrs=list(id=distribution_name, name="distr", offset=offset, spec="beast.math.distributions.OneOnX"))
+		distrib_XML = xmlNode(name="OneOnX", attrs=list(id=distribution_name, name="distr", offset=offset, spec="beast.base.inference.distribution.OneOnX"))
 
 		txt = paste0(" Prior probability density of the mean of '", clockModel_name, "', according to a OneOnX distribution (meaning: prior density of rate X ~ 1/X. This only a proper prior if the lower limit on X is above 0, and the upper is below infinity")
 		} # END if (clock_df$clockrate_prior_dist == "OneOnX")
@@ -403,7 +403,7 @@ clock_df_row_to_XML_distribution_meanSD <- function(clock_df, tree_name="shared_
 	tree_name_idref = paste0("@", tree_name)
 	rate_summary_xmlComment1 = xmlCommentNode(paste0(" Log of rate statistics: rate.mean, rate.variance, rate.coefficientOfVariation "))
 	rate_summary_xmlComment2 = xmlCommentNode(" coefficient of variation = stdev / mean = sqrt(variance)/mean ")
-	rate_summary_xml = xmlNode(name="log", attrs=list(id=rate_summary_id, branchratemodel=branchratemodel_idref, tree=tree_name_idref, spec="beast.evolution.branchratemodel.RateStatistic"))
+	rate_summary_xml = xmlNode(name="log", attrs=list(id=rate_summary_id, branchratemodel=branchratemodel_idref, tree=tree_name_idref, spec="beast.base.evolution.RateStatistic"))
 	
 	########################################################################
 	# Bring all the logs together
@@ -642,7 +642,7 @@ clock_df_row_to_XML_distribution_justMean <- function(clock_df, tree_name="share
 	tree_name_idref = paste0("@", tree_name)
 	rate_summary_xmlComment1 = xmlCommentNode(paste0(" Log of rate statistics: rate.mean, rate.variance, rate.coefficientOfVariation "))
 	rate_summary_xmlComment2 = xmlCommentNode(" coefficient of variation = stdev / mean = sqrt(variance)/mean ")
-	rate_summary_xml = xmlNode(name="log", attrs=list(id=rate_summary_id, branchratemodel=branchratemodel_idref, tree=tree_name_idref, spec="beast.evolution.branchratemodel.RateStatistic"))
+	rate_summary_xml = xmlNode(name="log", attrs=list(id=rate_summary_id, branchratemodel=branchratemodel_idref, tree=tree_name_idref, spec="beast.base.evolution.RateStatistic"))
 	
 	########################################################################
 	# Bring all the logs together

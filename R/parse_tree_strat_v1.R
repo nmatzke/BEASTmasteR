@@ -182,7 +182,7 @@ make_speciescoalescent_for_starBeast2 <- function(OTUs_df, seqs_df, treemodel_df
 	if ((treemodel_df$popModel == "constant"))
 		{
 		child1 = xmlNode(name="parameter", 2.0, attrs=list(id=popSizesShape_id, estimate="false", lower="0.0", name="alpha"))
-		child2 = xmlNode(name="Gamma", attrs=list(id="Gamma.0", beta=popSizesMean_idref, mode="ShapeMean", name="distr", spec="beast.math.distributions.Gamma"), .children=list(child1))
+		child2 = xmlNode(name="Gamma", attrs=list(id="Gamma.0", beta=popSizesMean_idref, mode="ShapeMean", name="distr", spec="beast.base.inference.distribution.Gamma"), .children=list(child1))
 		popSizesShape_prior_id = paste0("prior_on_", popSizesShape_id)
 		prior1_XML = xmlNode(name="prior", attrs=list(id=popSizesShape_prior_id, name="distribution", x=popSizes_idref), .children=list(child2))
 
@@ -849,7 +849,7 @@ make_BD_model_for_starBeast2 <- function(treemodel_df, seqs_df, taxonset_XML, tr
 		tree_idref = paste0("@", tree_name)
 		treemodel_id = paste0("BirthDeathModel_", tree_name)
 	
-		tree_prior_XML = xmlNode(name="distribution", attrs=list(id=treemodel_id, spec="beast.evolution.speciation.BirthDeathGernhard08Model", birthDiffRate=birthRate_idref, relativeDeathRate=deathRate_idref, tree=tree_idref))
+		tree_prior_XML = xmlNode(name="distribution", attrs=list(id=treemodel_id, spec="beast.base.evolution.speciation.BirthDeathGernhard08Model", birthDiffRate=birthRate_idref, relativeDeathRate=deathRate_idref, tree=tree_idref))
 		} # END if (treeprior == "starBeast2_BD")
 	
 	if (treeprior == "starBeast2_CalibratedYule")
@@ -862,7 +862,7 @@ make_BD_model_for_starBeast2 <- function(treemodel_df, seqs_df, taxonset_XML, tr
 		XML_children = make_cladePrior_XMLs(nodes_df, xml=NULL, list_of_empty_taxa=xml$list_of_empty_taxa, CalibratedYule_txt="CalibratedYule")
 		
 		# Write out to XML
-		tree_prior_XML = xmlNode(name="distribution", attrs=list(id=treemodel_id, spec="beast.evolution.speciation.CalibratedYuleModel", birthRate=birthRate_idref, tree=tree_idref, type="full"), .children=XML_children)
+		tree_prior_XML = xmlNode(name="distribution", attrs=list(id=treemodel_id, spec="beast.base.evolution.speciation.CalibratedYuleModel", birthRate=birthRate_idref, tree=tree_idref, type="full"), .children=XML_children)
 		} # END if (treeprior == "starBeast2_CalibratedYule")	
 	
 	
@@ -874,7 +874,7 @@ make_BD_model_for_starBeast2 <- function(treemodel_df, seqs_df, taxonset_XML, tr
 	#######################################################
 	TreeWithMetaDataLogger_id = paste0("TreeWithMetaDataLogger_", tree_name)
 	clockModel_name_idref = paste0("@", clockModel_name)
-	TreeWithMetaDataLogger_XML = xmlNode(name="log", attrs=list(id=TreeWithMetaDataLogger_id, tree=tree_name_idref, branchratemodel=clockModel_name_idref, substitutions="false", spec="beast.evolution.tree.TreeWithMetaDataLogger") )
+	TreeWithMetaDataLogger_XML = xmlNode(name="log", attrs=list(id=TreeWithMetaDataLogger_id, tree=tree_name_idref, branchratemodel=clockModel_name_idref, substitutions="false", spec="beast.base.evolution.TreeWithMetaDataLogger") )
 	TreeWithMetaDataLogger_XMLs = list(
 	xmlCommentNode(" Log the tree and branch rates "),
 	TreeWithMetaDataLogger_XML
@@ -884,7 +884,7 @@ make_BD_model_for_starBeast2 <- function(treemodel_df, seqs_df, taxonset_XML, tr
 	# subsLog -- tree of 
 	#######################################################
 	Subs_TreeWithMetaDataLogger_id = paste0("Subs_TreeWithMetaDataLogger_", tree_name)
-	Subs_TreeWithMetaDataLogger_XML = xmlNode(name="log", attrs=list(id=Subs_TreeWithMetaDataLogger_id, tree=tree_name_idref, substitutions="true", spec="beast.evolution.tree.TreeWithMetaDataLogger") )
+	Subs_TreeWithMetaDataLogger_XML = xmlNode(name="log", attrs=list(id=Subs_TreeWithMetaDataLogger_id, tree=tree_name_idref, substitutions="true", spec="beast.base.evolution.TreeWithMetaDataLogger") )
 	Subs_TreeWithMetaDataLogger_XMLs = list(
 	xmlCommentNode(" Log the tree and branch rates "),
 	Subs_TreeWithMetaDataLogger_XML
@@ -916,12 +916,12 @@ make_BD_model_for_starBeast2 <- function(treemodel_df, seqs_df, taxonset_XML, tr
 		{
 		id = paste0("TreeHeight_of_", geneTreeNames[i])
 		geneTreeName_idref = paste0("@", geneTreeNames[i])
-		tmpXML = xmlNode(name="log", attrs=list(id=id, spec="beast.evolution.tree.TreeHeightLogger", tree=geneTreeName_idref))
+		tmpXML = xmlNode(name="log", attrs=list(id=id, spec="beast.base.evolution.tree.TreeHeightLogger", tree=geneTreeName_idref))
 		geneTree_treeHeights_XMLs_list = c(geneTree_treeHeights_XMLs_list, list(tmpXML))
 		
 		# Tree log
 		id = paste0("TreeWithMetaDataLogger_for_", geneTreeNames[i])
-		child = xmlNode(name="log", attrs=list(id=id, spec="beast.evolution.tree.TreeWithMetaDataLogger", tree=geneTreeName_idref))
+		child = xmlNode(name="log", attrs=list(id=id, spec="beast.base.evolution.TreeWithMetaDataLogger", tree=geneTreeName_idref))
 		id = paste0("treeLog_for_", geneTreeNames[i])
 		fn = paste0("treeLog_for_", geneTreeNames[i], ".trees.txt")
 		tmpXML = xmlNode(name="logger", attrs=list(id=id, fileName=fn, logEvery=logEvery, mode="tree"), .children=list(child))
@@ -1124,7 +1124,7 @@ make_BDSKY_model <- function(treemodel_df, tree_name="shared_tree", clockModel_n
 			{
 			# UPGMA starting tree (commented out)
 			tipDates_idref = paste0("@", tipDates_id)
-			UPGMA_startingTree_XML = xmlNode(name=treetag, attrs=list(id=tree_name_init, initial=tree_name_idref_for_init, spec="beast.util.ClusterZBSATree", nodetype="beast.evolution.tree.ZeroBranchSANode", clusterType="neighborjoining2", taxa=alignment_name_w_taxaref, trait=tipDates_idref) )		
+			UPGMA_startingTree_XML = xmlNode(name=treetag, attrs=list(id=tree_name_init, initial=tree_name_idref_for_init, spec="beast.util.ClusterZBSATree", nodetype="beast.base.evolution.tree.ZeroBranchSANode", clusterType="neighborjoining2", taxa=alignment_name_w_taxaref, trait=tipDates_idref) )		
 			XMLstring = saveXML(doc=UPGMA_startingTree_XML, file=NULL, prefix=NULL)
 
 			txt0_XML = xmlCommentNode(" RRB (Remco) suggested: add initialiser ")
@@ -1144,15 +1144,15 @@ make_BDSKY_model <- function(treemodel_df, tree_name="shared_tree", clockModel_n
 			
 			if (treeModel_option == "BD")
 				{
-				startingTree_XML = xmlNode(name=treetag, attrs=list(id=tree_name_init, initial=tree_name_idref_for_init, estimate="true", spec="beast.evolution.tree.RandomTree", taxa=alignment_name_w_taxaref), .children=list(popModel_XML) )
+				startingTree_XML = xmlNode(name=treetag, attrs=list(id=tree_name_init, initial=tree_name_idref_for_init, estimate="true", spec="beast.base.evolution.tree.RandomTree", taxa=alignment_name_w_taxaref), .children=list(popModel_XML) )
 				} # END if (treeModel_options == "BDSKY")
 			if (treeModel_option == "BDSKY")
 				{
-				startingTree_XML = xmlNode(name=treetag, attrs=list(id=tree_name_init, initial=tree_name_idref_for_init, estimate="true", spec="beast.evolution.tree.RandomTree", taxa=alignment_name_w_taxaref, trait=tipDates_idref), .children=list(popModel_XML) )
+				startingTree_XML = xmlNode(name=treetag, attrs=list(id=tree_name_init, initial=tree_name_idref_for_init, estimate="true", spec="beast.base.evolution.tree.RandomTree", taxa=alignment_name_w_taxaref, trait=tipDates_idref), .children=list(popModel_XML) )
 				} # END if (treeModel_options == "BDSKY")
 			if (treeModel_option == "SABDSKY")
 				{
-				startingTree_XML = xmlNode(name=treetag, attrs=list(id=tree_name_init, initial=tree_name_idref_for_init, estimate="true", spec="beast.evolution.tree.ZeroBranchSARandomTree", taxonset=taxonset_w_taxaref, trait=tipDates_idref), .children=list(popModel_XML) )
+				startingTree_XML = xmlNode(name=treetag, attrs=list(id=tree_name_init, initial=tree_name_idref_for_init, estimate="true", spec="beast.base.evolution.tree.ZeroBranchSARandomTree", taxonset=taxonset_w_taxaref, trait=tipDates_idref), .children=list(popModel_XML) )
 				} # END if (treeModel_options == "SABDSKY")			
 				
 			txt0_XML = xmlCommentNode(" RRB (Remco) suggested: add initialiser ")
@@ -1166,15 +1166,15 @@ make_BDSKY_model <- function(treemodel_df, tree_name="shared_tree", clockModel_n
 			
 			if (treeModel_option == "BD")
 				{
-				random_startingTree_XML = xmlNode(name=treetag, attrs=list(id=tree_name_init, initial=tree_name_idref_for_init, estimate="true", spec="beast.evolution.tree.RandomTree", taxa=alignment_name_w_taxaref), .children=list(popModel_XML) )
+				random_startingTree_XML = xmlNode(name=treetag, attrs=list(id=tree_name_init, initial=tree_name_idref_for_init, estimate="true", spec="beast.base.evolution.tree.RandomTree", taxa=alignment_name_w_taxaref), .children=list(popModel_XML) )
 				} # END if (treeModel_options == "BDSKY")
 			if (treeModel_option == "BDSKY")
 				{
-				random_startingTree_XML = xmlNode(name=treetag, attrs=list(id=tree_name_init, initial=tree_name_idref_for_init, estimate="true", spec="beast.evolution.tree.RandomTree", taxa=alignment_name_w_taxaref, trait=tipDates_idref), .children=list(popModel_XML) )
+				random_startingTree_XML = xmlNode(name=treetag, attrs=list(id=tree_name_init, initial=tree_name_idref_for_init, estimate="true", spec="beast.base.evolution.tree.RandomTree", taxa=alignment_name_w_taxaref, trait=tipDates_idref), .children=list(popModel_XML) )
 				} # END if (treeModel_options == "BDSKY")
 			if (treeModel_option == "SABDSKY")
 				{
-				random_startingTree_XML = xmlNode(name=treetag, attrs=list(id=tree_name_init, initial=tree_name_idref_for_init, estimate="true", spec="beast.evolution.tree.ZeroBranchSARandomTree", taxonset=taxonset_w_taxaref, trait=tipDates_idref), .children=list(popModel_XML) )
+				random_startingTree_XML = xmlNode(name=treetag, attrs=list(id=tree_name_init, initial=tree_name_idref_for_init, estimate="true", spec="beast.base.evolution.tree.ZeroBranchSARandomTree", taxonset=taxonset_w_taxaref, trait=tipDates_idref), .children=list(popModel_XML) )
 				} # END if (treeModel_options == "SABDSKY")			
 
 			XMLstring = saveXML(doc=random_startingTree_XML, file=NULL, prefix=NULL)
@@ -1199,7 +1199,7 @@ make_BDSKY_model <- function(treemodel_df, tree_name="shared_tree", clockModel_n
 
 			# Starting Tree
 			tipDates_idref = paste0("@", tipDates_id)
-			startingTree_XML = xmlNode(name=treetag, attrs=list(id=tree_name_init, initial=tree_name_idref_for_init, spec="beast.util.ClusterZBSATree", nodetype="beast.evolution.tree.ZeroBranchSANode", clusterType="neighborjoining2", taxa=alignment_name_w_taxaref, trait=tipDates_idref) )	
+			startingTree_XML = xmlNode(name=treetag, attrs=list(id=tree_name_init, initial=tree_name_idref_for_init, spec="beast.util.ClusterZBSATree", nodetype="beast.base.evolution.tree.ZeroBranchSANode", clusterType="neighborjoining2", taxa=alignment_name_w_taxaref, trait=tipDates_idref) )	
 
 			txt0_XML = xmlCommentNode(" RRB (Remco) suggested: add initialiser ")
 			startingTree_XMLs = c(random_startingTree_XMLs, list(bl(), txt0_XML, xmlCommentNode(" Starting tree is constructed using UPGMA method (actually neighborjoining2) "), startingTree_XML))
@@ -1324,7 +1324,7 @@ make_BDSKY_model <- function(treemodel_df, tree_name="shared_tree", clockModel_n
 		if (treeModel_option == "SABDSKY")
 			{
 			print(paste0("Using constructed starting tree, treeModel_option='SABDSKY'"))
-			startingTree_XML = xmlNode(name=treetag, attrs=list(id=tree_name_init, initial=tree_name_idref_for_init, IsLabelledNewick="true", singlechild="true", estimate="true", threshold="0.001", spec="beast.util.ZeroBranchSATreeParser", taxa=alignment_name_w_taxaref, newick=trstr) )	
+			startingTree_XML = xmlNode(name=treetag, attrs=list(id=tree_name_init, initial=tree_name_idref_for_init, IsLabelledNewick="true", singlechild="true", estimate="true", threshold="0.001", spec="sa.util.ZeroBranchSATreeParser", taxa=alignment_name_w_taxaref, newick=trstr) )	
 			print("startingTree_XML")
 			print(startingTree_XML)
 			} # END if (treeModel_option == "SABDSKY")
@@ -1345,7 +1345,7 @@ make_BDSKY_model <- function(treemodel_df, tree_name="shared_tree", clockModel_n
 
 		# Starting Tree
 		tipDates_idref = paste0("@", tipDates_id)
-		random_startingTree_XML = xmlNode(name=treetag, attrs=list(id=tree_name_init, initial=tree_name_idref_for_init, estimate="true", spec="beast.evolution.tree.RandomTree", taxa=alignment_name_w_taxaref, trait=tipDates_idref), .children=list(popModel_XML) )
+		random_startingTree_XML = xmlNode(name=treetag, attrs=list(id=tree_name_init, initial=tree_name_idref_for_init, estimate="true", spec="beast.base.evolution.tree.RandomTree", taxa=alignment_name_w_taxaref, trait=tipDates_idref), .children=list(popModel_XML) )
 
 		XMLstring = saveXML(doc=random_startingTree_XML, file=NULL, prefix=NULL)
 
@@ -1369,7 +1369,7 @@ make_BDSKY_model <- function(treemodel_df, tree_name="shared_tree", clockModel_n
 		# o neighborjoining2 - corrects tree for tip data, unlike plain neighborjoining
 		
 		tipDates_idref = paste0("@", tipDates_id)
-		UPGMA_startingTree_XML = xmlNode(name=treetag, attrs=list(id=tree_name_init, initial=tree_name_idref_for_init, spec="beast.util.ClusterZBSATree", nodetype="beast.evolution.tree.ZeroBranchSANode", clusterType="neighborjoining2", taxa=alignment_name_w_taxaref, taxonset="list_of_OTUs", trait=tipDates_idref) )	
+		UPGMA_startingTree_XML = xmlNode(name=treetag, attrs=list(id=tree_name_init, initial=tree_name_idref_for_init, spec="beast.util.ClusterZBSATree", nodetype="beast.base.evolution.tree.ZeroBranchSANode", clusterType="neighborjoining2", taxa=alignment_name_w_taxaref, taxonset="list_of_OTUs", trait=tipDates_idref) )	
 		XMLstring = saveXML(doc=UPGMA_startingTree_XML, file=NULL, prefix=NULL)
 
 		txt0_XML = xmlCommentNode(" RRB (Remco) suggested: add initialiser ")
@@ -1420,7 +1420,8 @@ make_BDSKY_model <- function(treemodel_df, tree_name="shared_tree", clockModel_n
 		originTime = 1000
 		} # END if (isblank_TF(originTime) == TRUE)
 		
-	if ((treeModel_option == "BDSKY") || (treeModel_option == "BD"))
+	#if ((treeModel_option == "BDSKY") || (treeModel_option == "BD"))
+	if ((treeModel_option == "BDSKY") || (treeModel_option == "BD") || (treeModel_option == "BDSKY") || (treeModel_option == "SABDSKY"))
 		{
 		originTime_id = "originTime"
 		originTime_idref = "@originTime"
@@ -1593,10 +1594,10 @@ make_BDSKY_model <- function(treemodel_df, tree_name="shared_tree", clockModel_n
 					} # END if (grepl(pattern="min", x=dfline$birthRate_function) == TRUE)			
 				# Do the probability density
 				uniform_id = paste0("UniformDistrib_on_", calculation_result_name)
-				uniform_on_scaled_XML = xmlNode(name="Uniform", attrs=list(id=uniform_id, lower=min_of_scaled, upper=max_of_scaled, offset=0, spec="beast.math.distributions.Uniform", name="distr") )
+				uniform_on_scaled_XML = xmlNode(name="Uniform", attrs=list(id=uniform_id, lower=min_of_scaled, upper=max_of_scaled, offset=0, spec="beast.base.inference.distribution.Uniform", name="distr") )
 			
 				# Do the prior
-				scaled_prior_XML = xmlNode(name="prior", attrs=list(id=scaled_prior_name, spec="beast.math.distributions.Prior", name="distribution"), .children=list(eqn_XML, uniform_on_scaled_XML))
+				scaled_prior_XML = xmlNode(name="prior", attrs=list(id=scaled_prior_name, spec="beast.base.inference.distribution.Prior", name="distribution"), .children=list(eqn_XML, uniform_on_scaled_XML))
 				scaled_prior_XMLs = list(bl(), txt_XML, scaled_prior_XML)
 			
 				# Log the equation result, and the prior
@@ -1640,10 +1641,10 @@ make_BDSKY_model <- function(treemodel_df, tree_name="shared_tree", clockModel_n
 			
 				# Do the probability density
 				normal_id = paste0("NormalDistrib_on_", calculation_result_name)
-				normal_on_scaled_XML = xmlNode(name="Normal", attrs=list(id=normal_id, spec="beast.math.distributions.Normal", name="distr"), .children=list(param1_XML, param2_XML) )
+				normal_on_scaled_XML = xmlNode(name="Normal", attrs=list(id=normal_id, spec="beast.base.inference.distribution.Normal", name="distr"), .children=list(param1_XML, param2_XML) )
 			
 				# Do the prior
-				scaled_prior_XML = xmlNode(name="prior", attrs=list(id=scaled_prior_name, spec="beast.math.distributions.Prior", name="distribution"), .children=list(eqn_XML, normal_on_scaled_XML))
+				scaled_prior_XML = xmlNode(name="prior", attrs=list(id=scaled_prior_name, spec="beast.base.inference.distribution.Prior", name="distribution"), .children=list(eqn_XML, normal_on_scaled_XML))
 				scaled_prior_XMLs = list(bl(), txt_XML, scaled_prior_XML)
 			
 				# Log the equation result, and the prior
@@ -1842,10 +1843,10 @@ make_BDSKY_model <- function(treemodel_df, tree_name="shared_tree", clockModel_n
 					} # END if (grepl(pattern="min", x=dfline$deathRate_function) == TRUE)			
 				# Do the probability density
 				uniform_id = paste0("UniformDistrib_on_", calculation_result_name)
-				uniform_on_scaled_XML = xmlNode(name="Uniform", attrs=list(id=uniform_id, lower=min_of_scaled, upper=max_of_scaled, offset=0, spec="beast.math.distributions.Uniform", name="distr") )
+				uniform_on_scaled_XML = xmlNode(name="Uniform", attrs=list(id=uniform_id, lower=min_of_scaled, upper=max_of_scaled, offset=0, spec="beast.base.inference.distribution.Uniform", name="distr") )
 			
 				# Do the prior
-				scaled_prior_XML = xmlNode(name="prior", attrs=list(id=scaled_prior_name, spec="beast.math.distributions.Prior", name="distribution"), .children=list(eqn_XML, uniform_on_scaled_XML))
+				scaled_prior_XML = xmlNode(name="prior", attrs=list(id=scaled_prior_name, spec="beast.base.inference.distribution.Prior", name="distribution"), .children=list(eqn_XML, uniform_on_scaled_XML))
 				scaled_prior_XMLs = list(bl(), txt_XML, scaled_prior_XML)
 			
 				# Log the equation result, and the prior
@@ -1888,10 +1889,10 @@ make_BDSKY_model <- function(treemodel_df, tree_name="shared_tree", clockModel_n
 			
 				# Do the probability density
 				normal_id = paste0("NormalDistrib_on_", calculation_result_name)
-				normal_on_scaled_XML = xmlNode(name="Normal", attrs=list(id=normal_id, spec="beast.math.distributions.Normal", name="distr"), .children=list(param1_XML, param2_XML) )
+				normal_on_scaled_XML = xmlNode(name="Normal", attrs=list(id=normal_id, spec="beast.base.inference.distribution.Normal", name="distr"), .children=list(param1_XML, param2_XML) )
 			
 				# Do the prior
-				scaled_prior_XML = xmlNode(name="prior", attrs=list(id=scaled_prior_name, spec="beast.math.distributions.Prior", name="distribution"), .children=list(eqn_XML, normal_on_scaled_XML))
+				scaled_prior_XML = xmlNode(name="prior", attrs=list(id=scaled_prior_name, spec="beast.base.inference.distribution.Prior", name="distribution"), .children=list(eqn_XML, normal_on_scaled_XML))
 				scaled_prior_XMLs = list(bl(), txt_XML, scaled_prior_XML)
 			
 				# Log the equation result, and the prior
@@ -2208,10 +2209,10 @@ make_BDSKY_model <- function(treemodel_df, tree_name="shared_tree", clockModel_n
 					} # END if (grepl(pattern="min", x=dfline$samplingRate_function) == TRUE)			
 				# Do the probability density
 				uniform_id = paste0("UniformDistrib_on_", calculation_result_name)
-				uniform_on_scaled_XML = xmlNode(name="Uniform", attrs=list(id=uniform_id, lower=min_of_scaled, upper=max_of_scaled, offset=0, spec="beast.math.distributions.Uniform", name="distr") )
+				uniform_on_scaled_XML = xmlNode(name="Uniform", attrs=list(id=uniform_id, lower=min_of_scaled, upper=max_of_scaled, offset=0, spec="beast.base.inference.distribution.Uniform", name="distr") )
 			
 				# Do the prior
-				scaled_prior_XML = xmlNode(name="prior", attrs=list(id=scaled_prior_name, spec="beast.math.distributions.Prior", name="distribution"), .children=list(eqn_XML, uniform_on_scaled_XML))
+				scaled_prior_XML = xmlNode(name="prior", attrs=list(id=scaled_prior_name, spec="beast.base.inference.distribution.Prior", name="distribution"), .children=list(eqn_XML, uniform_on_scaled_XML))
 				scaled_prior_XMLs = list(bl(), txt_XML, scaled_prior_XML)
 			
 				# Log the equation result, and the prior
@@ -2253,10 +2254,10 @@ make_BDSKY_model <- function(treemodel_df, tree_name="shared_tree", clockModel_n
 			
 				# Do the probability density
 				normal_id = paste0("NormalDistrib_on_", calculation_result_name)
-				normal_on_scaled_XML = xmlNode(name="Normal", attrs=list(id=normal_id, spec="beast.math.distributions.Normal", name="distr"), .children=list(param1_XML, param2_XML) )
+				normal_on_scaled_XML = xmlNode(name="Normal", attrs=list(id=normal_id, spec="beast.base.inference.distribution.Normal", name="distr"), .children=list(param1_XML, param2_XML) )
 			
 				# Do the prior
-				scaled_prior_XML = xmlNode(name="prior", attrs=list(id=scaled_prior_name, spec="beast.math.distributions.Prior", name="distribution"), .children=list(eqn_XML, normal_on_scaled_XML))
+				scaled_prior_XML = xmlNode(name="prior", attrs=list(id=scaled_prior_name, spec="beast.base.inference.distribution.Prior", name="distribution"), .children=list(eqn_XML, normal_on_scaled_XML))
 				scaled_prior_XMLs = list(bl(), txt_XML, scaled_prior_XML)
 			
 				# Log the equation result, and the prior
@@ -2335,7 +2336,7 @@ make_BDSKY_model <- function(treemodel_df, tree_name="shared_tree", clockModel_n
 	#######################################################
 	reverseTimeArrays_id = "reverseTimeArrays"
 	reverseTimeArrays_idref = "@reverseTimeArrays"
-	reverseTimeArrays_XML = xmlNode(name="reverseTimeArrays", attrs=list(id=reverseTimeArrays_id, spec="beast.core.parameter.BooleanParameter", value="true true true true true") )
+	reverseTimeArrays_XML = xmlNode(name="reverseTimeArrays", attrs=list(id=reverseTimeArrays_id, spec="beast.base.inference.parameter.BooleanParameter", value="true true true true true") )
 
 	
 	
@@ -2442,7 +2443,7 @@ make_BDSKY_model <- function(treemodel_df, tree_name="shared_tree", clockModel_n
 	# BD
 	if ( treeModel_option == "BD" )
 		{
-		treeModel_XML = xmlNode(name="BirthDeathGernhard08Model", attrs=list(id=treeModel_idref, tree=treeModel_idref, contemp="false", spec="beast.evolution.speciation.BirthDeathGernhard08Model"), .children=kids_XML)
+		treeModel_XML = xmlNode(name="BirthDeathGernhard08Model", attrs=list(id=treeModel_idref, tree=treeModel_idref, contemp="false", spec="beast.base.evolution.speciation.BirthDeathGernhard08Model"), .children=kids_XML)
 	
 		treeModel_XMLs = list(bl(), xmlCommentNode(" Set up the BD tree model: BirthDeathSkylineModel "), xmlCommentNode(" (Other models, e.g. Yule (pure-birth), BD (birth-death), BDSS (BD, constant serial sampling) are special cases of BDSKY) "), xmlCommentNode(" (Except the Birth-Death-Skyline-Sampled-Ancestor model) "), treeModel_XML)
 		treeModel_XMLs
@@ -2453,7 +2454,7 @@ make_BDSKY_model <- function(treemodel_df, tree_name="shared_tree", clockModel_n
 	# BDSKY
 	if ( treeModel_option == "BDSKY" )
 		{
-		treeModel_XML = xmlNode(name="BirthDeathSkylineModel", attrs=list(id=treeModel_idref, tree=treeModel_idref, contemp="false", spec="beast.evolution.speciation.BirthDeathSkylineModel"), .children=kids_XML)
+		treeModel_XML = xmlNode(name="BirthDeathSkylineModel", attrs=list(id=treeModel_idref, tree=treeModel_idref, contemp="false", spec="bdsky.evolution.speciation.BirthDeathSkylineModel"), .children=kids_XML)
 	
 		treeModel_XMLs = list(bl(), xmlCommentNode(" Set up the BDSKY tree model: BirthDeathSkylineModel "), xmlCommentNode(" (Other models, e.g. Yule (pure-birth), BD (birth-death), BDSS (BD, constant serial sampling) are special cases of BDSKY) "), xmlCommentNode(" (Except the Birth-Death-Skyline-Sampled-Ancestor model) "), treeModel_XML)
 		treeModel_XMLs
@@ -2466,7 +2467,7 @@ make_BDSKY_model <- function(treemodel_df, tree_name="shared_tree", clockModel_n
 	# SABDSKY
 	if ( treeModel_option == "SABDSKY" )
 		{
-		treeModel_XML = xmlNode(name="SABDSkylineModel", attrs=list(id=treeModel_idref, tree=treeModel_idref, contemp="false", spec="beast.evolution.speciation.SABDSkylineModel"), .children=kids_XML)
+		treeModel_XML = xmlNode(name="SABDSkylineModel", attrs=list(id=treeModel_idref, tree=treeModel_idref, contemp="false", spec="beast.base.evolution.speciation.SABDSkylineModel"), .children=kids_XML)
 	
 		treeModel_XMLs = list(bl(), xmlCommentNode(" Set up the SABDSKY tree model: SABDSkylineModel "), xmlCommentNode(" (Other models, e.g. Yule (pure-birth), BD (birth-death), BDSS (BD, constant serial sampling) are special cases of BDSKY) "), xmlCommentNode(" (Except the Birth-Death-Skyline-Sampled-Ancestor model) "), treeModel_XML)
 		treeModel_XMLs
@@ -2651,21 +2652,21 @@ make_BDSKY_model <- function(treemodel_df, tree_name="shared_tree", clockModel_n
 		# SABD trees, after a few hundred generations:
 		# 
 		# java.lang.ArrayIndexOutOfBoundsException: -1
-		# at beast.evolution.branchratemodel.UCRelaxedClockModel.getRateForBranch(Unknown Source)
-		# at beast.evolution.likelihood.TreeLikelihood.traverse(Unknown Source)
-		# at beast.evolution.likelihood.TreeLikelihood.traverse(Unknown Source)
+		# at beast.base.evolution.branchratemodel.UCRelaxedClockModel.getRateForBranch(Unknown Source)
+		# at beast.base.evolution.likelihood.TreeLikelihood.traverse(Unknown Source)
+		# at beast.base.evolution.likelihood.TreeLikelihood.traverse(Unknown Source)
 		# 
 		#treeDimension_XML = xmlNode(name="operator", attrs=list(id=treeDimension_id, tree=tree_name_idref, removalProbability=removalProbability_idref, rateCategories=rateCategories_idref, weight="10.0", spec="TreeDimensionJump") )
-		treeDimension_XML = xmlNode(name="operator", attrs=list(id=treeDimension_id, tree=tree_name_idref, removalProbability=removalProbability_idref, weight="10.0", spec="TreeDimensionJump") )
+		treeDimension_XML = xmlNode(name="operator", attrs=list(id=treeDimension_id, tree=tree_name_idref, removalProbability=removalProbability_idref, weight="10.0", spec="sa.evolution.operators.TreeDimensionJump") )
 
 		treeScaler_id = paste0("treeScaler_", tree_name)
-		treeScaler_XML = xmlNode(name="operator", attrs=list(id=treeScaler_id, tree=tree_name_idref, scaleFactor="0.95", weight="3.0", spec="ScaleOperatorForZeroBranchSATrees") )
+		treeScaler_XML = xmlNode(name="operator", attrs=list(id=treeScaler_id, tree=tree_name_idref, scaleFactor="0.95", weight="3.0", spec="sa.evolution.operators.SAScaleOperator") )
 	
 		treeRootScaler_id = paste0("treeRootScaler_", tree_name)
-		treeRootScaler_XML = xmlNode(name="operator", attrs=list(id=treeRootScaler_id, tree=tree_name_idref, scaleFactor="0.95", weight="1.0", rootOnly="true", spec="ScaleOperatorForZeroBranchSATrees") )
+		treeRootScaler_XML = xmlNode(name="operator", attrs=list(id=treeRootScaler_id, tree=tree_name_idref, scaleFactor="0.95", weight="1.0", rootOnly="true", spec="sa.evolution.operators.SAScaleOperator") )
 	
 		UniformOperator_id = paste0("UniformOperator_", tree_name)
-		UniformOperator_XML = xmlNode(name="operator", attrs=list(id=UniformOperator_id, tree=tree_name_idref, weight="20.0", spec="UniformForZeroBranchSATrees") )
+		UniformOperator_XML = xmlNode(name="operator", attrs=list(id=UniformOperator_id, tree=tree_name_idref, weight="20.0", spec="sa.evolution.operators.SAUniform") )
 
 	# 	SubtreeSlide_id = paste0("SubtreeSlide_", tree_name)
 	# 	SubtreeSlide_XML = xmlNode(name="operator", attrs=list(id=SubtreeSlide_id, tree=tree_name_idref, weight="15.0", spec="SubtreeSlide") )
@@ -2676,13 +2677,13 @@ make_BDSKY_model <- function(treemodel_df, tree_name="shared_tree", clockModel_n
 
 	
 		narrowExchange_id = paste0("narrowExchange_", tree_name)
-		narrowExchange_XML = xmlNode(name="operator", attrs=list(id=narrowExchange_id, tree=tree_name_idref, weight="15.0", spec="Exchange") )
+		narrowExchange_XML = xmlNode(name="operator", attrs=list(id=narrowExchange_id, tree=tree_name_idref, isNarrow="true", weight="15.0", spec="sa.evolution.operators.SAExchange") )
 
 		wideExchange_id = paste0("wideExchange_", tree_name)
-		wideExchange_XML = xmlNode(name="operator", attrs=list(id=wideExchange_id, tree=tree_name_idref, isNarrow="false", weight="3.0", spec="Exchange") )
+		wideExchange_XML = xmlNode(name="operator", attrs=list(id=wideExchange_id, tree=tree_name_idref, isNarrow="false", weight="3.0", spec="sa.evolution.operators.SAExchange") )
 
 		WilsonBalding_id = paste0("WilsonBalding_", tree_name)
-		WilsonBalding_XML = xmlNode(name="operator", attrs=list(id=WilsonBalding_id, tree=tree_name_idref, weight="3.0", spec="WilsonBalding") )
+		WilsonBalding_XML = xmlNode(name="operator", attrs=list(id=WilsonBalding_id, tree=tree_name_idref, weight="3.0", spec="sa.evolution.operators.SAWilsonBalding") )
 
 		# Make the list of tree operators
 		tree_operators_XMLs = list(
@@ -2829,7 +2830,7 @@ make_BDSKY_model <- function(treemodel_df, tree_name="shared_tree", clockModel_n
 		{
 		tree_prior_XML = xmlNode(name="distribution", attrs=list(
 		id=tree_prior_id,
-		spec="beast.evolution.speciation.BirthDeathSkylineModel",
+		spec="bdsky.evolution.speciation.BirthDeathSkylineModel",
 		tree=tree_name_idref,
 		origin=originTime_idref,
 		birthRate=birthRate_params_idref,
@@ -2913,7 +2914,7 @@ make_BDSKY_model <- function(treemodel_df, tree_name="shared_tree", clockModel_n
 		{
 		tree_prior_XML = xmlNode(name="distribution", attrs=list(
 		id=tree_prior_id,
-		spec="beast.evolution.speciation.BirthDeathGernhard08Model",
+		spec="beast.base.evolution.speciation.BirthDeathGernhard08Model",
 		tree=tree_name_idref,
 		birthDiffRate=birthRate_params_idref,
 		relativeDeathRate=deathRate_params_idref
@@ -2975,7 +2976,7 @@ make_BDSKY_model <- function(treemodel_df, tree_name="shared_tree", clockModel_n
 	#######################################################
 	TreeWithMetaDataLogger_id = paste0("TreeWithMetaDataLogger_", tree_name)
 	clockModel_name_idref = paste0("@", clockModel_name)
-	TreeWithMetaDataLogger_XML = xmlNode(name="log", attrs=list(id=TreeWithMetaDataLogger_id, tree=tree_name_idref, branchratemodel=clockModel_name_idref, substitutions="false", spec="beast.evolution.tree.TreeWithMetaDataLogger") )
+	TreeWithMetaDataLogger_XML = xmlNode(name="log", attrs=list(id=TreeWithMetaDataLogger_id, tree=tree_name_idref, branchratemodel=clockModel_name_idref, substitutions="false", spec="beast.base.evolution.TreeWithMetaDataLogger") )
 	TreeWithMetaDataLogger_XMLs = list(
 	xmlCommentNode(" Log the tree and branch rates "),
 	TreeWithMetaDataLogger_XML
@@ -2985,7 +2986,7 @@ make_BDSKY_model <- function(treemodel_df, tree_name="shared_tree", clockModel_n
 	# subsLog -- tree of 
 	#######################################################
 	Subs_TreeWithMetaDataLogger_id = paste0("Subs_TreeWithMetaDataLogger_", tree_name)
-	Subs_TreeWithMetaDataLogger_XML = xmlNode(name="log", attrs=list(id=Subs_TreeWithMetaDataLogger_id, tree=tree_name_idref, substitutions="true", spec="beast.evolution.tree.TreeWithMetaDataLogger") )
+	Subs_TreeWithMetaDataLogger_XML = xmlNode(name="log", attrs=list(id=Subs_TreeWithMetaDataLogger_id, tree=tree_name_idref, substitutions="true", spec="beast.base.evolution.TreeWithMetaDataLogger") )
 	Subs_TreeWithMetaDataLogger_XMLs = list(
 	xmlCommentNode(" Log the tree and branch rates "),
 	Subs_TreeWithMetaDataLogger_XML
@@ -3069,13 +3070,13 @@ make_taxon_superset <- function(taxonsets_df, speciesTree_taxonset_listname="tax
 		for (j in 1:length(specimenStrings))
 			{
 			specimenString = specimenStrings[j]
-			xml_child = xmlNode(name="taxon", attrs=list(id=specimenString, spec="Taxon") )
+			xml_child = xmlNode(name="taxon", attrs=list(id=specimenString, spec="beast.base.evolution.alignment.Taxon") )
 			specimen_children = c(specimen_children, list(xml_child))
 			}
-		xml_specimens_with_a_species = xmlNode(name="taxon", attrs=list(id=uniq_speciesNames[i], spec="TaxonSet"), .children=specimen_children)
+		xml_specimens_with_a_species = xmlNode(name="taxon", attrs=list(id=uniq_speciesNames[i], spec="beast.base.evolution.alignment.TaxonSet"), .children=specimen_children)
 		list_of_taxonset_children = c(list_of_taxonset_children, list(xml_specimens_with_a_species))
 		} # END for (i in 1:length(uniq_speciesNames))
-	taxonset_XML = xmlNode(name="taxonset", attrs=list(id=speciesTree_taxonset_listname, spec="TaxonSet"), .children=list_of_taxonset_children)
+	taxonset_XML = xmlNode(name="taxonset", attrs=list(id=speciesTree_taxonset_listname, spec="beast.base.evolution.alignment.TaxonSet"), .children=list_of_taxonset_children)
 	return(taxonset_XML)
 	}
 	
@@ -3264,7 +3265,7 @@ genetrees_operators <- function(seqs_df, taxonsets_df, treemodel_df, tree_name="
 		
 		child = xmlNode(name="alignment", attrs=list(idref=alignment_source_id))
 		taxonset_id = paste0("taxonset_", gene_tree_name)
-		taxonset_XML = xmlNode(name="taxonset", attrs=list(id=taxonset_id, spec="TaxonSet"), .children=list(child))
+		taxonset_XML = xmlNode(name="taxonset", attrs=list(id=taxonset_id, spec="beast.base.evolution.alignment.TaxonSet"), .children=list(child))
 		
 		tree_XML = xmlNode(name="tree", attrs=list(id=gene_tree_name, name="stateNode"), .children=list(taxonset_XML))
 		tree_XMLs = c(tree_XMLs, list(tree_XML))
