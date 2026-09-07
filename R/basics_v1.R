@@ -1550,7 +1550,10 @@ strsplit_whitespace <- function(tmpline)
 #' 
 moref <- function(fn, printnotcat = FALSE)
 	{
-	lines = scan(file=fn, what="character", sep="\n")
+	#lines = scan(file=fn, what="character", sep="\n")
+	lines = scan(file=fn, what="character", sep="\n", nmax = 100000)
+	
+
 	
 	if (printnotcat == TRUE)
 		{

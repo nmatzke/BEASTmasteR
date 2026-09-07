@@ -151,7 +151,9 @@ subset_BEAST_trees_to_NEXUS <- function(fn, outfn, numlines=NULL, numtrees=3, bu
 	# Scan the beginning of the file and figure out where trees start
 	# Make sure nlines is big enough to get to the trees (i.e. it has to be at least ntaxa + some)
 	# This program assumes the header ends within the first 500 (by default of header_in_first)
-	X <- scan(file = fn, what = "", sep = "\n", quiet = TRUE, blank.lines.skip=FALSE, nlines=header_in_first)
+	#X <- scan(file = fn, what = "", sep = "\n", quiet = TRUE, blank.lines.skip=FALSE, nlines=header_in_first)
+	X <- scan(file = fn, what = "", sep = "\n", quiet = TRUE, blank.lines.skip=FALSE, nlines=header_in_first, nmax = 100000)
+  #X <- scan(file = file, what = "character", sep = "\n", quiet = TRUE, nmax = 100000)
 	
 	# Get line numbers for END; and ENDBLOCK;
 	endblock <- grep("END;|ENDBLOCK;", X, ignore.case = TRUE)
@@ -223,7 +225,9 @@ subset_BEAST_trees_to_NEXUS <- function(fn, outfn, numlines=NULL, numtrees=3, bu
 		{
 		tmpstr = paste("Seeking line ", randlinenums[i], "...", sep="")
 		cat(tmpstr)
-		mysel[i] <- scan(input, what="", sep="\n", skip=skips[i], n=1, quiet=TRUE)
+		#mysel[i] <- scan(input, what="", sep="\n", skip=skips[i], n=1, quiet=TRUE)
+		mysel[i] <- scan(input, what="character", sep="\n", skip=skips[i], n=1, quiet=TRUE, nmax = 100000)
+		#X <- scan(file = file, what = "character", sep = "\n", quiet = TRUE, nmax = 100000)
 		tmpstr = paste("extracted ", i, " of ", sel, ".\n", sep="")
 		cat(tmpstr)
 		}
@@ -264,8 +268,9 @@ sample_BEAST_trees_to_newick_files <- function(fn, treedir, numtrees=100, burnin
 
 	# Scan the beginning of the file and figure out where trees start
 	# Make sure nlines is big enough to get to the trees (i.e. it has to be at least ntaxa + some)
-	X <- scan(file = fn, what = "", sep = "\n", quiet = TRUE, blank.lines.skip=FALSE, nlines=500)
-	
+	#X <- scan(file = fn, what = "", sep = "\n", quiet = TRUE, blank.lines.skip=FALSE, nlines=500)
+	X <- scan(file = fn, what = "character", sep = "\n", quiet = TRUE, blank.lines.skip=FALSE, nlines=500, nmax = 100000)
+	#X <- scan(file = file, what = "character", sep = "\n", quiet = TRUE, nmax = 100000)
 	# Get line numbers for END; and ENDBLOCK;
 	endblock <- grep("END;|ENDBLOCK;", X, ignore.case = TRUE)
 	
@@ -385,10 +390,11 @@ file = confn
 '
 extractBEASTstats_orig <- function (file, digits=4, printflag=FALSE) 
 	{
-	X <- scan(file = file, what = "", sep = "\n", quiet = TRUE)
-	
+	#X <- scan(file = file, what = "", sep = "\n", quiet = TRUE)
+  X <- scan(file = file, what = "character", sep = "\n", quiet = TRUE, nmax = 100000)
+
 	# Get the node labels
-	plain_tr = phytools::readNexus(file=file, format="raxml")
+	plain_tr = phytools_readNexus2(file=file, format="raxml", nmax=1000000)
 	plain_tr$node.label = paste0("[", (length(plain_tr$tip.label)+1):(length(plain_tr$tip.label)+plain_tr$Nnode), "]")
 	plain_tr_string = ape::write.tree(plain_tr, file="")
 
@@ -399,7 +405,7 @@ extractBEASTstats_orig <- function (file, digits=4, printflag=FALSE)
 	nodelabels_in_text_order = as.numeric(nodelabels_in_text_order)
 
 	# Get ALL node labels, including tips
-	plain_tr = phytools::readNexus(file=file, format="raxml")
+	plain_tr = phytools_readNexus2(file=file, format="raxml", nmax=1000000)
 	plain_tr$node.label = paste0("[", (length(plain_tr$tip.label)+1):(length(plain_tr$tip.label)+plain_tr$Nnode), "]")
 	plain_tr$tip.label = paste0(plain_tr$tip.label, "[", 1:length(plain_tr$tip.label), "]")
 	plain_tr_string = ape::write.tree(plain_tr, file="")
@@ -420,6 +426,17 @@ extractBEASTstats_orig <- function (file, digits=4, printflag=FALSE)
 		beast_first_tree_string = "tree TREE_1[[:space:]]+="
 		row_with_first_tree = grep(beast_first_tree_string, X, ignore.case=TRUE)
 		}
+	if (length(row_with_first_tree) == 0)
+		{
+		beast_first_tree_string = "tree TREE[[:space:]]+="
+		row_with_first_tree = grep(beast_first_tree_string, X, ignore.case=TRUE)
+		}
+	if (length(row_with_first_tree) == 0)
+		{
+		beast_first_tree_string = "tree STATE[[:space:]]+="
+		row_with_first_tree = grep(beast_first_tree_string, X, ignore.case=TRUE)
+		}
+
 	
 	# Error check
 	if (length(row_with_first_tree) == 0)
@@ -617,9 +634,11 @@ file=confn
 
 extractBEASTstats3 <- function (file) 
 {
-    X <- scan(file=file, what="", sep="\n", quiet=TRUE)
+    #X <- scan(file=file, what="", sep="\n", quiet=TRUE)
+    X <- scan(file = file, what = "character", sep = "\n", quiet = TRUE, nmax = 100000)
+
     #phy <- read.nexus(file)
-    phy <- phytools::readNexus(file, format="raxml")
+    phy <- phytools_readNexus2(file, format="raxml")
     beast_first_tree_string = "tree TREE1[[:space:]]+="
     row_with_first_tree = grep(beast_first_tree_string, X, ignore.case=TRUE)
    	# Alternate starting string
@@ -628,6 +647,16 @@ extractBEASTstats3 <- function (file)
 			beast_first_tree_string = "tree TREE_1[[:space:]]+="
 			row_with_first_tree = grep(beast_first_tree_string, X, ignore.case=TRUE)
     	}
+	if (length(row_with_first_tree) == 0)
+		{
+		beast_first_tree_string = "tree TREE[[:space:]]+="
+		row_with_first_tree = grep(beast_first_tree_string, X, ignore.case=TRUE)
+		}
+	if (length(row_with_first_tree) == 0)
+		{
+		beast_first_tree_string = "tree STATE[[:space:]]+="
+		row_with_first_tree = grep(beast_first_tree_string, X, ignore.case=TRUE)
+		}
     
     # Error check
     if (length(row_with_first_tree) == 0)
@@ -707,9 +736,11 @@ extractBEASTstats3 <- function (file)
 
 extractMrBayesStats4 <- function (file) 
 {
-    X <- scan(file = file, what = "", sep = "\n", quiet = TRUE)
+    #X <- scan(file = file, what = "", sep = "\n", quiet = TRUE)
+    X <- scan(file = file, what = "character", sep = "\n", quiet = TRUE, nmax = 100000)
+
     #phy <- read.nexus(file)
-    phy <- phytools::readNexus(file, format="raxml")
+    phy <- phytools_readNexus2(file, format="raxml")
 
 
     X <- X[grep("tree TREE1[[:space:]]+=", X)]
@@ -772,7 +803,7 @@ extractMrBayesStats4 <- function (file)
 # Remove equals signs from NEXUS tree files tip names
 remove_equals_from_tips <- function(nexfn, outfn="noEQs.nexus", format="raxml")
 	{
-	tr = phytools::readNexus(nexfn, format=format)
+	tr = phytools_readNexus2(nexfn, format=format)
 	TF = grepl(pattern="\\=", x=tr$tip.label)
 	sum(TF)
 	tr$tip.label[TF]
@@ -838,8 +869,9 @@ printflag=FALSE
 read.beast_original <- function (file, digits = NULL, printflag=FALSE) 
 	{
 	# Scan the files in
-	X <- scan(file = file, what = "", sep = "\n", quiet = TRUE)
-	
+	#X <- scan(file = file, what = "", sep = "\n", quiet = TRUE)
+  X <- scan(file = file, what = "character", sep = "\n", quiet = TRUE, nmax = 100000)
+
 	# LEFT is the lines containing [
 	# -- basically the tree lines
 	LEFT <- grep("\\[", X)
@@ -992,7 +1024,7 @@ read.beast_original <- function (file, digits = NULL, printflag=FALSE)
     
     # Read the input file as plain NEXUS
     #tr <- read.nexus(file)
-    tr <- phytools::readNexus(file, format="raxml")
+    tr <- phytools_readNexus2(file, format="raxml")
     # Use the node numbers as the node.label
     tr$node.label = (length(tr$tip.label)+1):(length(tr$tip.label)+tr$Nnode)
     
@@ -1037,7 +1069,7 @@ read.beast_original <- function (file, digits = NULL, printflag=FALSE)
 strip_tree_EQUALS_from_nexus_treestring <- function(tmpstring)
 	{
 	# Position of the first equals in the string
-	first_equals = str_locate(string=tmpstring, pattern="=")
+	first_equals = stringr::str_locate(string=tmpstring, pattern="=")
 	newick_string = trim(substr(x=tmpstring, start=first_equals[,"end"]+1, stop=str_length(tmpstring)))
 	return(newick_string)
 	}
@@ -1088,8 +1120,8 @@ read_beast_prt <- function (file, digits = 9, get_tipnames=TRUE, printflag=FALSE
 	'
 	
 	# Scan the files in
-    X <- scan(file = file, what = "", sep = "\n", quiet = TRUE)
-    
+    #X <- scan(file = file, what = "", sep = "\n", quiet = TRUE)
+    X <- scan(file = file, what = "character", sep = "\n", quiet = TRUE, nmax = 100000)
     # LEFT is the lines containing [
     # -- basically the tree lines
     LEFT <- grep("\\[", X)
@@ -1146,7 +1178,7 @@ read_beast_prt <- function (file, digits = 9, get_tipnames=TRUE, printflag=FALSE
             if (any(s < sb - 1)) 
                 X <- X[-unlist(mapply(":", (s + 1), (sb - 1)))]
         	}
-    	}
+    	} # END if (length(LEFT))
     
     # Get line numbers for END; and ENDBLOCK;
     endblock <- grep("END;|ENDBLOCK;", X, ignore.case = TRUE)
@@ -1164,8 +1196,8 @@ read_beast_prt <- function (file, digits = 9, get_tipnames=TRUE, printflag=FALSE
     i2 <- grep("TRANSLATE", X, ignore.case = TRUE)
     
     # If a TRANSLATE BLOCK IS FOUND (in i2), use the first one
-    if (length(i2) != 0)
-    	{    
+ if (length(i2) != 0)
+    {    
 		# Last line with TRANSLATE items
 		end <- semico[semico > i2][1]
 		
@@ -1197,7 +1229,9 @@ read_beast_prt <- function (file, digits = 9, get_tipnames=TRUE, printflag=FALSE
     # (e.g. tree TREE1 =  
     #  in NEXUS files...)
    	#tree <- gsub("^.*= *", "", tree)
-		first_equals = str_locate(string=tmpstring, pattern="=")
+   	# 2026-09-07
+   	tmpstring = tree
+		first_equals = stringr::str_locate(string=tmpstring, pattern="=")
 		newick_string = substr(x=tmpstring, start=first_equals[,"end"]+1, stop=str_length(tmpstring))
     tree = trim(newick_string)
     
@@ -1322,7 +1356,7 @@ read_beast_prt <- function (file, digits = 9, get_tipnames=TRUE, printflag=FALSE
     
     # Read the input file as plain NEXUS
     #tr <- read.nexus(file)
-    tr <- phytools::readNexus(file, format="raxml")
+    tr <- phytools_readNexus2(file, format="raxml")
 
     
     # Add the stats (a bunch of sub-objects) to the standard 
@@ -1335,10 +1369,13 @@ read_beast_prt <- function (file, digits = 9, get_tipnames=TRUE, printflag=FALSE
     tr
     
     
-    #######################################################
+  #######################################################
 	# Get the prt table    
 	#######################################################
-    tr_table = prt(tr, printflag=FALSE, relabel_nodes = FALSE, time_bp_digits=7, get_tipnames=get_tipnames)
+		# 2026-09-07
+    #tr_table = prt(tr, printflag=FALSE, relabel_nodes = FALSE, time_bp_digits=7, get_tipnames=get_tipnames)
+    tr_table = prt(tr, printflag=FALSE, relabel_nodes = TRUE, time_bp_digits=7, get_tipnames=get_tipnames)
+    tail(tr_table)
     
     # make the internal node numbers
     tipnums = 1:length(tr$tip.label)
@@ -1454,7 +1491,9 @@ read_beasttree_rates <- function (trfn, digits = NULL)
 	'
 
 	# Scan the trfns in
-    X <- scan(file = trfn, what = "", sep = "\n", quiet = TRUE)
+    #X <- scan(file = trfn, what = "", sep = "\n", quiet = TRUE)
+    X <- scan(file = file, what = "character", sep = "\n", quiet = TRUE, nmax = 100000)
+
     X_orig = X
     
     # LEFT is the lines containing [
@@ -1658,7 +1697,11 @@ read_beasttree_rates <- function (trfn, digits = NULL)
 read_beasttree_states <- function (trfn, digits = NULL) 
 	{
 	# Scan the trfns in
-    X <- scan(file = trfn, what = "", sep = "\n", quiet = TRUE)
+    #X <- scan(file = trfn, what = "", sep = "\n", quiet = TRUE)
+    X <- scan(file = trfn, what = "character", sep = "\n", quiet = TRUE, nmax = 100000)
+    
+    #X <- scan(file = file, what = "character", sep = "\n", quiet = TRUE, nmax = 100000)
+    
     X_orig = X
     
     # LEFT is the lines containing [
@@ -1832,7 +1875,9 @@ extractBEASTstats2 <- function (fn, regexp = "(tree)( )(STATE)(_)(\\d+)")
 	{
 	
 	# Scan in the NEXUS file
-    X1 <- scan(file = fn, what = "", sep = "\n", quiet = TRUE)
+    X1 <- scan(file = fn, what = "character", sep = "\n", quiet = TRUE, nmax = 100000)
+    #X1 <- scan(file = fn, what = "", sep = "\n", quiet = TRUE)
+    #X <- scan(file = file, what = "character", sep = "\n", quiet = TRUE, nmax = 100000)
     
     # phyloch original search string (assumes consensus tree)
     #Y <- X[grep("tree [[:space:]]+=", X)]
@@ -1949,7 +1994,9 @@ extractBEASTstats2 <- function (fn, regexp = "(tree)( )(STATE)(_)(\\d+)")
 
 read_nex_phyloch <- function(fn){
 	
-	x <- scan(fn, what = "c", quiet = TRUE)
+	#x <- scan(fn, what = "c", quiet = TRUE)
+	x <- scan(fn, what = "c", quiet = TRUE, nmax = 100000)
+	#X <- scan(file = file, what = "character", sep = "\n", quiet = TRUE, nmax = 100000)
 		
 	## eliminate comments
 	## ------------------

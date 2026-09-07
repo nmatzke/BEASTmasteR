@@ -493,6 +493,16 @@ get_tipdates_from_logfile <- function(logfn, tr, burnin_skipnum=500, sample_ever
 	height_colnums = colnums[height_TF]
 	
 	# Row numbers to extract (post-burnin)
+	if (burnin_skipnum >= nrow(tdf))
+		{
+		txt = paste0("STOP ERROR in get_tipdates_from_logfile(). burnin_skipnum=", burnin_skipnum, ", but this cannot be >= than nrow(tdf) which = ", nrow(tdf), ".")
+		cat("\n")
+		cat(txt)
+		cat("\n")
+		stop(txt)
+		
+		}
+	
 	rownums = seq(burnin_skipnum, nrow(tdf), by=sample_every)
 	
 	# Go through the height columns. If they correspond to tree tip

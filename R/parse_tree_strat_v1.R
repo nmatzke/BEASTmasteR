@@ -1306,7 +1306,7 @@ make_BDSKY_model <- function(treemodel_df, tree_name="shared_tree", clockModel_n
 		if (treeModel_option == "BD")
 			{
 			print(paste0("Using constructed starting tree, treeModel_option='BD'"))
-			startingTree_XML = xmlNode(name=treetag, attrs=list(id=tree_name_init, initial=tree_name_idref_for_init, IsLabelledNewick="true", adjustTipHeights="false", estimate="true", spec="beast.util.TreeParser", taxa=alignment_name_w_taxaref, threshold="0.001", newick=trstr) )	
+			startingTree_XML = xmlNode(name=treetag, attrs=list(id=tree_name_init, initial=tree_name_idref_for_init, IsLabelledNewick="true", adjustTipHeights="false", estimate="true", spec="beast.base.evolution.tree.TreeParser", taxa=alignment_name_w_taxaref, threshold="0.001", newick=trstr) )	
 			print("startingTree_XML")
 			print(startingTree_XML)
 			} # END if (treeModel_option == "BD")
@@ -1315,7 +1315,7 @@ make_BDSKY_model <- function(treemodel_df, tree_name="shared_tree", clockModel_n
 		if (treeModel_option == "BDSKY")
 			{
 			print(paste0("Using constructed starting tree, treeModel_option='BDSKY'"))
-			startingTree_XML = xmlNode(name=treetag, attrs=list(id=tree_name_init, initial=tree_name_idref_for_init, IsLabelledNewick="true", adjustTipHeights="false", estimate="true", spec="beast.util.TreeParser", taxa=alignment_name_w_taxaref, threshold="0.001", newick=trstr) )	
+			startingTree_XML = xmlNode(name=treetag, attrs=list(id=tree_name_init, initial=tree_name_idref_for_init, IsLabelledNewick="true", adjustTipHeights="false", estimate="true", spec="beast.base.evolution.tree.TreeParser", taxa=alignment_name_w_taxaref, threshold="0.001", newick=trstr) )	
 			print("startingTree_XML")
 			print(startingTree_XML)
 			} # END if (treeModel_option == "BDSKY")
@@ -3089,7 +3089,7 @@ make_speciesTree_statenode <- function(tree_name="shared_tree", taxonset_XML, st
 		speciesTree_statenode_XML = xmlNode(name="tree", attrs=list(id=tree_name, name="stateNode"), .children=list(taxonset_XML))
 		} else {
 		# Use a user-specified starting tree Newick string
-		speciesTree_statenode_XML = xmlNode(name="tree", attrs=list(id=tree_name, name="stateNode", initial="NULL", IsLabelledNewick="true", adjustTipHeights="false", estimate="true", spec="beast.util.TreeParser", threshold="0.001", newick=starting_tree_string), .children=list(taxonset_XML))
+		speciesTree_statenode_XML = xmlNode(name="tree", attrs=list(id=tree_name, name="stateNode", initial="NULL", IsLabelledNewick="true", adjustTipHeights="false", estimate="true", spec="beast.base.evolution.tree.TreeParser", threshold="0.001", newick=starting_tree_string), .children=list(taxonset_XML))
 		}
 	return(speciesTree_statenode_XML)
 	}
@@ -3112,7 +3112,7 @@ make_speciesTree_starting <- function(tree_name="shared_tree", taxonset_XML, sta
 		speciesTree_statenode_XML = xmlNode(name="tree", attrs=list(id=tree_name, name="tree"), .children=list(taxonset_XML))
 		} else {
 		# Use a user-specified starting tree Newick string
-		speciesTree_statenode_XML = xmlNode(name="tree", attrs=list(id=tree_name, name="tree", initial="NULL", IsLabelledNewick="true", adjustTipHeights="false", estimate="true", spec="beast.util.TreeParser", threshold="0.001", newick=starting_tree_string), .children=list(taxonset_XML))
+		speciesTree_statenode_XML = xmlNode(name="tree", attrs=list(id=tree_name, name="tree", initial="NULL", IsLabelledNewick="true", adjustTipHeights="false", estimate="true", spec="beast.base.evolution.tree.TreeParser", threshold="0.001", newick=starting_tree_string), .children=list(taxonset_XML))
 		}
 	return(speciesTree_statenode_XML)
 	}

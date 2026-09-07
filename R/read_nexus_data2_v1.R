@@ -197,8 +197,10 @@ read_nexus_data2 <- function(file, check_ambig_chars=TRUE, convert_ambiguous_to=
     	}
     
     # Scan in the datafile
+    #X <- scan(file=file, what=character(), sep = "\n", quiet = TRUE, 
+    #    comment.char = "[", strip.white = TRUE)
     X <- scan(file=file, what=character(), sep = "\n", quiet = TRUE, 
-        comment.char = "[", strip.white = TRUE)
+        comment.char = "[", strip.white = TRUE, nmax = 1000000)
     ntax <- find.ntax(X)
     nchar <- find.nchar(X)
     matrix.line <- find.matrix.line(X)
