@@ -255,10 +255,10 @@ phytools_modified.text_to_tree2 <- function(text, trans)
     i <- j <- k <- 1
     while (text[i] != "(") i <- i + 1
     while (text[i] != ";") {
-        cat(i)
-        cat(",")
+        #cat(i)
+        #cat(",")
         if (text[i] == "(") {
-            cat("here1")
+            #cat("here1")
             if (j > nrow(edge)) 
                 edge <- rbind(edge, c(NA, NA))
             edge[j, 1] <- currnode
@@ -284,7 +284,7 @@ phytools_modified.text_to_tree2 <- function(text, trans)
             j <- j + 1
         }
         else if (text[i] == ")") {
-            cat("here2")
+            #cat("here2")
             i <- i + 1
             if (text[i] == "[") {
                 temp <- phytools_getBS2(text, i)
@@ -300,7 +300,7 @@ phytools_modified.text_to_tree2 <- function(text, trans)
             currnode <- edge[match(currnode, edge[, 2]), 1]
         }
         else if (text[i] == ",") {
-            cat("here3")
+            #cat("here3")
             if (j > nrow(edge)) 
                 edge <- rbind(edge, c(NA, NA))
             edge[j, 1] <- currnode

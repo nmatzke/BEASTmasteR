@@ -1070,7 +1070,7 @@ strip_tree_EQUALS_from_nexus_treestring <- function(tmpstring)
 	{
 	# Position of the first equals in the string
 	first_equals = stringr::str_locate(string=tmpstring, pattern="=")
-	newick_string = trim(substr(x=tmpstring, start=first_equals[,"end"]+1, stop=str_length(tmpstring)))
+	newick_string = trim(substr(x=tmpstring, start=first_equals[,"end"]+1, stop=stringr::str_length(tmpstring)))
 	return(newick_string)
 	}
 
@@ -1232,7 +1232,7 @@ read_beast_prt <- function (file, digits = 9, get_tipnames=TRUE, printflag=FALSE
    	# 2026-09-07
    	tmpstring = tree
 		first_equals = stringr::str_locate(string=tmpstring, pattern="=")
-		newick_string = substr(x=tmpstring, start=first_equals[,"end"]+1, stop=str_length(tmpstring))
+		newick_string = substr(x=tmpstring, start=first_equals[,"end"]+1, stop=stringr::str_length(tmpstring))
     tree = trim(newick_string)
     
     # Branch lengths are everything after a :
