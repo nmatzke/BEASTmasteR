@@ -15,7 +15,7 @@ functions for parsing Beast2 output, e.g. plotting a dated tree in R, with
 posterior probabilities, 95% HPDs on node dates, and also 95% HPDs on tip dates,
 if available.
 
-2026 additions: The BEASTmasteR R code was updated to work on DNA and morphology datasets in the current Beast 2.7+, and to fix various problems due to the change in how the scan() function works in newer versions of R. (scan() now seems to hang on any moderately large text file; this is a memory and/or typing problem. The solution is to add e.g. nmax=1000000 as an argument. This was done throughout.)
+2026 additions: The BEASTmasteR R code was updated to work on DNA and morphology datasets in the current Beast 2.7+, and to fix various problems due to the change in how the scan() function works in newer versions of R. (scan() now seems to hang on any moderately large text file; this is a memory and/or typing problem. The solution is to add e.g. nmax=1000000 as an argument. This was done throughout.). Note: The BDSS skyline tree prior works, but the Sampled-Ancestor prior needs more work at present.
 
 2016-2017 additions: Added ascertainment bias corrections, various bug checks, 
 gene-tree/species tree analysis setup.
