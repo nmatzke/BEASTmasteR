@@ -1,4 +1,4 @@
-Package: BioGeoBEARS
+Package: BEASTmasteR
 Type: Package
 Title: BEASTmasteR: R tools for automated conversion of NEXUS data to BEAST2 XML format, for fossil tip-dating and other uses
 Version: 0.21
@@ -10,7 +10,7 @@ Remotes: github::nmatzke/rexpokit, github::nmatzke/cladoRcpp
 Depends: 
 Imports: methods, gdata, ape, phylobase, phytools, devtools, stringr, BioGeoBEARS
 Suggests: test that
-Description: Allows  convert NEXUS data file(s) (DNA, amino acids, discrete morphological characters, and/or continuous traits), plus an Excel settings file, into Beast2 XML format.
+Description: Allows conversion of NEXUS data file(s) (DNA, amino acids, discrete morphological characters, and/or continuous traits), plus an Excel settings file, into Beast2 XML format.
 URL: http://phylo.wikidot.com/beastmaster , https://github.com/nmatzke/BEASTmasteR
 License: GPL (>= 2)
 LazyLoad: yes
