@@ -31,13 +31,13 @@ NEXUS data to BEAST2 XML format, for fossil tip-dating and other uses."
 date).
 
 Matzke, Nicholas J. (2026). BEASTmasteR code archive. <i>Github</i>:
-<a href="https://github.com/nmatzke/BEASTmasteR">https://github.com/nmatzke/BEASTmasteR</a> . Accessed (access date). Release: 0.2. 
-DOI: XX. 
+<a href="https://github.com/nmatzke/BEASTmasteR">https://github.com/nmatzke/BEASTmasteR</a> . Accessed (access date). Release: 0.21. 
+DOI: <a href="http://dx.doi.org/10.5281/zenodo.594056">http://dx.doi.org/10.5281/zenodo.594056</a>. 
 
 Ideally, there will be a release with a DOI, but it may be you just use the 
 most up-to-date commit. Find the most recent release at: 
 https://github.com/nmatzke/BEASTmasteR/releases , and/or DOI 
-http://dx.doi.org/10.5281/zenodo.31927 -- and a button: <a href="https://zenodo.org/badge/latestdoi/18687/nmatzke/BEASTmasteR"><img src="https://zenodo.org/badge/18687/nmatzke/BEASTmasteR.svg" alt="10.5281/zenodo.31927"></a>
+http://dx.doi.org/10.5281/zenodo.594056 -- and a button: <a href="https://zenodo.org/badge/latestdoi/18687/nmatzke/BEASTmasteR"><img src="https://zenodo.org/badge/18687/nmatzke/BEASTmasteR.svg" alt="10.5281/zenodo.594056"></a>
 
 <b>Acknowledgements</b>
 
