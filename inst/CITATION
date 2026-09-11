@@ -1,0 +1,19 @@
+bibentry("Manual",
+         title = "BEASTmasteR: R tools for automated conversion of NEXUS data to BEAST2 XML format, for fossil tip-dating and other uses",
+         author = c(person("Nicholas J.", "Matzke", email = "nickmatzke.ncse@gmail.com", role =
+        c("aut", "cre", "cph"))),
+         organization = "School of Biological Sciences, University of Auckland, New Zealand",
+         address      = "3A Symonds Street, Auckland, New Zealand",
+         year         = 2026,
+         note         = "The rexpokit/cladoRcpp/BioGeoBEARS packages were first published in:\n\n1. MMatzke, Nicholas J. (2014). "BEASTmasteR: R tools for automated conversion of NEXUS data to BEAST2 XML format, for fossil tip-dating and other uses." PhyloWiki, http://phylo.wikidot.com/beastmaster. Accessed (access date). Code archive: https://github.com/nmatzke/BEASTmasteR",
+         url          = "https://github.com/nmatzke/BEASTmasteR",
+                
+         mheader = "To cite package 'BEASTmasteR' in publications use:",
+	 
+	 mfooter = 
+         paste("A lot of time and effort in creating BEASTmasteR",
+          "please cite it and the other packages when using it for publication.",
+	  "See also", sQuote("citation(\"pkgname\")"),
+	  "for citing R packages.", sep = " ")
+	)
+
