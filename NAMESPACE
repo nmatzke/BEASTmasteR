@@ -1,0 +1,36 @@
+importFrom("BioGeoBEARS", "prt")
+
+importFrom("graphics", "abline", "box", "boxplot", "hist",
+		 "plot.default", "points", "segments", "axis", "barplot", "layout", "legend", "mtext",
+"par", "plot", "rect", "strheight", "strwidth", "text",
+"title", "xinch", "yinch", "symbols", "polygon")
+
+importFrom("grDevices", "col2rgb", "rainbow", "rgb", "dev.off", "pdf", "png")
+
+importFrom("methods", "as", "is", "new")
+
+importFrom("stats", "aggregate", "lm", "rexp", "rnorm", "sd", "median", "optim", "pchisq", "quantile", "reorder", "runif")
+importFrom("utils", "head", "installed.packages", "packageVersion",
+		 "tail", "read.table", "write.table")
+
+
+importFrom("devtools", "source_url")
+importFrom("stringr", "str_count")
+
+
+
+importFrom("ape", "axisPhylo", "plot.phylo", "read.tree", "drop.tip", "extract.clade", "write.tree", "tiplabels", "nodelabels", "old2new.phylo", "read.nexus", "is.rooted", "dist.nodes", "ladderize", "getMRCA", "is.binary", "is.binary.tree", "is.ultrametric", "write.nexus")
+importFrom("phylobase", "children", "descendants", "ancestor", "nodeId", "nNodes", "nTips")
+
+
+
+
+importFrom("rexpokit", "maxent", "mat2coo", "expokit_dgpadm_Qmat")
+importFrom("cladoRcpp", "numstates_from_numareas", "rcpp_states_list_to_DEmat", "rcpp_calc_anclikes_sp", "rcpp_areas_list_to_states_list", "rcpp_calc_anclikes_sp_COOprobs", "rcpp_calc_anclikes_sp_using_COOprobs", "rcpp_calc_anclikes_sp_COOweights_faster", "rcpp_calc_rowsums_for_COOweights_columnar", "rcpp_calc_splitlikes_using_COOweights_columnar")
+
+
+exportPattern("^[[:alpha:]]+")
+exportClasses(
+    "BioGeoBEARS_model",
+     "tipranges" 
+)

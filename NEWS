@@ -1,0 +1,19 @@
+CHANGES in BEASTmasteR VERSION 0.2
+
+NEW FEATURES
+
+    o none
+
+OTHER CHANGES
+
+    o 2026-09-11: The BEASTmasteR R code was updated to work 
+      on DNA and morphology datasets in the current Beast 2.7+, 
+      and to fix various problems due to the change in how the 
+      scan() function works in newer versions of R. (scan() 
+      now seems to hang on any moderately large text file; 
+      this is a memory and/or typing problem. The solution is 
+      to add e.g. nmax=1000000 as an argument. This was done 
+      throughout.). Note: The BDSS skyline tree prior works, 
+      but the Sampled-Ancestor prior needs more work at present.
+
+
