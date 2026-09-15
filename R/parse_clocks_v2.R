@@ -646,14 +646,16 @@ priors_on_stdev_of_shared_clock_XML = NULL
 		clock_rate_mean_idref = paste0("@", mean_of_shared_clock_id)
 		Indicators_idref = paste0("@", Indicators_of_shared_clock_id)
 
-		Indicators_of_shared_clock_XML = xmlNode(name="stateNode", "true", attrs=c(id=Indicators_of_shared_clock_id, dimension=relaxed_clock_dimension, spec="parameter.BooleanParameter"))
+		# 2026-09-15
+		#Indicators_of_shared_clock_XML = xmlNode(name="stateNode", "true", attrs=c(id=Indicators_of_shared_clock_id, dimension=relaxed_clock_dimension, spec="parameter.BooleanParameter"))
+		Indicators_of_shared_clock_XML = xmlNode(name="stateNode", "false", attrs=c(id=Indicators_of_shared_clock_id, dimension=relaxed_clock_dimension, spec="parameter.BooleanParameter"))
 
 		# LocalRates of Random Local Clock
 		LocalRates_of_shared_clock_id = paste0("LocalRates_of_", clockModel_name)
 		clock_rate_mean_idref = paste0("@", mean_of_shared_clock_id)
 		LocalRates_idref = paste0("@", LocalRates_of_shared_clock_id)
 
-		LocalRates_of_shared_clock_XML = xmlNode(name="parameter", 0.1, attrs=c(id=LocalRates_of_shared_clock_id, dimension=relaxed_clock_dimension, name="stateNode"))
+		LocalRates_of_shared_clock_XML = xmlNode(name="parameter", 0.1, attrs=c(id=LocalRates_of_shared_clock_id, dimension=relaxed_clock_dimension, spec="parameter.RealParameter", lower=clock_df$clockrate_min, name="stateNode"))
 		
 		state_XMLs = list(bl(), shared_clock_title_XML, bl(), clock_type_XML, mean_of_shared_clock_XML, Indicators_of_shared_clock_XML, LocalRates_of_shared_clock_XML)
 

@@ -1,8 +1,8 @@
 Package: BEASTmasteR
 Type: Package
 Title: BEASTmasteR: R tools for automated conversion of NEXUS data to BEAST2 XML format, for fossil tip-dating and other uses
-Version: 0.21
-Date: 2026-09-11
+Version: 0.21.1
+Date: 2026-09-15
 Author: c(person("Nicholas J.", "Matzke", email = "nickmatzke.ncse@gmail.com", role =
         c("aut", "cre", "cph")))
 Maintainer: Nicholas J. Matzke <nickmatzke.ncse@gmail.com>

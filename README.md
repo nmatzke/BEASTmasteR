@@ -36,9 +36,9 @@ http://dx.doi.org/10.5281/zenodo.594056
 
 <!-- and a button: <a href="https://zenodo.org/badge/latestdoi/18687/nmatzke/BEASTmasteR"><img src="https://zenodo.org/badge/18687/nmatzke/BEASTmasteR.svg" alt="10.5281/zenodo.594056"></a> -->
 
-<b>2026 additions (version 0.21):</b> The BEASTmasteR R code was updated to work on DNA and morphology datasets in the current Beast 2.7+, and to fix various problems due to the change in how the scan() function works in newer versions of R. (scan() now seems to hang on any moderately large text file; this is a memory and/or typing problem. The solution is to add e.g. nmax=1000000 as an argument. This was done throughout.). Note: The BDSS skyline tree prior works, but the Sampled-Ancestor prior needs more work at present.
+<b>2026 additions (version 0.21.1):</b> The BEASTmasteR R code was updated to work on DNA and morphology datasets in the current Beast 2.7+, and to fix various problems due to the change in how the scan() function works in newer versions of R. (scan() now seems to hang on any moderately large text file; this is a memory and/or typing problem. The solution is to add e.g. nmax=1000000 as an argument. This was done throughout.). Note: The BDSS skyline tree prior works, but the Sampled-Ancestor prior needs more work at present.
 
-<b>2026 additions (version 0.21):</b> Added ascertainment bias corrections, various bug checks, 
+<b>2026 additions (version 0.21.1):</b> Added ascertainment bias corrections, various bug checks, 
 gene-tree/species tree analysis setup.
 
 <b>Acknowledgements</b>
