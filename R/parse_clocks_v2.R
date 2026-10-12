@@ -292,6 +292,15 @@ priors_on_stdev_of_shared_clock_XML = NULL
 		#######################################################
 		# XML for branchRateModel
 		branchRateModel_XML = xmlNode(name="branchRateModel", attrs=list(id=clockModel_name, clock.rate=clock_rate_mean_idref, spec="beast.base.evolution.branchratemodel.StrictClockModel") )
+# 		# XML for mean inside LogNormal distribution inside branchRateModel
+#		branchRateModel_Exponential_mean_XMLcomment = xmlCommentNode(" The random local clock has no internal distribution of branch rates ")
+#	
+#		# XML for branchRateModel
+#		branchRateModel_XML = xmlNode(name="branchRateModel", attrs=list(id=clockModel_name, clock.rate=clock_rate_mean_idref, indicators=Indicators_idref, rates=LocalRates_idref, spec="beast.base.evolution.branchratemodel.RandomLocalClockModel", tree=tree_name_idref) )
+#
+#		# Make into a list
+#		branchRateModel_XMLs = list(bl(), bl(), shared_clock_title_XML, bl(), clock_type_XML, branchRateModel_XML)	
+
 
 		# Make into a list
 		branchRateModel_XMLs = list(bl(), bl(), shared_clock_title_XML, bl(), clock_type_XML, branchRateModel_XML)
