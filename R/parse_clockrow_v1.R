@@ -606,6 +606,34 @@ clock_df_row_to_XML_distribution_justMean <- function(clock_df, tree_name="share
 		txt = paste0(" Prior probability density of the mean of '", clockModel_name, "', according to a ", clock_df$clockrate_prior_dist, " distribution with lower=", lower, ", upper=", upper, ". ")
 		} # END if (clock_df$clockrate_prior_dist == "uniform")
 	
+	# 2026-10-15_updated for Gamma distribution on clockrates, 2026-10-15
+	# And prior on number of rate shifts in RLC clock
+	# Make the distribution, before it goes into the prior
+	if (clock_df$clockrate_prior_dist == "gamma")
+		{
+		id_of_prior_distrib_on_clock_mean = paste0("prP_GammaDistrib_on_clockrates_for_", clockModel_name)
+
+		alpha = clock_df$clockrate_prior_param1
+		beta = clock_df$clockrate_prior_param2
+		offset = offset
+		
+		distribution_name = paste0("GammaDistrib_on_clockrates_for_", clockModel_name)
+		
+		
+		param1_name = paste0("alpha_of_GammaDistrib_on_clockrates_for_", clockModel_name)
+		param2_name = paste0("beta_of_GammaDistrib_on_clockrates_for_", clockModel_name)
+		offset_name = paste0("offset_of_GammaDistrib_on_clockrates_for_", clockModel_name)
+		param1_XML = xmlNode(name="parameter", alpha, attrs=list(id=param1_name, name="alpha", estimate="false"))
+		param2_XML = xmlNode(name="parameter", beta, attrs=list(id=param2_name, name="beta", estimate="false"))
+		offset_XML = xmlNode(name="parameter", offset, attrs=list(id=offset_name, name="offset", estimate="false"))
+
+		gamma_params_XMLs = list(param1_XML, param2_XML, offset_XML)
+		distrib_XML = xmlNode(name="Gamma", attrs=list(id=distribution_name, name="distr"), .children=list(gamma_params_XMLs))
+
+		txt = paste0(" Prior probability density on the rates of '", clockModel_name, "', according to a ", clock_df$clockrate_prior_dist, " distribution with alpha=", alpha, ", beta=", beta, ", offset=", offset, ". ")
+		} # END if (clock_df$clockrate_prior_dist == "uniform")
+
+
 	
 	########################################################################
 	# Now, make the prior probability distribution for the mean of the clock model

@@ -685,14 +685,26 @@ priors_on_stdev_of_shared_clock_XML = NULL
 		branchRateModel_XMLs = list(bl(), bl(), shared_clock_title_XML, bl(), clock_type_XML, branchRateModel_XML)	
 
 
+		# <prior id="RRateChangesPrior.c:shared_clock" name="distribution">
+		# 		<x id="RRateChanges.c:shared_clock" spec="beast.base.evolution.Sum">
+		# 				<arg idref="Indicators.c:shared_clock"/>
+		# 		</x>
+		# 		<distr id="Poisson.0" spec="distribution.Poisson">
+		# 				<parameter id="RealParameter.5" spec="parameter.RealParameter" estimate="false" name="lambda">0.6931471805599453</parameter>
+		# 		</distr>
+		# </prior>
+
+
 
 		#######################################################
-		# Priors on clock model parameters
+		# Priors on clock model parameters -- Random Local Clock model
 		#######################################################
 		clock_priors_XMLcomment = xmlCommentNode(" Priors on clock model parameters ")
 	
 		# Get the prior distributions, the clock rate operators, and the 
 		# logs, for this clock
+		# 2026-10-15_updated for Gamma distribution on clockrates, 2026-10-15
+		# And prior on number of rate shifts in RLC clock
 		tmpXML = clock_df_row_to_XML_distribution(clock_df, tree_name=species_tree_name)
 		clockModel_priors_XML = tmpXML$priors
 		clockModel_screenLog_XML = tmpXML$screenlog
